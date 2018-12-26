@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatCcDayRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatCcDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="DATE" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="CHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="ringingsum" property="ringringsum" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, feeid, appid, subid, abline, operator, pname, cname, callcnt, succcnt, 
+    answercnt, ringingsum, thscsum, jfscsum, fee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_cc_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectCc" resultType="map" parameterType="java.util.HashMap">
+    SELECT CASE cc.abline WHEN 'I' then '呼入' when 'O' then '呼出' END as abline,
+    SUM(cc.thscsum) as thscsum,SUM(cc.jfscsum) as jfscsum,
+    case when sum(cc.answercnt)=0 then '0' else ROUND(sum(cc.thscsum)/sum(cc.answercnt),0) end as pjsc,
+    CONCAT(CAST((sum(cc.succcnt)/sum(cc.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(cc.answercnt)/sum(cc.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    FROM stat_cc_day_record cc WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(cc.statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(cc.statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    GROUP BY abline
+  </select>
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="countCcRecordList" resultType="long" parameterType="Page">
+    SELECT count(1) FROM (
+      SELECT
+        '1' as cnt
+      FROM stat_cc_day_record cc
+      LEFT JOIN tb_user_admin ua ON cc.feeid = ua.feeid
+      LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+      LEFT JOIN tb_cc_info ci ON cc.subid = ci.subid
+      LEFT JOIN tb_telno_operator op ON cc.operator = op.ocode
+      WHERE 1=1
+      <if test="params.companyName != null and params.companyName != ''">
+        and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+      </if>
+      <if test="params.sid != null and params.sid != ''">
+        and ua.sid = #{params.sid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.abline != null and params.abline != ''">
+        and cc.abline = #{params.abline,jdbcType=VARCHAR}
+      </if>
+      <if test="params.operator != null and params.operator != ''">
+        <if test="params.operator =='06'">
+          and cc.operator  not in ('00','01','02')
+        </if>
+        <if test="params.operator !='06'">
+          and cc.operator = #{params.operator,jdbcType=VARCHAR}
+        </if>
+      </if>
+      <if test="params.subid != null and params.subid != ''">
+        and cc.subid = #{params.subid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.ccname != null and params.ccname != ''">
+        and ci.ccname LIKE "%"#{params.ccname,jdbcType=VARCHAR}"%"
+      </if>
+      <if test="datemin != null">
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(cc.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(cc.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+      <if test="datemax != null">
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(cc.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(cc.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+
+      <if test="params.reportType==2">
+        GROUP BY DATE_FORMAT(cc.statday,'%Y-%m'),cc.feeid,cc.subid,cc.abline,cc.operator
+      </if>
+      <if test="params.reportType==1">
+        GROUP BY DATE_FORMAT(cc.statday,'%Y-%m-%d'),cc.feeid,cc.subid,cc.abline,cc.operator
+      </if>
+      <if test="params.reportType==0 or params.reportType ==null">
+        GROUP BY DATE_FORMAT(cc.statday,'%Y-%m-%d'),cc.feeid,cc.subid,cc.abline,cc.operator
+      </if>
+    ) t
+  </select>
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageCcRecordList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT cc.statday,ua.sid,ac.name as companyName,
+    cc.abline,cc.subid,ci.ccname,cc.operator,SUM(cc.callcnt) callcnt,
+    CONCAT(CAST((sum(cc.succcnt)/sum(cc.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(cc.answercnt)/sum(cc.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate,
+    sum(thscsum)as thscsum,sum(jfscsum)as jfscsum,
+    case when sum(cc.answercnt)=0 then '0' else ROUND(sum(cc.thscsum)/sum(cc.answercnt),0) end as pjsc,
+    SUM(cc.fee) fee,
+    acc.allCallCnt,
+    ascc.allSubCallCnt
+    FROM stat_cc_day_record cc
+    LEFT JOIN tb_user_admin ua ON cc.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    LEFT JOIN tb_cc_info ci ON cc.subid = ci.subid
+    LEFT JOIN tb_telno_operator op ON cc.operator = op.ocode
+    LEFT JOIN (select statday,feeid,sum(callcnt) allCallCnt from stat_cc_day_record GROUP BY statday,feeid) acc ON cc.statday = acc.statday AND cc.feeid = acc.feeid
+    LEFT JOIN (select sum(callcnt) allSubCallCnt,statday,subid,feeid from stat_cc_day_record GROUP BY statday,feeid,subid) ascc ON cc.statday = ascc.statday AND cc.feeid = ascc.feeid AND ascc.subid = cc.subid
+    WHERE 1=1
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.abline != null and params.abline != ''">
+      and cc.abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+    <if test="params.operator != null and params.operator != ''">
+      <if test="params.operator =='06'">
+      and cc.operator  not in ('00','01','02')
+      </if>
+      <if test="params.operator !='06'">
+        and cc.operator = #{params.operator,jdbcType=VARCHAR}
+      </if>
+    </if>
+    <if test="params.subid != null and params.subid != ''">
+      and cc.subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccname != null and params.ccname != ''">
+      and ci.ccname LIKE "%"#{params.ccname,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(cc.statday,'%Y-%m'),cc.feeid,cc.subid,cc.abline,cc.operator
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(cc.statday,'%Y-%m-%d'),cc.feeid,cc.subid,cc.abline,cc.operator
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(cc.statday,'%Y-%m-%d'),cc.feeid,cc.subid,cc.abline,cc.operator
+    </if>
+    ORDER BY cc.statday DESC, allCallCnt DESC, cc.feeid, allSubCallCnt DESC, cc.subid, cc.abline
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出选取话务报表列表 -->
+  <!--<select id="downloadCcRecord" resultType="map" parameterType="Page">
+    SELECT cc.statday,ua.sid,ac.name as companyName,
+    cc.abline,cc.subid,ci.ccname,cc.operator,SUM(cc.callcnt) callcnt,
+    CONCAT(CAST((sum(cc.succcnt)/sum(cc.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(cc.answercnt)/sum(cc.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate,
+    sum(thscsum)as thscsum,sum(jfscsum)as jfscsum,
+    case when sum(cc.answercnt)=0 then '0' else ROUND(sum(cc.thscsum)/sum(cc.answercnt),0) end as pjsc,
+    SUM(cc.fee) fee,
+    (select sum(callcnt) from stat_cc_day_record where feeid = cc.feeid and statday = cc.statday) as allCallCnt,
+    (select sum(callcnt) from stat_cc_day_record where feeid = cc.feeid and statday = cc.statday AND subid = cc.subid) as allSubCallCnt
+    FROM stat_cc_day_record cc
+    LEFT JOIN tb_user_admin ua ON cc.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    LEFT JOIN tb_cc_info ci ON cc.subid = ci.subid
+    LEFT JOIN tb_telno_operator op ON cc.operator = op.ocode
+    WHERE 1=1
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.abline != null and params.abline != ''">
+      and cc.abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+    <if test="params.operator != null and params.operator != ''">
+      <if test="params.operator =='06'">
+        and cc.operator  not in ('00','01','02')
+      </if>
+      <if test="params.operator !='06'">
+        and cc.operator = #{params.operator,jdbcType=VARCHAR}
+      </if>
+    </if>
+    <if test="params.subid != null and params.subid != ''">
+      and cc.subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccname != null and params.ccname != ''">
+      and ci.ccname LIKE "%"#{params.ccname,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(cc.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(cc.statday,'%Y-%m'),cc.feeid,cc.subid,cc.abline,cc.operator
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(cc.statday,'%Y-%m-%d'),cc.feeid,cc.subid,cc.abline,cc.operator
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(cc.statday,'%Y-%m-%d'),cc.feeid,cc.subid,cc.abline,cc.operator
+    </if>
+    ORDER BY cc.statday DESC, allCallCnt DESC, cc.feeid, allSubCallCnt DESC,cc.subid,cc.abline
+  </select>
+-->
+  <!-- 按天统计(各运营商占比) 智能云调度 话务走势 的话务情况 -->
+  <select id="countCcScanByOperator" resultType="map" parameterType="map">
+    SELECT
+
+      SUM(if(sr.abline='I' AND sr.operator='00',sr.callcnt,0)) callcntI00,
+      SUM(if(sr.abline='I' AND sr.operator='01',sr.callcnt,0)) callcntI01,
+      SUM(if(sr.abline='I' AND sr.operator='02',sr.callcnt,0)) callcntI02,
+      SUM(if(sr.abline='I' AND sr.operator not in ('00','01','02'),sr.callcnt,0)) callcntI06,
+
+      SUM(if(sr.abline='O' AND sr.operator='00',sr.callcnt,0)) callcntO00,
+      SUM(if(sr.abline='O' AND sr.operator='01',sr.callcnt,0)) callcntO01,
+      SUM(if(sr.abline='O' AND sr.operator='02',sr.callcnt,0)) callcntO02,
+      SUM(if(sr.abline='O' AND sr.operator not in ('00','01','02'),sr.callcnt,0)) callcntO06
+
+    FROM stat_cc_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    <if test="sid != null and sid != '-1' and sid != ''">
+      AND sr.feeid = (SELECT feeid FROM tb_user_admin WHERE sid = #{sid,jdbcType=VARCHAR})
+    </if>
+    <if test="subid!=null and ''!=subid">
+      AND sr.subid = #{subid,jdbcType=VARCHAR}
+    </if>
+
+  </select>
+
+  <!-- 按天统计 智能云调度 话务走势 的话务情况 -->
+  <select id="countCcScanByDay" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(if(sr.abline='I',sr.thscsum,0)) thscsumI,
+      SUM(if(sr.abline='O',sr.thscsum,0)) thscsumO,
+
+      SUM(if(sr.abline='I',sr.thscsum,0))/SUM(if(sr.abline='I',sr.succcnt,0)) thscAvgI,
+      SUM(if(sr.abline='O',sr.thscsum,0))/SUM(if(sr.abline='O',sr.succcnt,0)) thscAvgO,
+
+      SUM(sr.jfscsum) jfscsum,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(if(sr.abline='I',sr.succcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) succcntI,
+      SUM(if(sr.abline='O',sr.succcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) succcntO,
+
+      SUM(if(sr.abline='I',sr.answercnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) answercntI,
+      SUM(if(sr.abline='O',sr.answercnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) answercntO,
+
+      SUM(if(sr.abline='I' AND sr.operator='00',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI00,
+      SUM(if(sr.abline='I' AND sr.operator='01',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI01,
+      SUM(if(sr.abline='I' AND sr.operator='02',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI02,
+      SUM(if(sr.abline='I' AND sr.operator='06',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI06,
+
+      SUM(if(sr.abline='O' AND sr.operator='00',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO00,
+      SUM(if(sr.abline='O' AND sr.operator='01',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO01,
+      SUM(if(sr.abline='O' AND sr.operator='02',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO02,
+      SUM(if(sr.abline='O' AND sr.operator='06',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO06,
+
+      DATE_FORMAT(sr.statday,'%Y-%m-%d') d
+    FROM stat_cc_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    <if test="sid != null and sid != '-1' and sid != ''">
+      AND sr.feeid = (SELECT feeid FROM tb_user_admin WHERE sid = #{sid,jdbcType=VARCHAR})
+    </if>
+    <if test="subid!=null and ''!=subid">
+      AND sr.subid = #{subid,jdbcType=VARCHAR}
+    </if>
+    GROUP BY d
+  </select>
+
+</mapper>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RelayRes_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RelayRes" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sup_id" property="supId" jdbcType="VARCHAR" />
+    <result column="res_name" property="resName" jdbcType="VARCHAR" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="relay_cnt" property="relayCnt" jdbcType="INTEGER" />
+    <result column="relay_rent" property="relayRent" jdbcType="DECIMAL" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="sign_type" property="signType" jdbcType="VARCHAR" />
+    <result column="cycle" property="cycle" jdbcType="INTEGER" />
+    <result column="per" property="per" jdbcType="DECIMAL" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, sup_id, res_name, relay_num, relay_cnt, relay_rent, cityid, operator, sign_type, cycle,
+    per, status, addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+    select 
+    <include refid="Base_Column_List" />
+    from tb_relay_res
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 删除资源线路时 -->
+  <update id="updateForDelByPK" parameterType="com.e9cloud.mybatis.domain.RelayRes" >
+    update tb_relay_res
+    <set>
+      relay_num = NULL,
+      status = '01'
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="pageRes" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      rr.id, rr.res_name resName, rr.operator, rr.relay_num relayNum, sb.relay_name relayName
+    FROM tb_relay_res rr
+    LEFT JOIN (SELECT * FROM tb_sip_basic WHERE `status` = '00') sb ON rr.relay_num = sb.relay_num
+    WHERE rr.status != '01' AND rr.sup_id = #{params.supId,jdbcType=VARCHAR}
+    ORDER BY rr.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from tb_relay_res
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.RelayRes" useGeneratedKeys="true" keyProperty="id">
+    insert into tb_relay_res
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="supId != null" >
+        sup_id,
+      </if>
+      <if test="resName != null" >
+        res_name,
+      </if>
+      <if test="relayNum != null" >
+        relay_num,
+      </if>
+      <if test="relayCnt != null" >
+        relay_cnt,
+      </if>
+      <if test="relayRent != null" >
+        relay_rent,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="operator != null" >
+        operator,
+      </if>
+      <if test="signType != null" >
+        sign_type,
+      </if>
+      <if test="cycle != null" >
+        cycle,
+      </if>
+      <if test="per != null" >
+        per,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="supId != null" >
+        #{supId,jdbcType=VARCHAR},
+      </if>
+      <if test="resName != null" >
+        #{resName,jdbcType=VARCHAR},
+      </if>
+      <if test="relayNum != null" >
+        #{relayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="relayCnt != null" >
+        #{relayCnt,jdbcType=INTEGER},
+      </if>
+      <if test="relayRent != null" >
+        #{relayRent,jdbcType=DECIMAL},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null" >
+        #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="signType != null" >
+        #{signType,jdbcType=VARCHAR},
+      </if>
+      <if test="cycle != null" >
+        #{cycle,jdbcType=INTEGER},
+      </if>
+      <if test="per != null" >
+        #{per,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.RelayRes" >
+    update tb_relay_res
+    <set >
+      <if test="supId != null" >
+        sup_id = #{supId,jdbcType=VARCHAR},
+      </if>
+      <if test="resName != null" >
+        res_name = #{resName,jdbcType=VARCHAR},
+      </if>
+      <if test="relayNum != null" >
+        relay_num = #{relayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="relayCnt != null" >
+        relay_cnt = #{relayCnt,jdbcType=INTEGER},
+      </if>
+
+      <if test="relayCnt == null" >
+        relay_cnt = NULL,
+      </if>
+
+      <if test="relayRent != null" >
+        relay_rent = #{relayRent,jdbcType=DECIMAL},
+      </if>
+
+      <if test="relayRent == null" >
+        relay_rent = 0,
+      </if>
+
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null" >
+        operator = #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="signType != null" >
+        sign_type = #{signType,jdbcType=VARCHAR},
+      </if>
+      <if test="cycle != null" >
+        cycle = #{cycle,jdbcType=INTEGER},
+      </if>
+      <if test="per != null" >
+        per = #{per,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <resultMap id="ResultMapWithPersAndCity" type="com.e9cloud.mybatis.domain.RelayRes" extends="BaseResultMap">
+    <result column="pcode" property="pcode" jdbcType="VARCHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <association property="sipBasic" column="relay_num" javaType="com.e9cloud.mybatis.domain.SipBasic" select="SipBasic_Mapper.getSipBasicByRelayNum"/>
+    <collection property="relayResPers" column="id" javaType="ArrayList" ofType="com.e9cloud.mybatis.domain.RelayResPer" select="RelayResPer_Mapper.selectPersByResId"/>
+  </resultMap>
+
+  <!--通过主键（id）得到资源信息(价格详细，中继，城市)-->
+  <select id="selectResWithPersAndCityById" resultMap="ResultMapWithPersAndCity" parameterType="int">
+    SELECT
+    rr.*, tp.pcode, tp.pname, tc.cname
+    FROM tb_relay_res rr
+    LEFT JOIN tb_telno_city tc ON rr.cityid = tc.ccode
+	LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    WHERE rr.id = #{id,jdbcType=INTEGER}
+  </select>
+
+</mapper>

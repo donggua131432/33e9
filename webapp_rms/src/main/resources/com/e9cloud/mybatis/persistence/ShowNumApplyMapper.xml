@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ShowNumApply_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SpApplyNum" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="apply_id" property="applyId" jdbcType="VARCHAR" />
+    <result column="sipphone_id" property="sipphoneId" jdbcType="VARCHAR" />
+    <result column="sip_phone" property="sipphone" jdbcType="VARCHAR" />
+    <result column="fixphone_id" property="fixphoneId" jdbcType="VARCHAR" />
+    <result column="number" property="fixphone" jdbcType="VARCHAR" />
+    <result column="show_num" property="showNum" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="atime" property="atime" jdbcType="TIMESTAMP" />
+    <result column="audit_status" property="auditStatus" jdbcType="CHAR" />
+    <result column="audit_common" property="auditCommon" jdbcType="VARCHAR" />
+    <result column="audit_time" property="auditTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <select id="pageShowNumApplyList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT h.shownum_id,h.id,e.name,a.sid,a.app_name,a.appid,h.atime,f.sip_phone,g.number,h.show_num,h.audit_status,h.audit_common
+    FROM
+    tb_app_info a INNER JOIN tb_sp_apply_num b
+    INNER JOIN (
+    select aud.id,aud.shownum_id,aud.show_num,aud.atime,aud.audit_status,aud.audit_common,aud.audit_time
+    from tb_sp_num_audit aud,(select shownum_id,max(atime) atime from tb_sp_num_audit group by shownum_id) b
+    where aud.shownum_id = b.shownum_id and aud.atime = b.atime order by aud.shownum_id
+    ) h
+    INNER JOIN tb_sp_sipphone f INNER JOIN tb_sp_fixphone g INNER JOIN (
+    SELECT
+    c.sid,
+    c.uid,
+    d. NAME
+    FROM
+    tb_user_admin c,
+    tb_user_admin_authen_company d
+    WHERE
+    c.uid = d.uid
+    ) e
+    ON a.appid = b.appid AND b.id = h.shownum_id AND a.sid = e.sid AND b.sipphone_id=f.id AND b.fixphone_id=g.id AND b.status='00'
+    <if test="params.accountID != null and params.accountID != ''">
+      AND e.sid = #{params.accountID,jdbcType=VARCHAR}
+    </if>
+    <if test="params.custom_name != null and params.custom_name != ''">
+      and e.name LIKE CONCAT('%',#{params.custom_name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.appid_ != null and params.appid_ != ''">
+      and a.appid = #{params.appid_,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid != null and params.appid != ''">
+      and a.app_name LIKE CONCAT('%',#{params.appid,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.sipphone != null and params.sipphone != ''">
+      and f.sip_phone LIKE CONCAT('%',#{params.sipphone,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.fixphone != null and params.fixphone != ''">
+      and g.number LIKE CONCAT('%',#{params.fixphone,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.showNum != null and params.showNum != ''">
+      and h.show_num LIKE CONCAT('%',#{params.showNum,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.auditStatus != null and params.auditStatus != ''">
+      and h.audit_status = #{params.auditStatus,jdbcType=VARCHAR}
+    </if>
+      order by FIELD(h.audit_status,'00','01','02'),h.atime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="getSpApplyNumByIds" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    SELECT a.id,a.appid,a.apply_id,a.sipphone_id,b.sip_phone,a.fixphone_id,c.number,d.show_num,d.atime,d.audit_status,d.audit_common,d.audit_time
+    FROM tb_sp_apply_num a,
+    (
+    select aud.id,aud.shownum_id,aud.show_num,aud.atime,aud.audit_status,aud.audit_common,aud.audit_time
+    from tb_sp_num_audit aud,(select shownum_id,max(atime) atime from tb_sp_num_audit group by shownum_id) b
+    where aud.shownum_id = b.shownum_id and aud.atime = b.atime order by aud.shownum_id
+    ) d,
+    tb_sp_sipphone b,tb_sp_fixphone c
+    WHERE a.id = d.shownum_id AND a.sipphone_id=b.id AND a.fixphone_id=c.id AND a.status='00'
+    AND a.id in
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </select>
+
+  <update id="updateSpApplyNums" parameterType="map" >
+    update tb_sp_apply_num
+    set audit_status= #{auditStatus,jdbcType=VARCHAR},audit_common = #{auditCommon,jdbcType=VARCHAR},audit_time=NOW()
+    where id IN
+    <foreach collection="ids" item="item" open="(" close=")" index="index" separator=",">
+      #{item}
+    </foreach>
+  </update>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SpApplyNum" useGeneratedKeys="true" keyProperty="id">
+    insert into tb_sp_apply_num
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="applyId != null" >
+        apply_id,
+      </if>
+      <if test="sipphoneId != null" >
+        sipphone_id,
+      </if>
+      <if test="fixphoneId != null" >
+        fixphone_id,
+      </if>
+      <if test="showNum != null" >
+        show_num,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="atime != null" >
+        atime,
+      </if>
+      <if test="auditStatus != null" >
+        audit_status,
+      </if>
+      <if test="auditCommon != null" >
+        audit_common,
+      </if>
+      <if test="auditTime != null" >
+        audit_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="applyId != null" >
+        #{applyId,jdbcType=VARCHAR},
+      </if>
+      <if test="sipphoneId != null" >
+        #{sipphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="fixphoneId != null" >
+        #{fixphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="showNum != null" >
+        #{showNum,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="atime != null" >
+        #{atime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="auditStatus != null" >
+        #{auditStatus,jdbcType=CHAR},
+      </if>
+      <if test="auditCommon != null" >
+        #{auditCommon,jdbcType=VARCHAR},
+      </if>
+      <if test="auditTime != null" >
+        #{auditTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <resultMap id="spNumAuditResultMap" type="com.e9cloud.mybatis.domain.SpNumAudit" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="shownum_id" property="showNumId" jdbcType="BIGINT" />
+    <result column="show_num" property="showNum" jdbcType="VARCHAR" />
+    <result column="atime" property="atime" jdbcType="TIMESTAMP" />
+    <result column="audit_status" property="auditStatus" jdbcType="CHAR" />
+    <result column="audit_common" property="auditCommon" jdbcType="VARCHAR" />
+    <result column="audit_time" property="auditTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <select id="getSpNumAuditByIds" resultMap="spNumAuditResultMap" parameterType="java.lang.Long">
+    SELECT d.id,d.shownum_id,d.show_num,d.atime,d.audit_status,d.audit_common,d.audit_time
+    FROM tb_sp_num_audit d
+    WHERE d.id in
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </select>
+
+  <update id="updateAppNumberList" parameterType="java.util.List" >
+    <foreach collection="list" item="item" index="index" separator=";">
+    update tb_sp_apply_num set show_num=#{item.showNum} where id =#{item.id}
+    </foreach>
+  </update>
+
+  <update id="updateSpNumAudio" parameterType="java.util.List" >
+    <foreach collection="list" item="item" index="index" separator=";">
+      update tb_sp_num_audit set audit_status=#{item.auditStatus},audit_common=#{item.auditCommon} where id =#{item.id}
+    </foreach>
+  </update>
+
+  <insert id="insertNumAuditSelective" parameterType="com.e9cloud.mybatis.domain.SpNumAudit" >
+    insert into tb_sp_num_audit
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="showNumId != null" >
+        shownum_id,
+      </if>
+      <if test="showNum != null" >
+        show_num,
+      </if>
+      <if test="atime != null" >
+        atime,
+      </if>
+      <if test="auditStatus != null" >
+        audit_status,
+      </if>
+      <if test="auditCommon != null" >
+        audit_common,
+      </if>
+      <if test="auditTime != null" >
+        audit_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="showNumId != null" >
+        #{showNumId,jdbcType=BIGINT},
+      </if>
+      <if test="showNum != null" >
+        #{showNum,jdbcType=VARCHAR},
+      </if>
+      <if test="atime != null" >
+        #{atime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="auditStatus != null" >
+        #{auditStatus,jdbcType=CHAR},
+      </if>
+      <if test="auditCommon != null" >
+        #{auditCommon,jdbcType=VARCHAR},
+      </if>
+      <if test="auditTime != null" >
+        #{auditTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <select id="getSpNumAuditByShowNumId" resultMap="spNumAuditResultMap" parameterType="java.lang.Long">
+      SELECT * FROM tb_sp_num_audit sa WHERE not EXISTS(SELECT * FROM tb_sp_num_audit WHERE  shownum_id=sa.shownum_id AND atime> sa.atime)
+      AND shownum_id = #{showNumId,jdbcType=VARCHAR}
+  </select>
+</mapper>

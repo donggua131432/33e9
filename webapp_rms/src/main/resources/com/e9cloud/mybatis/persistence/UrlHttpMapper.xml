@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UrlHttp_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.UrlHttp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="task_id" property="taskId" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, task_id, url, addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_http_url
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="pageURLList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT ac.id, ac.task_id, ac.url, bc.url_id, bc.result, bc.updatetime, bc.addtime FROM tb_http_url ac LEFT JOIN (SELECT a.* from tb_http_execute a,(SELECT url_id,max(updatetime) updatetime from tb_http_execute GROUP BY url_id) b WHERE a.url_id = b.url_id AND a.updatetime = b.updatetime) bc ON ac.task_id = bc.task_id AND ac.id = bc.url_id WHERE 1 = 1
+    <if test="params.taskID != null and params.taskID != ''">
+      And ac.task_id = #{params.taskID,jdbcType=VARCHAR}
+    </if>
+    ORDER BY bc.addtime desc
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="queryListByDId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    id, task_id, url
+    from tb_http_url
+    where task_id = #{taskID,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_http_url
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.UrlHttp" >
+    insert into tb_http_url (id, task_id, url,
+      addtime, updatetime)
+    values (#{id,jdbcType=INTEGER}, #{taskId,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR},
+      #{addtime,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.UrlHttp" >
+    insert into tb_http_url
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="taskId != null" >
+        task_id,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="taskId != null" >
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.UrlHttp" >
+    update tb_http_url
+    <set >
+      <if test="taskId != null" >
+        task_id = #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.UrlHttp" >
+    update tb_http_url
+    set task_id = #{taskId,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      addtime = #{addtime,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

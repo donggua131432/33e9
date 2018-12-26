@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- Rest接口请求失败原因 -->
+<mapper namespace="StatRestResponse_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatRestResponse" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stat_time" property="statTime" jdbcType="TIMESTAMP" />
+    <result column="resp_code" property="respCode" jdbcType="VARCHAR" />
+    <result column="resp_cnt" property="respCnt" jdbcType="INTEGER" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, stat_time, resp_code, resp_cnt, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_rest_response
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="countRestResponseByMin" resultType="map" parameterType="map">
+    SELECT
+    resp_code, COUNT(resp_cnt) as resp_cnt
+    FROM stat_rest_response
+    WHERE resp_code != '000000'
+    AND stat_time &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND stat_time &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY resp_code
+  </select>
+
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StafMonthFile_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StafMonthFile" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stype" property="stype" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="sdate" property="sdate" jdbcType="DATE" />
+    <result column="fname" property="fname" jdbcType="VARCHAR" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, stype, feeid, sid, sdate, fname, ctime
+  </sql>
+
+  <select id="findStafMonthFileList" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+    select
+    <include refid="Base_Column_List" />
+    from stat_month_file
+    where 1 = 1
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(stype)">
+      and stype = #{stype,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(feeid)">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.StafMonthFile" >
+    insert into stat_month_file
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="stype != null" >
+        stype,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="sdate != null" >
+        sdate,
+      </if>
+      <if test="fname != null" >
+        fname,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="stype != null" >
+        #{stype,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="sdate != null" >
+        #{sdate,jdbcType=DATE},
+      </if>
+      <if test="fname != null" >
+        #{fname,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.StafMonthFile" >
+    update stat_month_file
+    <set >
+      <if test="stype != null" >
+        stype = #{stype,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="sdate != null" >
+        sdate = #{sdate,jdbcType=DATE},
+      </if>
+      <if test="fname != null" >
+        fname = #{fname,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

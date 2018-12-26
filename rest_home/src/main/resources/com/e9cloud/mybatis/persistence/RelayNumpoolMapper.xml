@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RelayNumpool_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RelayNumpool" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, relay_num, number, max_concurrent, create_time
+  </sql>
+
+  <select id="selectRelayNumpoolsByZero" resultMap="BaseResultMap">
+    select
+      <include refid="Base_Column_List" />
+    from tb_relay_numpool
+    where relay_num in(
+      select ts.relay_num from tb_sip_basic ts
+      where ts.is_force='1' and ts.status='00' and ts.relay_type in('10','11')
+    )
+  </select>
+
+  <select id="selectRelayNumpoolsByOne" resultMap="BaseResultMap" parameterType="java.lang.String">
+    select
+      <include refid="Base_Column_List" />
+    from tb_relay_numpool
+    where relay_num in(
+      select tr.relay_num from tb_app_info ta
+      inner join tb_app_relay tr on ta.appid=tr.appid
+        and ta.appid = #{appid,jdbcType=VARCHAR}
+      inner join tb_sip_basic ts on ts.relay_num=tr.relay_num
+        and ts.status='00' and ts.relay_type in('10','11')
+    )
+  </select>
+
+</mapper>

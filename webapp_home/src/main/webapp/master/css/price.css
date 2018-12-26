@@ -1,0 +1,24 @@
+
+/****************价格内容样式******************/
+.container{background:url("../img/product_page_bg.png") 0 0 repeat;padding-top: 20px;}
+.main_box{margin:2.5em auto 8em;height:540px;padding-bottom:100px;}
+.price_series{text-align: center;padding-top:20px;}
+.preferential{font-size:48px;letter-spacing:36px;color:#5488EA;}
+.advantage{margin-top:1em;font-size:1.3em;letter-spacing:15px;color:#BDBEC3;font-size:24px;}
+.price_main{border-radius:3px;margin-top:50px;width:268px;height:438px;text-align: center;margin-right:37px;}
+.price_box .p1{border:1px solid #4E7ED6;background:#2C374B;color:#5798FF;}
+.price_box .p2{border:1px solid #31A6B2;background:#2A3A49;color:#33C0D0;}
+.price_box .p3{border:1px solid #4FA76D;background:#2C3A45;color:#56BE73;}
+.price_box .bd{border:1px solid #14dbc0;background:#2C3A45;color:#14dbc0;}
+.price_common_title{display:inline-block;width:172px;height:172px;margin-top:20px;}
+.znydd_pic{background:url("../img/price_znydd.png") 0 0 no-repeat;}
+.rest_pic{background:url("../img/price_rest.png") 0 0 no-repeat;}
+.record_pic{background:url("../img/price_record.png") 0 0 no-repeat;}
+.Designed_pic4{background:url("../img/Designed_pic4.png") 0 0 no-repeat;}
+.pri_common{font-size:1.9em;letter-spacing:5px;padding-bottom:30px;}
+.face_talk{margin:40px auto 40px;border:1px solid #466DB6;width:180px;height:60px;letter-spacing:5px;line-height:60px;font-size:22px;}
+.price_state{margin-top:40px;}
+.price{display:inline-block;min-width:90px;font-size:3em;letter-spacing:2px;}
+.DesingBtn{width:103px;height:28px;line-height:28px;border:1px solid #1e8c84; text-align:center;display:inline-block;color:#14dbc0;}
+.DesPrice{padding-left:10px;}
+.DesigFont{font-size:18px;padding-top:20px;}

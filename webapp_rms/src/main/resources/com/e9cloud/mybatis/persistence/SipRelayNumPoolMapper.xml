@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SubPool_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, subid, number, max_concurrent, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_relay_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    delete from tb_sip_relay_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteBySubid" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    delete from tb_sip_relay_numpool
+    where subid = #{subid,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    insert into tb_sip_relay_numpool (id, subid, number, 
+      max_concurrent, create_time)
+    values (#{id,jdbcType=INTEGER}, #{subid,jdbcType=VARCHAR}, #{number,jdbcType=VARCHAR}, 
+      #{maxConcurrent,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    insert into tb_sip_relay_numpool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    update tb_sip_relay_numpool
+    <set >
+      <if test="subid != null" >
+        subid = #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    update tb_sip_relay_numpool
+    set subid = #{subid,jdbcType=VARCHAR},
+      number = #{number,jdbcType=VARCHAR},
+      max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!-- 分页获取子帐号号码池信息 -->
+  <select id="getSubNumberList" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List"/>
+    from tb_sip_relay_numpool
+    where subid = #{params.subid,jdbcType=VARCHAR}
+    <if test="params.number!=null and ''!=params.number">
+      and number LIKE "%" #{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    order by create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- 根据号码查询信息 -->
+  <select id="selectSubNumberByNumber1" resultMap="BaseResultMap" parameterType="Map" >
+    SELECT t1.id id, t1.subid subid, t1.number number, t1.max_concurrent max_concurrent, t1.create_time create_time,t3.appid appid
+    FROM tb_sip_relayinfo t3 LEFT JOIN tb_sip_relay_numpool t1 ON t1.subid=t3.subid
+    WHERE t1.number=#{number,jdbcType=VARCHAR} AND t3.`status`='00'
+  </select>
+
+
+  <!-- 根据号码查询信息 -->
+  <select id="selectSubNumberByNumber" resultMap="BaseResultMap" parameterType="Map" >
+    select
+    <include refid="Base_Column_List"/>
+    from tb_sip_relay_numpool
+    where number = #{number,jdbcType=VARCHAR}
+    AND subid = #{subid,jdbcType=VARCHAR}
+  </select>
+
+
+  <!-- 判断是否已删除号码 -->
+  <select id="checkSubNumUnique" resultType="long" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    select
+    count(1)
+    from tb_sip_relay_numpool
+    where
+    <![CDATA[ 1<>1 ]]>
+    <if test="id!=null and ''!=id">
+      OR id = #{id,jdbcType=INTEGER}
+    </if>
+
+  </select>
+
+  <delete id="deleteStatusBylink" parameterType="java.lang.String" >
+    delete FROM tb_sip_relay_numpool where id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+
+</mapper>

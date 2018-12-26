@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RelayGroup1_Mapper" >
+
+  <!-- 中继群To头域号段 -->
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RelayGroup1" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="tg_num" property="tgNum" jdbcType="VARCHAR" />
+    <result column="tg_name" property="tgName" jdbcType="VARCHAR" />
+    <result column="city_name" property="cityName" jdbcType="VARCHAR" />
+    <result column="area_code" property="areaCode" jdbcType="VARCHAR" />
+    <result column="code_start" property="codeStart" jdbcType="VARCHAR" />
+    <result column="code_end" property="codeEnd" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, tg_num, tg_name, city_name, area_code, code_start, code_end
+  </sql>
+
+  <sql id="Page_Column_List" >
+    id, tg_num tgNum, tg_name tgName, city_name cityName, area_code areaCode, code_start codeStart, code_end codeEnd
+  </sql>
+
+  <select id="selectRelayGroup1ById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_relay_group1
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectRelayGroup1ByName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_relay_group1
+    where tg_name = #{tgName,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="selectRelayGroup1ByNum" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_relay_group1
+    where tg_num = #{tgNum,jdbcType=INTEGER}
+  </select>
+
+  <select id="pageGroup1" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Page_Column_List" />
+    from tb_relay_group1
+    WHERE 1 = 1
+    <if test="params.tgNum != null and '' != params.tgNum">
+    AND tg_num = #{params.tgNum,jdbcType=VARCHAR}
+    </if>
+    <if test="params.tgName != null and  '' != params.tgName">
+    AND tg_name LIKE CONCAT('%',#{params.tgName,jdbcType=VARCHAR},'%')
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_relay_group1
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="saveRelayGroup1" parameterType="com.e9cloud.mybatis.domain.RelayGroup1" >
+    insert into tb_relay_group1
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="tgNum != null" >
+        tg_num,
+      </if>
+      <if test="tgName != null" >
+        tg_name,
+      </if>
+      <if test="cityName != null" >
+        city_name,
+      </if>
+      <if test="areaCode != null" >
+        area_code,
+      </if>
+      <if test="codeStart != null" >
+        code_start,
+      </if>
+      <if test="codeEnd != null" >
+        code_end,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tgNum != null" >
+        #{tgNum,jdbcType=VARCHAR},
+      </if>
+      <if test="tgName != null" >
+        #{tgName,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null" >
+        #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="codeStart != null" >
+        #{codeStart,jdbcType=VARCHAR},
+      </if>
+      <if test="codeEnd != null" >
+        #{codeEnd,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateRelayGroup1ById" parameterType="com.e9cloud.mybatis.domain.RelayGroup1" >
+    update tb_relay_group1
+    <set >
+      <if test="tgNum != null" >
+        tg_num = #{tgNum,jdbcType=VARCHAR},
+      </if>
+      <if test="tgName != null" >
+        tg_name = #{tgName,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null" >
+        city_name = #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        area_code = #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="codeStart != null" >
+        code_start = #{codeStart,jdbcType=VARCHAR},
+      </if>
+      <if test="codeEnd != null" >
+        code_end = #{codeEnd,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

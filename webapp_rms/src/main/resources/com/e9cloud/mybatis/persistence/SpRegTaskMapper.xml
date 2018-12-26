@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SpRegTask_Mapper">
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SpRegTask" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="shownum_id" property="shownumId" jdbcType="BIGINT" />
+    <result column="sipphone_id" property="sipphoneId" jdbcType="VARCHAR" />
+    <result column="fixphone_id" property="fixphoneId" jdbcType="VARCHAR" />
+    <result column="task_time" property="taskTime" jdbcType="TIMESTAMP" />
+    <result column="task_type" property="taskType" jdbcType="VARCHAR" />
+    <result column="task_status" property="taskStatus" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, shownum_id, sipphone_id, fixphone_id, task_time, task_type, task_status, 
+    addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_sp_reg_task
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_sp_reg_task
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.SpRegTask" >
+    insert into tb_sp_reg_task (id, appid, shownum_id, 
+      sipphone_id, fixphone_id, task_time, 
+      task_type, task_status, addtime, 
+      updatetime)
+    values (#{id,jdbcType=BIGINT}, #{appid,jdbcType=VARCHAR}, #{shownumId,jdbcType=BIGINT}, 
+      #{sipphoneId,jdbcType=VARCHAR}, #{fixphoneId,jdbcType=VARCHAR}, #{taskTime,jdbcType=TIMESTAMP}, 
+      #{taskType,jdbcType=VARCHAR}, #{taskStatus,jdbcType=VARCHAR}, #{addtime,jdbcType=TIMESTAMP}, 
+      #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SpRegTask" >
+    insert into tb_sp_reg_task
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="shownumId != null" >
+        shownum_id,
+      </if>
+      <if test="sipphoneId != null" >
+        sipphone_id,
+      </if>
+      <if test="fixphoneId != null" >
+        fixphone_id,
+      </if>
+      <if test="taskTime != null" >
+        task_time,
+      </if>
+      <if test="taskType != null" >
+        task_type,
+      </if>
+      <if test="taskStatus != null" >
+        task_status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="shownumId != null" >
+        #{shownumId,jdbcType=BIGINT},
+      </if>
+      <if test="sipphoneId != null" >
+        #{sipphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="fixphoneId != null" >
+        #{fixphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskTime != null" >
+        #{taskTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskType != null" >
+        #{taskType,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null" >
+        #{taskStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateStatusByPK" parameterType="com.e9cloud.mybatis.domain.SpRegTask" >
+    update tb_sp_reg_task
+    <set>
+      <if test="taskTime != null" >
+        task_time = #{taskTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskStatus != null" >
+        task_status = #{taskStatus,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <!-- 锁定任务状态 -->
+  <update id="updateTaskStatusForLocked">
+    update tb_sp_reg_task
+    <set>
+        task_status = '01'
+    </set>
+    where id IN
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+      #{item.id}
+    </foreach>
+  </update>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SpRegTask" >
+    update tb_sp_reg_task
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="shownumId != null" >
+        shownum_id = #{shownumId,jdbcType=BIGINT},
+      </if>
+      <if test="sipphoneId != null" >
+        sipphone_id = #{sipphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="fixphoneId != null" >
+        fixphone_id = #{fixphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskTime != null" >
+        task_time = #{taskTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskType != null" >
+        task_type = #{taskType,jdbcType=VARCHAR},
+      </if>
+      <if test="taskStatus != null" >
+        task_status = #{taskStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <resultMap id="TaskResultMap" type="com.e9cloud.mybatis.domain.SpRegTask" extends="BaseResultMap">
+    <result column="sip_phone" property="sipphone" jdbcType="VARCHAR" />
+    <result column="ip_port" property="outerIp" jdbcType="VARCHAR" />
+    <result column="inner_ip" property="innerIp" jdbcType="VARCHAR" />
+    <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectToDoTaskList" resultMap="TaskResultMap" parameterType="string" >
+    SELECT
+     t.* , s.sip_phone, s.ip_port, m.inner_ip, s.pwd
+    FROM tb_sp_reg_task t
+    LEFT JOIN tb_sp_sipphone s ON t.sipphone_id = s.id
+    LEFT JOIN (
+        SELECT * FROM tb_sp_ip_mapper im WHERE im.env_name = #{_parameter}
+    ) m ON s.ip_port = m.outer_ip
+    WHERE t.task_status = '00' AND t.sipphone_id is NOT NULL
+    ORDER BY t.addtime
+  </select>
+
+</mapper>

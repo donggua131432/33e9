@@ -1,0 +1,116 @@
+
+
+/********************页头页面样式*********************/
+*{ margin:0px; padding:0px;}
+body { margin-top: 50px;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif, "Microsoft Yahei";}
+#wrapper{overflow:hidden;}
+#header li a,.nav>a{ color:#fff;font-weight: bold;}
+#header ul li a:hover{ color:#5688E6;}
+.register,.login{display:inline-block; width:94px; height:27px;line-height: 27px;text-align: center;border-radius: 3px; font-weight: bold; border:1px solid #fff;}
+.register:hover,.login:hover{ text-decoration:none; font-size:18px; border:none; color:#fff;background:#548BEF;}
+.register{ margin-left:36px;}
+.login{ margin-left:12px;}
+.logo { display: inline-block; width: 248px; height: 45px; line-height: 45px;background:url("../img/logo2.png") 0 0 no-repeat;}
+.shadow{box-shadow: 0px 0px 1px 2px #47637D;}
+/***************登录页面样式***********************/
+input{vertical-align: middle;}
+#section{ border-top:1px solid #3E4857;  background:#3E4857;}
+#section .section_main{ margin-top:80px;}
+#section .section_main .center{text-align:center}
+#section .section_main .center img{  display:inline-block;}
+#section .center p{ color:#fff; font-size:18px; padding-top:20px; margin-bottom:60px;}
+.section_main .row2 i,.login_4 .row3 .l4_top i{ display:inline-block; width:22px; height:22px;background:url("../img/cuo.png") 0 0 no-repeat; vertical-align: middle; margin-right:10px;}
+#section .section_main .row3 .left{ margin-left:25px;}
+#section .row3 span{ color:#fff; margin-left:5px;}
+#section .section_main .row3 i{display:inline-block;border:1px solid #fff; width:13px; height:13px; border-radius: 50%;color:#fff;text-align:center;line-height:14px;}
+#section .section_main .row3 a{ color:#E76BF8;}
+.section_main input{ background:#323A46; color:#fff;}
+.section_main .row4 button{ display:block; width:160px; height:40px;font-size:20px;font-weight:bold;border:none; border-radius: 3px; background:#548BEF;margin-top:30px; margin-left: 50px;color: #fff;}
+/****************登录成功页面样式*********************/
+.success_main .center{ text-align: center;}
+.success_main .row1{margin-top:50px;}
+.success_main .row1 h1{ font-size: 68px;color:#fff;}
+.success_main .row1 p{ color:#CFCFCF;font-size: 18px;}
+.success_main .row2 img{ display:inline-block; margin-top:20px;}
+.success_main .row3{ margin-top:20px;}
+.success_main .row3 a{ display:block; width:332px;height:47px; margin:30px auto 0 auto; background:#5682C3;border-radius: 4px; color:#fff;line-height: 47px; font-size: 24px;}
+.success_main .row3 a:hover{ text-decoration:none;}
+
+/*****************找回密码1填写邮箱页面样式******************/
+label{font-size: 18px !important;}
+.error{background:url("../img/cuo.png") 0 0 no-repeat;padding-left:2em;color:#EA5153;font-weight:normal;font-size:1.1em !important;line-height: 1.5em;margin-top:0.5em;!important;}
+.rg_row3 label.error,.register_4 label.error{margin-left:1em;color:#EA5153 !important;}
+.fw{ color:#DFE0E2;font-size: 24px; position:relative;top:70px;left:-530px;z-index:1000;}
+.login_1{text-align: center;}
+.login_1 .row2{margin-top:50px;}
+.login_1 .row2 label{color:#EDEDEE;font-size:16px;margin-right:15px;}
+.login_1 .row2 input{border-radius: 3px;background:#323A46;border:1px solid #C7C9CC;color:#fff;padding-left:5px;line-height: 32px;}
+.login_1 .row2 .t_email{margin-top:30px;margin-left:110px;}
+.login_1 .row2 .tip_text,.register_1 .row3 .tip_text{display:inline-block;width:22px; height:22px;background:url("../img/dui.png") 0 0 no-repeat;margin-left:10px;vertical-align: middle}
+.login_1 .row2 .test_code{display: inline-block;width:80px;height:30px;border:1px solid #fff;background:#fff;color:#000;text-align: center;}
+.login_1 .row2 button{color:#F3F5FD;background:#548BEF;border-radius: 3px;border:none;font-size: 16px;font-weight: bold;}
+.login_1 .row2 .upDate{width:50px; height:30px; }
+.login_1 .row2 .s_btm{margin:35px 0 0 130px;width:130px;height:35px; }
+
+/****************找回密码2页面样式*******************/
+.login_2,.login_3,.login_4 .row2,.login_4 .row_img{text-align: center;}
+.login_2 h3,.login_3 h3,.login_4 h3{color:#F0F1F1;}
+.login_2 .row2 h3,.login_3 h3{margin-top:50px;}
+.login_2 .row2 h3>span,.login_3 h3>span,.login_4 h3>span{color:#517AB5;margin:0 15px 0 15px;}
+.login_2 .row2 p{font-size: 14px !important;}
+.login_2 .row3 a{display:inline-block;width:120px; height:35px;background:#5682C3;line-height: 35px;color:#F5FAFE;font-weight: bold;border-radius: 3px;font-size: 18px;}
+.login_2 a:hover{text-decoration: none !important;}
+
+/****************找回密码3页面样式***********************/
+.login_3 .row3{margin-top:30px;}
+.login_3 .row3 .top{margin-bottom:20px;}
+.login_3 .row3 .top label,.login_4 .row3 .l4_top label{color:#C3C6CA;margin-right:10px;}
+.login_3 .row3 .top input,.login_4 .row3 .l4_top input{line-height: 32px;border-radius: 3px;background:#323844;border:1px solid #C8CBCF;color:#fff;padding-left: 5px;}
+.login_3 .row3 .left{margin-right: 28px;}
+.s_btm{width:120px; height:35px;line-height:35px; background:#5682C3;border-radius: 3px;color:#F5FAFE;border:none;margin-top:20px;font-weight: bold;font-size: 16px;margin-left:25px;}
+
+/****************找回密码4页面样式***********************/
+.login_4 .row2 h3{margin-bottom: 20px;}
+.login_4 .row3 .l4_top{margin-left:50px;}
+.login_4 .row3 .l4_top .tip_text,.section_main .tip_text{color:#FF5353 !important;}
+.login_4 .row3 .l4_right{margin:20px 0px 15px 50px;}
+.login_4 .row3 .l4_check{color:#E0E2E3; margin-left:90px;}
+.login_4 .row3 .l4_check a{color:#D265ED;}
+.login_4 .row3 .l4_check a i{display:inline-block;margin-left:75px; border:1px solid #fff; width:13px; height:13px; border-radius: 50%;color:#fff;text-align:center;line-height:14px;}
+.login_4 .s_btm{margin-left:140px;}
+
+/*****************注册页面1样式*************************/
+.rg{ color:#DFE0E2;font-size: 24px; position:relative;top:70px;left:-450px;z-index:1000;}
+.register_1 .row3{margin:45px 0 0 30px;}
+.register_1 .row3 .bottom{margin:20px 0 25px 10px;}
+.register_1 .row3 .terms{font-size:12px;}
+.register_1 .row3 .terms a{text-decoration:underline;}
+.register_1 .row3 .terms a:hover{color:#fff;}
+.register_1 .rg_left{margin-left:100px;}
+/******************注册页面2样式******************/
+.register_2 .re_row3{margin-top:50px;}
+/******************注册页面3样式******************/
+.register_3 .re_row2 h3{margin-top:-20px;}
+.register_3 .rg_row3 .re_btm{margin:5px 0 20px 88px;}
+.rg_row3 #paw{margin-left:1.9em;}
+#phone,#test_code{margin-left:0.2em;}
+.register_3 .rg_row3 .rg_left{margin-left:0;}
+.register_3 .rg_row3 .rg_left span{margin-left:0;color:#EDEDEE;font-weight: bold;}
+.register_3 .rg_row3 .rg_left input{margin-left:20px;}
+.register_3 .rg_row3 .rg_left b{margin-left:5px;color:#EBECEB;}
+.register_3 .rg_row3 .rg_btm{margin:5px 0 0 85px;}
+/************************************************/
+
+/***********************页尾样式**************************/
+.footer{ background:#39414E;}
+.foot_1{ margin-top:46px; margin-left:5px;text-align: center;}
+.foot_1 h4{ color:#fff;margin-bottom:19px;}
+.foot_1 ul li a{color:#fff;}
+.foot_1 li{ margin-bottom:10px;}
+.foot_1 a:hover{ color:#fff;}
+.foot_1 p,.foot img{ margin-top:-1px;color:#fff;}
+.foot_2 p{ margin-top:30px;text-align:center; margin-bottom:25px;color:#A3A4A6;}
+
+
+
+

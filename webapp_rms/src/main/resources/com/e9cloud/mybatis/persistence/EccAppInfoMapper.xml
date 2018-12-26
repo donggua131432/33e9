@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="EccAppInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.EccAppInfo" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="switchboard_id" property="switchboardId" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="transfer" property="transfer" jdbcType="BIT" />
+    <result column="transfer_num" property="transferNum" jdbcType="VARCHAR" />
+    <result column="ivr_voice_need" property="ivrVoiceNeed" jdbcType="BIT" />
+    <result column="ivr_voice_name" property="ivrVoiceName" jdbcType="VARCHAR" />
+    <result column="ivr_voice_url" property="ivrVoiceUrl" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="BaseResultMapWithCityInfo" type="com.e9cloud.mybatis.domain.EccAppInfo" extends="BaseResultMap">
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="pcode" property="pcode" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <result column="areaCode" property="areaCode" jdbcType="VARCHAR" />
+    <result column="switchboard" property="switchboard" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, switchboard_id, cityid, transfer, transfer_num, ivr_voice_need, ivr_voice_name, 
+    ivr_voice_url, addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMapWithCityInfo" parameterType="java.lang.String" >
+    select 
+    ie.id, ie.appid, switchboard_id, ie.cityid, transfer, transfer_num, ivr_voice_need, ivr_voice_name,
+    ivr_voice_url, ie.addtime, ie.updatetime, tc.area_code areaCode, tc.cname, tp.pcode, tp.pname, es.number AS switchboard
+    from tb_app_info_ecc ie
+    LEFT JOIN tb_ecc_switchboard es ON ie.switchboard_id = es.id
+    LEFT JOIN tb_telno_city tc ON tc.ccode = ie.cityid
+    LEFT JOIN tb_telno_province tp ON tp.pcode = tc.pcode
+    where ie.id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectEccAppInfoByAppid" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    ie.id, ie.appid, switchboard_id, ie.cityid, transfer, transfer_num, ivr_voice_need, ivr_voice_name,
+    ivr_voice_url, ie.addtime, ie.updatetime, tc.area_code areaCode, tc.cname, tp.pcode, tp.pname, es.number AS switchboard
+    from tb_app_info_ecc ie
+    LEFT JOIN tb_ecc_switchboard es ON ie.switchboard_id = es.id
+    LEFT JOIN tb_telno_city tc ON tc.ccode = ie.cityid
+    LEFT JOIN tb_telno_province tp ON tp.pcode = tc.pcode
+    where ie.appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_app_info_ecc
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.EccAppInfo" >
+    insert into tb_app_info_ecc (id, appid, switchboard_id, 
+      cityid, transfer, transfer_num, 
+      ivr_voice_need, ivr_voice_name, ivr_voice_url, 
+      addtime, updatetime)
+    values (#{id,jdbcType=VARCHAR}, #{appid,jdbcType=VARCHAR}, #{switchboardId,jdbcType=VARCHAR}, 
+      #{cityid,jdbcType=VARCHAR}, #{transfer,jdbcType=BIT}, #{transferNum,jdbcType=VARCHAR}, 
+      #{ivrVoiceNeed,jdbcType=BIT}, #{ivrVoiceName,jdbcType=VARCHAR}, #{ivrVoiceUrl,jdbcType=VARCHAR}, 
+      #{addtime,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.EccAppInfo" >
+    insert into tb_app_info_ecc
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="switchboardId != null" >
+        switchboard_id,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="transfer != null" >
+        transfer,
+      </if>
+      <if test="transferNum != null" >
+        transfer_num,
+      </if>
+      <if test="ivrVoiceNeed != null" >
+        ivr_voice_need,
+      </if>
+      <if test="ivrVoiceName != null" >
+        ivr_voice_name,
+      </if>
+      <if test="ivrVoiceUrl != null" >
+        ivr_voice_url,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="switchboardId != null" >
+        #{switchboardId,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="transfer != null" >
+        #{transfer,jdbcType=BIT},
+      </if>
+      <if test="transferNum != null" >
+        #{transferNum,jdbcType=VARCHAR},
+      </if>
+      <if test="ivrVoiceNeed != null" >
+        #{ivrVoiceNeed,jdbcType=BIT},
+      </if>
+      <if test="ivrVoiceName != null" >
+        #{ivrVoiceName,jdbcType=VARCHAR},
+      </if>
+      <if test="ivrVoiceUrl != null" >
+        #{ivrVoiceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.EccAppInfo" >
+    update tb_app_info_ecc
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="switchboardId != null" >
+        switchboard_id = #{switchboardId,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="transfer != null" >
+        transfer = #{transfer,jdbcType=BIT},
+      </if>
+      <if test="transferNum != null" >
+        transfer_num = #{transferNum,jdbcType=VARCHAR},
+      </if>
+      <if test="ivrVoiceNeed != null" >
+        ivr_voice_need = #{ivrVoiceNeed,jdbcType=BIT},
+      </if>
+      <if test="ivrVoiceName != null" >
+        ivr_voice_name = #{ivrVoiceName,jdbcType=VARCHAR},
+      </if>
+      <if test="ivrVoiceUrl != null" >
+        ivr_voice_url = #{ivrVoiceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.EccAppInfo" >
+    update tb_app_info_ecc
+    set appid = #{appid,jdbcType=VARCHAR},
+      switchboard_id = #{switchboardId,jdbcType=VARCHAR},
+      cityid = #{cityid,jdbcType=VARCHAR},
+      transfer = #{transfer,jdbcType=BIT},
+      transfer_num = #{transferNum,jdbcType=VARCHAR},
+      ivr_voice_need = #{ivrVoiceNeed,jdbcType=BIT},
+      ivr_voice_name = #{ivrVoiceName,jdbcType=VARCHAR},
+      ivr_voice_url = #{ivrVoiceUrl,jdbcType=VARCHAR},
+      addtime = #{addtime,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

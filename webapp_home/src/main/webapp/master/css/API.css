@@ -1,0 +1,69 @@
+
+
+.API_container{padding-top:120px;background:#ECECEC;overflow: hidden;}
+/*API第一部分样式*/
+.API_main1{position:fixed;z-index:2;width:250px;background:#E3E3E3;border: 1px solid #CCCCCC;}
+.dl{margin-bottom:15px;border-bottom: 1px solid #CCCCCC;}
+.dl:last-child{border-bottom: none !important;}
+.dt_api{display:inline-block;width:200px;}
+.api_txt{display:inline-block;margin-left:20px;width:40px;height:40px;background:url("../img/all_Doc.png") 0 0 no-repeat;vertical-align:-10px;}
+.l_api{display:inline-block;margin:10px 0 10px -10px;letter-spacing:5px;font-size:24px;color:#E9EAEC;}
+.api_left_color{background:#38424E;}
+.APIComTop{display: inline-block;margin:11px 10px 0 0;}
+.bouLt1{display:inline-block;width:10px;height:10px;background:url("../img/API_right.png") 0 0 no-repeat;vertical-align: middle;}
+.bouLt2{display:inline-block;width:10px;height:10px;background:url("../img/API_XX.png") 0 0 no-repeat;vertical-align: middle;}
+/*.api_com_left{margin-right:90px;}*/
+/*.api_last_left{margin-right:65px;}*/
+.api_left dl>dd{margin:15px 0 10px 0;padding-left:25px;cursor:pointer;width:223px;height:30px;font-size:16px;line-height:30px;letter-spacing: 2px;color:#686868;}
+.api_left dl>dd:hover{color:#548BEF;}
+.api_left dl>dt{margin:10px 0 10px 25px;font-size:20px;color:#090909;cursor:pointer;}
+.l_api{display:inline-block;margin:10px 0 10px 25px;font-size:24px;color:#E9EAEC;}
+.dd_hover{background:#548BEF;color:#FFFFFF !important;}
+
+/*API第二部分样式*/
+.API_main2{position:relative;z-index:1;width:790px;margin-left:270px;margin-bottom:30px;line-height: 25px;}
+.picWidth>img{width:780px;}
+.api_m2{margin-bottom:15px;padding:15px 0 15px 0;border-bottom:1px solid #C4C4C4;}
+.api_m2>span{letter-spacing:3px;font-size:28px;color:#1E252C;}
+.api_m2_box{margin:20px 0 0 10px}
+.Aline{text-decoration: underline;}
+.load{display:inline-block;padding:0 8px;height:28px;background:#548BEF;color:#FFFFFF !important;}
+.load:visited,.Aline:visited{color:#2220EF;}
+.api_com_font{display:inline-block;margin-bottom:15px;letter-spacing:3px;font-size:26px;color:#2D2D2D;}
+/*.api_com_font>b{margin-right:20px;font-size:42px;color:#4B85EF;!important;}*/
+.api_m2_box>p{margin-bottom:15px;letter-spacing: 1px;font-size:15px;color:#393D42;}
+.STop{display:inline-block;margin:10px 0 5px 0;letter-spacing: 1px;font-size:15px;color:#393D42;}
+.APIlgFont{margin:10px 0 5px 0 !important;font-size:22px !important;color:#111111 !important;}
+.marginTop{margin-top:20px !important;}
+.APImdFont{margin:10px 0 5px 0 !important;font-size:20px !important;color:#111111 !important;}
+.APIsmFont{margin:3px !important;font-size:16px !important;color:#000000 !important;}
+.blueBg{background:#D3D8EE;}
+.redFont{color:#FF0000;}
+.API_style{margin-bottom:15px;border:1px solid #C1C1C1;border-collapse: collapse;width:780px;}
+.API_style tr{height:28px;}
+.API_style tr:first-child{background:#D5D5D5;font-size: 16px;}
+.API_style tr:first-child>td{color:#828282 !important;}
+.API_style td{padding:0 6px;border:1px solid #C1C1C1;}
+.icon{display: inline-block;width:28px;height:28px;}
+.guideTxt{background:url("../img/API_arrows.png") 0 0 no-repeat;vertical-align:middle;}
+.downTxt{margin-right:5px;background:url("../img/API_download.png") 0 0 no-repeat;vertical-align:-8px;}
+/*API第三部分样式*/
+.AVisited{text-decoration:underline}
+.imgTop{margin-top:20px;}
+.AVisited:visited{color:#3624F5;}
+.API_main3{position:fixed;margin-left:1100px;width:152px;height:460px;overflow: hidden;}
+.api_right_box{position:relative;z-index:60;margin-left:14px;border-left:2px solid #4B5561;width:140px;}
+.StarePageHeight{height:395px;}
+.OHeight{height:60px;}
+.THeight{height:135px;}
+.FHeight{height:171px;}
+.fireHeight{height:208px;}
+.api_right_center{position:absolute;left:-8px;padding-top:2px;}
+.api_right_center>p{margin-top:20px;font-size:13px;color:#282828;cursor: pointer;}
+.api_right_center>p>b{display:inline-block;margin-left:2px;margin-right:3px;border-radius:50%;width:10px;height:10px;background:#ACACAC;}
+.click_tb{display: inline-block;width:30px;height:30px;cursor:pointer;}
+.spread_tb{background:url("../img/API_zk.png") 0 0 no-repeat;margin-bottom:-5px;}
+.close_tb{background:url("../img/API_ss.png") 0 0 no-repeat;}
+.xtb,.stb{position: relative;z-index: 80;}
+.api_center_hover{color:#5A8EEF !important;}
+.api_b_hover{background:#3499FF !important;}

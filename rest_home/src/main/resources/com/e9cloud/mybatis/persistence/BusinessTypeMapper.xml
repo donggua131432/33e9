@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BusinessType_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.BusinessType" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sid, bus_type, status, create_date, updatetime
+  </sql>
+  <select id="selectBusinessTypeByParam" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_business_type
+    where sid = #{sid,jdbcType=VARCHAR} and bus_type = #{busType,jdbcType=VARCHAR} and status = #{status,jdbcType=VARCHAR}
+  </select>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd"
+	default-lazy-init="true">
+
+	<description>Shiro安全配置</description>
+
+	<!-- Shiro's main business-tier object for web-enabled applications -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="shiroDbRealm" />
+		<property name="cacheManager" ref="shiroEhcacheManager" />
+		<property name="sessionManager" ref="shiroSessionManager"/>
+	</bean>
+
+	<bean id="shiroSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<property name="sessionValidationInterval" value="3600000"/>  <!-- 相隔多久检查一次session的有效性 -->
+		<property name="globalSessionTimeout" value="7200000"/>  <!-- session 有效时间为2小时 （毫秒单位）-->
+		<!--<property name="sessionIdCookie.domain" value="/"/>-->
+		<property name="sessionIdCookie.name" value="DSID"/>
+		<!--<property name="sessionIdCookie.path" value="/"/>-->
+		<!-- <property name="sessionListeners">
+            <list>
+                <bean class="com.concom.security.interfaces.listener.SessionListener"/>
+            </list>
+        </property> -->
+	</bean>
+
+
+	<!--<bean id="logSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<property name="sessionListeners">
+			<list>
+				<ref bean="logSessionListener"/>
+			</list>
+		</property>
+	</bean>-->
+
+
+	<!--<bean id="logSessionListener" class="com.e9cloud.core.support.LogSessionListener"/>-->
+
+	<!-- 項目自定义的Realm, 所有accountService依赖的dao都需要用depends-on声明 -->
+	<bean id="shiroDbRealm" class="com.e9cloud.mybatis.service.ShiroDbRealm">
+	</bean>
+
+	<!-- Shiro Filter -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login" />
+		<property name="successUrl" value="" />
+		<property name="filters">
+			<map>
+				<entry key="authc" value-ref="logAuthenticationFilter"/>
+			</map>
+		</property>
+
+
+		<property name="filterChainDefinitions">
+			<value>
+				/login = authc
+				/logout = logout
+				/admin/** = authc
+				/js/** = anon
+				/css/** = anon
+				/images/** = anon
+				/skin/** = anon
+				/favicon.ico = anon
+				/robots.txt = anon
+				/log/additive** = anon
+				/** = authc
+			</value>
+		</property>
+	</bean>
+
+	<bean id="logAuthenticationFilter" class="com.e9cloud.mybatis.service.LogAuthenticationFilter"></bean>
+
+	<!-- 用户授权信息Cache, 采用EhCache classpath:config/ehcache/ehcache-shiro.xml -->
+	<bean id="shiroEhcacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:config/ehcache/ehcache-shiro.xml"/>
+	</bean>
+
+	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+</beans>

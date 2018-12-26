@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VoiceverifyNum_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.VoiceverifyNum" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="num_id" property="numId" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="deltime" property="deltime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="BaseResultMap1" extends="BaseResultMap"  type="com.e9cloud.mybatis.domain.VoiceverifyNum" >
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="areaCode" property="areaCode" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="pageVoiceverifyNumList" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select vn.*,vnp.number,tc.cname,tc.area_code areaCode
+    from tb_voiceverify_num vn ,tb_voiceverify_num_pool vnp ,tb_telno_city tc,tb_telno_province tp
+    where vn.num_id = vnp.id and tc.ccode = vnp.cityid
+    and tc.pcode = tp.pcode AND tc.ctype = 0
+    and vn.status='00'
+    and appid = #{params.appid,jdbcType=VARCHAR}
+
+    <if test="params.number != null and params.number != ''">
+      and vnp.number = #{params.number,jdbcType=VARCHAR}
+    </if>
+    <if test="params.id != null and params.id != ''">
+      and id = #{params.id,jdbcType=VARCHAR}
+    </if>
+    <if test="params.areaCode != null and params.areaCode != ''">
+      and tc.area_code = #{params.areaCode,jdbcType=CHAR}
+      and vnp.number not regexp '^1[0-9]{10}$' AND number not regexp '^95[0-9]{3}$'
+    </if>
+    ORDER BY IF(tp.pinyin LIKE 'a%' OR tp.pinyin LIKE '\_%', tp.pinyin, 'AA'), IF(tc.pinyin LIKE 'a%', SUBSTRING(tc.pinyin,3),tc.pinyin)
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="getpageVoiceverifyNumList" resultType="map" parameterType="Page" >
+    select vn.*,vnp.number,tc.cname,tc.area_code areaCode
+    from tb_voiceverify_num vn ,tb_voiceverify_num_pool vnp ,tb_telno_city tc,tb_telno_province tp
+    where vn.num_id = vnp.id and tc.ccode = vnp.cityid
+    and tc.pcode = tp.pcode AND tc.ctype = 0
+    and vn.status='00'
+    and appid = #{params.appid,jdbcType=VARCHAR}
+
+    <if test="params.number != null and params.number != ''">
+      and vnp.number = #{params.number,jdbcType=VARCHAR}
+    </if>
+    <if test="params.id != null and params.id != ''">
+      and id = #{params.id,jdbcType=VARCHAR}
+    </if>
+    <if test="params.areaCode != null and params.areaCode != ''">
+      and tc.area_code = #{params.areaCode,jdbcType=CHAR}
+      and vnp.number not regexp '^1[0-9]{10}$' AND number not regexp '^95[0-9]{3}$'
+    </if>
+    ORDER BY IF(tp.pinyin LIKE 'a%' OR tp.pinyin LIKE '\_%', tp.pinyin, 'AA'), IF(tc.pinyin LIKE 'a%', SUBSTRING(tc.pinyin,3),tc.pinyin)
+  </select>
+
+  <select id="findListCountByMap" resultType="Integer" parameterType="java.util.HashMap" >
+    select count(1)
+    from tb_voiceverify_num vn ,tb_voiceverify_num_pool vnp ,tb_telno_city tc,tb_telno_province tp
+    where vn.num_id = vnp.id and tc.ccode = vnp.cityid
+    and tc.pcode = tp.pcode AND tc.ctype = 0
+    and vn.status='00'
+    and appid = #{appid,jdbcType=VARCHAR}
+
+    <if test="number != null and number != ''">
+      and vnp.number = #{number,jdbcType=VARCHAR}
+    </if>
+    <if test="id != null and id != ''">
+      and id = #{id,jdbcType=VARCHAR}
+    </if>
+    <if test="areaCode != null and areaCode != ''">
+      and tc.area_code = #{areaCode,jdbcType=CHAR}
+      and vnp.number not regexp '^1[0-9]{10}$' AND number not regexp '^95[0-9]{3}$'
+    </if>
+
+  </select>
+
+  <select id="findListByMap" resultMap="BaseResultMap1" parameterType="java.util.HashMap" >
+
+    select vn.*,vnp.number,tc.cname,tc.area_code areaCode
+    from tb_voiceverify_num vn ,tb_voiceverify_num_pool vnp ,tb_telno_city tc,tb_telno_province tp
+    where vn.num_id = vnp.id and tc.ccode = vnp.cityid
+    and tc.pcode = tp.pcode AND tc.ctype = 0
+    and vn.status='00'
+    and appid = #{appid,jdbcType=VARCHAR}
+
+    <if test="number != null and number != ''">
+      and vnp.number = #{number,jdbcType=VARCHAR}
+    </if>
+    <if test="id != null and id != ''">
+      and id = #{id,jdbcType=VARCHAR}
+    </if>
+    <if test="areaCode != null and areaCode != ''">
+      and tc.area_code = #{areaCode,jdbcType=CHAR}
+      and vnp.number not regexp '^1[0-9]{10}$' AND number not regexp '^95[0-9]{3}$'
+    </if>
+    ORDER BY IF(tp.pinyin LIKE 'a%' OR tp.pinyin LIKE '\_%', tp.pinyin, 'AA'), IF(tc.pinyin LIKE 'a%', SUBSTRING(tc.pinyin,3),tc.pinyin)
+    limit  #{start,jdbcType=DECIMAL},#{pageSize,jdbcType=DECIMAL}
+  </select>
+</mapper>

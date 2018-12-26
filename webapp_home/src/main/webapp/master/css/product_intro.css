@@ -1,0 +1,124 @@
+
+/********************智能云调度页面样式***********************/
+.zyd_container1,.zyd_container2,.zyd_container3,.zyd_container4{width:100%;text-align: center;}
+
+/*************智能云调度第一部分样式***************/
+.zyd_container1{padding-top:85px;background:url("../img/pro_zyd_bg1.png") 0 0 repeat;border-bottom:1px solid #323D53;}
+.zyd_com_img_kj{display:inline-block;margin-right:15px;width:130px;height:130px;cursor:pointer;}
+.zyd_img1{background:url("../img/plus.png") 0 0 no-repeat;}
+.zyd_img2{background:url("../img/product_zhinengyundiaodu2.png") 0 0 no-repeat;}
+.zyd_img2b{background:url("../img/product_zhinengyundiaodu1.png") 0 0 no-repeat;}
+.zyd_img3{background:url("../img/product_huiborest1.png") 0 0 no-repeat;}
+.zydTwo{margin-top:60px;}
+.product_common{font-size:65px;color:#FFFFFF;}
+.zydTwo>p{margin:20px 0 33px 0;font-size:26px;color:#5080D9;}
+.zydThree,.zydFour{margin-bottom:50px;}
+.zydFour>p{margin-top:15px;font-size:20px;letter-spacing:6px;color:#D4D5DA;}
+.zyd_bg{background:url("../img/cover_bg.png") 0 0 no-repeat;width:1170px;height:596px;}
+
+
+/*************智能云调度第二部分样式***************/
+.zyd_container2{background:url("../img/pro_zyd_bg2.png") 0 0 repeat;border-bottom:1px solid #242B35;border-top:1px solid #273041;}
+.wisdom_img{margin-top:60px;}
+.zydFour_top{margin:30px 0 100px 0;}
+
+/*************智能云调度第三部分样式***************/
+.zyd_container3{background:url("../img/pro_zyd_bg3.png") 0 0 repeat;border-top:1px solid #2B323C;height:680px;padding-bottom:100px;}
+.product_advantage{margin:50px 0 60px 0;}
+.advantage_list{margin-left:50px;}
+.zyd_advantage{display: inline-block;width:110px;height:110px;vertical-align:middle;}
+.ad1{background:url("../img/fast.png") 0 0 no-repeat;}
+.ad2{background:url("../img/timesaving.png") 0 0 no-repeat;}
+.ad3{background:url("../img/short_cycle.png") 0 0 no-repeat;}
+.ad4{background:url("../img/profession.png") 0 0 no-repeat;}
+.ad5{background:url("../img/connection.png") 0 0 no-repeat;}
+.ad6{background:url("../img/stable.png") 0 0 no-repeat;}
+.advantage_list li{float:left;margin-bottom:50px;margin-right:20px;width:556px;height:110px;}
+.zyd_ad{display:inline-block;width:400px;}
+.txt_left{margin-left:25px;text-align: left !important;}
+.common_font_color{margin:10px 0 15px 0;letter-spacing:3px;font-size:26px;color:#01BDF5;}
+.zyd_common_font{font-size:16px;letter-spacing:1px;color:#B8BBBC;}
+
+/*************智能云调度第四部分样式***************/
+.zyd_container4{background:url("../img/pro_zyd_bg4.png") 0 0 repeat;border-bottom:1px solid #2B323C;border-top:1px solid #2B323C;}
+.code_top{margin-top:85px;}
+.code_common_top{margin-top:180px;}
+.zyd_code_img{margin:70px 0 50px 0;}
+.code_95{display:inline-block;margin-bottom:40px;letter-spacing:10px;font-size:36px;color:#07EBEC;}
+.code_common>p{margin-bottom:30px;letter-spacing:5px;font-size:18px;color:#C3C3C2;}
+
+
+
+
+/********************回拨Rest页面样式***********************/
+.hbr_container1,.hbr_container2,.hbr_container3,.hbr_container4{width:100%;text-align: center;}
+/*************回拨rest第一部分样式***************/
+.hbr_container1{padding-top:85px;background:url("../img/pro_rest_bg1.png") 0 0 repeat;border-bottom:1px solid #25414C;}
+.hbr_img3{background:url("../img/product_huiborest2.png") 0 0 no-repeat;}
+.hbr_img2{background:url("../img/product_zhinengyundiaodu1.png") 0 0 no-repeat;}
+
+/*************回拨rest第二部分样式***************/
+.hbr_container2{background:url("../img/pro_rest_bg2.png") 0 0 repeat;border-top:1px solid #10373E;border-bottom:1px solid #10373E;}
+.hbrFour_top{margin:30px 0 50px 0;}
+/*************回拨rest第三部分样式***************/
+.hbr_container3{background:url("../img/pro_rest_bg3.png") 0 0 repeat;border-top:1px solid #1B3035;height:680px;}
+.hbr_ad1{background:url("../img/feather.png") 0 0 no-repeat;}
+.hbr_ad2{background:url("../img/equipment.png") 0 0 no-repeat;}
+.hbr_ad3{background:url("../img/costing.png") 0 0 no-repeat;}
+.hbr_ad4{background:url("../img/voice.png") 0 0 no-repeat;}
+.hbr_ad5{background:url("../img/function.png") 0 0 no-repeat;}
+.common_blue_color{margin:10px 0 15px 0;letter-spacing:3px;font-size:26px;color:#00FFC2;}
+/*************回拨rest第四部分样式***************/
+.hbr_container4{background:url("../img/pro_rest_bg3.png") 0 0 repeat;border-top:1px solid #23353F;height:680px;}
+.hbr_container4Two{background:url("../img/pro_rest_bg4.png") center no-repeat;height:680px;margin-top:-8px;}
+/*.hbr_container4{background:url("../img/pro_rest_bg4.png") 0 0 repeat;border:1px solid #23353F;background-image: -ms-radial-gradient(1000px at bottom center,#223D44,#243841,#23353F,#24323D); background-image:-o-radial-gradient(1000px at bottom center,#223D44,#243841,#23353F,#24323D); background-image:radial-gradient(1000px at bottom center,#223D44,#243841,#23353F,#24323D);height:680px;filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#223D44, endColorstr=#24323D);/!*IE<9>*!/   -ms-filter: "progid:DXImageTransform.Microsoft.gradient (GradientType=0, startColorstr=#223D44, endColorstr=#24323D)";/!*IE8+*!/}*/
+/*.hbr_container4{border:1px solid #23353F;height:680px;background:url("../img/use_bg.png") 0 0 no-repeat;}*/
+.APPCode_top{padding-top:70px;}
+.hbr_dw{position:absolute;}
+.hbr_wz1{left:0;top:450px;}
+.hbr_wz2{left:220px;top:240px;}
+.hbr_wz3{left:380px;top:450px;}
+.hbr_wz4{left:600px;top:360px;}
+.hbr_wz5{left:820px;top:240px;}
+.hbr_wz6{left:980px;top:450px;}
+.hbr_dw>p{font-size:22px;color:#BFC2C3;}
+.mul_use{display: inline-block;width:150px;height:150px;}
+.mul1{background:url("../img/Call_back.png") 0 0 no-repeat;}
+.mul2{background:url("../img/click_call.png") 0 0 no-repeat;}
+.mul3{background:url("../img/Batch_electricity.png") 0 0 no-repeat;}
+.mul4{background:url("../img/data_analysis.png") 0 0 no-repeat;}
+.mul5{background:url("../img/Call_records.png") 0 0 no-repeat;}
+.mul6{background:url("../img/hide_number.png") 0 0 no-repeat;}
+
+/*专通号*/
+.zyd_img4{background:url("../img/product_Designed1.png") 0 0 no-repeat;}
+.zyd_img4b{background:url("../img/product_Designed2.png") 0 0 no-repeat;}
+.DesigColor{color:#1cbde9 !important;}
+.DesigBott{margin-bottom:-50px !important;}
+.DesigBg{background:url(../img/DesigBg.png) repeat;overflow:hidden;border:none !important;}
+.DesigTop{padding-top:90px;}
+.DesigedH2{ text-align:center;font-size:60px; font-weight:normal;padding-top:70px;}
+.DesigBg2{background:url(../img/DesigBg2.png) repeat;overflow:hidden;padding-bottom:100px;}
+.DesigBg2 .DesignUl{padding-top:80px;}
+.DesigBg2 .DesignUl li{border:1px solid #51bdd9;padding:3px;margin-right:47px;float:left;width:352px;height:464px;background:#155264;}
+.DesigBg2 .DesignUl li p{padding:10px 5px 10px 15px;margin-top:-4px;color:#fff;font-size:18px;line-height:32px; letter-spacing:2px;}
+.DesigColor{color:#9ff72d !important;}
+.DesigIco i{background:url(../img/Designed_pic9.png) no-repeat;display:inline-block;}
+.DesigIco i.ico1{background-position:0px 0px;width:60px;height:95px;margin:0px 15px 0px 15px;}
+.DesigIco i.ico2{background-position:-80px -13px;width:83px;height:63px;margin:30px 20px 0px 20px;}
+.DesigIco i.ico3{background-position:0px -112px;width:67px;height:78px;margin:20px 22px 0px 0px;}
+.DesigIco i.ico4{background-position:-80px -112px;width:80px;height:75px;margin:20px 20px 0px 20px;}
+.DesigIco i.ico5{background-position:0px -219px;width:88px;height:59px;margin:30px 0px 0px 0px;}
+.DesigIco i.ico6{background-position:-99px -219px;width:87px;height:56px;margin:30px 15px 0px 20px;}
+.DesigList ul li{float:left;margin-bottom:50px;margin-right:40px;height:110px;width:565px;}
+
+
+
+
+
+
+
+
+
+
+

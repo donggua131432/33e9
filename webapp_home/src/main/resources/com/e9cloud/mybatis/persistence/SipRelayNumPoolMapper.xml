@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SipRelayNumPool_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, subid, number, max_concurrent, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_relay_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectSipRelayNumPoolPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select <include refid="Base_Column_List" />
+    from tb_sip_relay_numpool
+    where 1 = 1
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.number!=null and ''!=params.number">
+      and number like "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    ORDER  BY create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    insert into tb_sip_relay_numpool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SipRelayNumPool" >
+    update tb_sip_relay_numpool
+    <set >
+      <if test="subid != null" >
+        subid = #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

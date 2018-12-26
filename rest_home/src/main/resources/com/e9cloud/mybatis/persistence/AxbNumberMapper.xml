@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AxbNumber_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AxbNumRelation" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="requestId" property="requestId" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="num_a" property="numA" jdbcType="VARCHAR" />
+    <result column="num_x" property="numX" jdbcType="VARCHAR" />
+    <result column="num_b" property="numB" jdbcType="VARCHAR" />
+    <result column="area_code" property="areaCode" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="add_time" property="addTime" jdbcType="TIMESTAMP" />
+    <result column="second_length" property="secondLength" jdbcType="INTEGER" />
+    <result column="out_time" property="outTime" jdbcType="TIMESTAMP" />
+    <result column="lock_time" property="lockTime" jdbcType="TIMESTAMP" />
+    <result column="rid_time" property="ridTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, requestId, appid, num_a, num_x, num_b, area_code, subid, add_time, second_length, out_time, lock_time,
+    rid_time
+  </sql>
+
+  <select id="selectNumXByAppId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_axb_num_relation
+    where appid = #{appid,jdbcType=VARCHAR} and out_time &gt; now()
+  </select>
+
+  <select id="selectNumXByParam" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_axb_num_relation
+    where appid = #{appid,jdbcType=VARCHAR} and num_a = #{telA,jdbcType=VARCHAR} and num_b = #{telB,jdbcType=VARCHAR} and out_time &gt; now()
+  </select>
+
+
+  <select id="selectNumXPool" resultType="java.lang.String" parameterType="java.util.HashMap" >
+    select b.number
+    from tb_axb_num a, tb_axb_num_pool b, tb_telno_city c
+    where a.axb_num_id = b.id and b.cityid = c.ccode and a.appid = #{appid,jdbcType=VARCHAR} and c.area_code = #{areaCode,jdbcType=VARCHAR} and a.status='00'
+  </select>
+
+
+  <resultMap id="AxbNumberResultMap" type="com.e9cloud.rest.obt.AxbNumber" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appId" jdbcType="VARCHAR" />
+    <result column="number" property="telX" jdbcType="VARCHAR" />
+    <result column="num_a" property="telA" jdbcType="VARCHAR" />
+    <result column="num_b" property="telB" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="selectNumXByUinJoin"  resultMap="AxbNumberResultMap" parameterType="java.util.HashMap">
+    select n.appid , p.number ,r.num_a, r.num_b
+    from (SELECT * FROM tb_axb_num an WHERE an.appid = #{appid,jdbcType=VARCHAR} AND an.status='00') n
+    inner join tb_axb_num_pool p on n.axb_num_id = p.id and p.cityid  in (SELECT tc.ccode FROM tb_telno_city tc WHERE tc.area_code = #{areaCode,jdbcType=VARCHAR} and ctype = '0')
+    left join tb_axb_num_relation r on n.appid = r.appid and p.number = r.num_x and r.out_time > now()
+    and (r.num_a =  #{telA,jdbcType=VARCHAR} or r.num_b= #{telB,jdbcType=VARCHAR} or r.num_a= #{telA,jdbcType=VARCHAR} or r.num_b= #{telB,jdbcType=VARCHAR})
+    where (r.num_a=  #{telA,jdbcType=VARCHAR} and r.num_b= #{telB,jdbcType=VARCHAR}) or (r.num_a= #{telA,jdbcType=VARCHAR} and r.num_b= #{telB,jdbcType=VARCHAR}) or num_x is null
+    order by r.num_x desc
+  </select>
+
+
+  <delete id="deleteAxbNumRelationId" parameterType="java.lang.String" >
+    delete from tb_axb_num_relation
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+
+  <insert id="insertAxbNumRelation" parameterType="com.e9cloud.mybatis.domain.AxbNumRelation" >
+    insert into tb_axb_num_relation
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="numA != null" >
+        num_a,
+      </if>
+      <if test="numX != null" >
+        num_x,
+      </if>
+      <if test="numB != null" >
+        num_b,
+      </if>
+      <if test="areaCode != null" >
+        area_code,
+      </if>
+      <if test="addTime != null" >
+        add_time,
+      </if>
+      <if test="secondLength != null" >
+        second_length,
+      </if>
+      <if test="outTime != null" >
+        out_time,
+      </if>
+      <if test="lockTime != null" >
+        lock_time,
+      </if>
+      <if test="ridTime != null" >
+        rid_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="numA != null" >
+        #{numA,jdbcType=VARCHAR},
+      </if>
+      <if test="numX != null" >
+        #{numX,jdbcType=VARCHAR},
+      </if>
+      <if test="numB != null" >
+        #{numB,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="addTime != null" >
+        #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="secondLength != null" >
+        #{secondLength,jdbcType=INTEGER},
+      </if>
+      <if test="outTime != null" >
+        #{outTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lockTime != null" >
+        #{lockTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ridTime != null" >
+        #{ridTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateAxbNumRelationById" parameterType="com.e9cloud.mybatis.domain.AxbNumRelation" >
+    update tb_axb_num_relation
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="numA != null" >
+        num_a = #{numA,jdbcType=VARCHAR},
+      </if>
+      <if test="numX != null" >
+        num_x = #{numX,jdbcType=VARCHAR},
+      </if>
+      <if test="numB != null" >
+        num_b = #{numB,jdbcType=VARCHAR},
+      </if>
+      <if test="areaCode != null" >
+        area_code = #{areaCode,jdbcType=VARCHAR},
+      </if>
+      <if test="addTime != null" >
+        add_time = #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="secondLength != null" >
+        second_length = #{secondLength,jdbcType=INTEGER},
+      </if>
+      <if test="outTime != null" >
+        out_time = #{outTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lockTime != null" >
+        lock_time = #{lockTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ridTime != null" >
+        rid_time = #{ridTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

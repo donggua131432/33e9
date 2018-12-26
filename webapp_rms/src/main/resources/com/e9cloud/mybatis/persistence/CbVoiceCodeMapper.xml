@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CbVoiceCode_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CbVoiceCode" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="bus_code" property="busCode" jdbcType="VARCHAR" />
+    <result column="voice_code" property="voiceCode" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.CbVoiceCode" >
+    insert into tb_cb_voice_code
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="busCode != null" >
+        bus_code,
+      </if>
+      <if test="voiceCode != null" >
+        voice_code,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="busCode != null" >
+        #{busCode,jdbcType=VARCHAR},
+      </if>
+      <if test="voiceCode != null" >
+        #{voiceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.CbVoiceCode" >
+    update tb_cb_voice_code
+    <set >
+      <if test="busCode != null" >
+        bus_code = #{busCode,jdbcType=VARCHAR},
+      </if>
+      <if test="voiceCode != null" >
+        voice_code = #{voiceCode,jdbcType=VARCHAR},
+      </if>
+
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectCbVoiceCodeByBusCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select id,bus_code, voice_code
+    from tb_cb_voice_code  where bus_code = #{busCode,jdbcType=VARCHAR}
+  </select>
+</mapper>

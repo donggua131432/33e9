@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AuthenCompanyRecords_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AuthenCompanyRecords" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="legal_representative" property="legalRepresentative" jdbcType="VARCHAR" />
+    <result column="telno" property="telno" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="website" property="website" jdbcType="VARCHAR" />
+    <result column="trade_id" property="tradeId" jdbcType="CHAR" />
+    <result column="organization_no" property="organizationNo" jdbcType="VARCHAR" />
+    <result column="organization_pic" property="organizationPic" jdbcType="VARCHAR" />
+    <result column="tax_reg_no" property="taxRegNo" jdbcType="VARCHAR" />
+    <result column="tax_reg_pic" property="taxRegPic" jdbcType="VARCHAR" />
+    <result column="business_license_no" property="businessLicenseNo" jdbcType="VARCHAR" />
+    <result column="business_license_pic" property="businessLicensePic" jdbcType="VARCHAR" />
+    <result column="card_type" property="cardType" jdbcType="CHAR" />
+    <result column="credit_no" property="creditNo" jdbcType="VARCHAR" />
+    <result column="register_no" property="registerNo" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="comment" property="comment" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, uid, name, legal_representative, telno, address, website, trade_id, organization_no, 
+    organization_pic, tax_reg_no, tax_reg_pic, business_license_no, business_license_pic, 
+    card_type, credit_no, register_no, status, create_date, update_date, comment
+  </sql>
+
+  <select id="selectAuthenCompanyRecordsById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_authen_company_records
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectAuthenCompanyRecordsPage" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+
+    select a.id, c.sid, a.create_date,  IF(ac.uid is NULL, a.name, ac.`name`) c_name, a.status, c.auth_status, c.fee, a.trade_id,c.email
+    from tb_authen_company_records a,
+    (select uid,max(create_date) date from tb_authen_company_records group by uid) b , tb_user_admin c
+    LEFT JOIN tb_user_admin_authen_company ac ON c.uid = ac.uid
+    where a.uid=b.uid and a.create_date=b.date and a.uid = c.uid
+    <if test="timemin != null">
+      AND a.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND a.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="fuzzy != null and fuzzy != ''">
+      and ((ac.uid IS NULL AND a.name like #{fuzzy,jdbcType=VARCHAR}) OR ac.`name` LIKE #{fuzzy,jdbcType=VARCHAR} )
+    </if>
+    <if test="params.custom_email != null and params.custom_email != ''">
+      And c.email LIKE CONCAT('%',#{params.custom_email,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.tradeId != null and params.tradeId != ''">
+      And a.trade_id = #{params.tradeId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status != ''">
+      And a.status = #{params.status,jdbcType=INTEGER}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord} ,create_date DESC
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <select id="getPageAuthenCompanyRecords" resultType="map" parameterType="Page">
+
+    select a.id, c.sid, a.create_date, IF(ac.uid is NULL, a.name, ac.`name`) c_name, a.status, c.auth_status, c.fee,  d.`name` tradeName, c.email
+    from tb_authen_company_records a
+    INNER JOIN (select uid,max(create_date) date  from tb_authen_company_records group by uid) b ON a.uid=b.uid and a.create_date=b.date
+    LEFT JOIN (select name,code from tb_dic_data where typekey = 'tradeType') d ON d.`code` = a.trade_id
+    INNER JOIN tb_user_admin c ON a.uid = c.uid
+    LEFT JOIN tb_user_admin_authen_company ac ON c.uid = ac.uid
+    where 1 = 1
+    <if test="timemin != null">
+      AND a.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND a.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="fuzzy != null and fuzzy != ''">
+      and ((ac.uid IS NULL AND a.name like #{fuzzy,jdbcType=VARCHAR}) OR ac.`name` LIKE #{fuzzy,jdbcType=VARCHAR} )
+    </if>
+    <if test="params.custom_email != null and params.custom_email != ''">
+      And c.email LIKE CONCAT('%',#{params.custom_email,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.tradeId != null and params.tradeId != ''">
+      And a.trade_id = #{params.tradeId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status != ''">
+      And a.status = #{params.status,jdbcType=INTEGER}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord} ,create_date DESC
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.AuthenCompanyRecords" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    insert into tb_authen_company_records
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="legalRepresentative != null" >
+        legal_representative,
+      </if>
+      <if test="telno != null" >
+        telno,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="website != null" >
+        website,
+      </if>
+      <if test="tradeId != null" >
+        trade_id,
+      </if>
+      <if test="organizationNo != null" >
+        organization_no,
+      </if>
+      <if test="organizationPic != null" >
+        organization_pic,
+      </if>
+      <if test="taxRegNo != null" >
+        tax_reg_no,
+      </if>
+      <if test="taxRegPic != null" >
+        tax_reg_pic,
+      </if>
+      <if test="businessLicenseNo != null" >
+        business_license_no,
+      </if>
+      <if test="businessLicensePic != null" >
+        business_license_pic,
+      </if>
+      <if test="cardType != null" >
+        card_type,
+      </if>
+      <if test="creditNo != null" >
+        credit_no,
+      </if>
+      <if test="registerNo != null" >
+        register_no,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="comment != null" >
+        comment,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="uid != null" >
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="legalRepresentative != null" >
+        #{legalRepresentative,jdbcType=VARCHAR},
+      </if>
+      <if test="telno != null" >
+        #{telno,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="website != null" >
+        #{website,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeId != null" >
+        #{tradeId,jdbcType=CHAR},
+      </if>
+      <if test="organizationNo != null" >
+        #{organizationNo,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationPic != null" >
+        #{organizationPic,jdbcType=VARCHAR},
+      </if>
+      <if test="taxRegNo != null" >
+        #{taxRegNo,jdbcType=VARCHAR},
+      </if>
+      <if test="taxRegPic != null" >
+        #{taxRegPic,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicenseNo != null" >
+        #{businessLicenseNo,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicensePic != null" >
+        #{businessLicensePic,jdbcType=VARCHAR},
+      </if>
+      <if test="cardType != null" >
+        #{cardType,jdbcType=CHAR},
+      </if>
+      <if test="creditNo != null" >
+        #{creditNo,jdbcType=VARCHAR},
+      </if>
+      <if test="registerNo != null" >
+        #{registerNo,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="comment != null" >
+        #{comment,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.AuthenCompanyRecords" >
+    update tb_authen_company_records
+    <set >
+      <if test="uid != null" >
+        uid = #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="legalRepresentative != null" >
+        legal_representative = #{legalRepresentative,jdbcType=VARCHAR},
+      </if>
+      <if test="telno != null" >
+        telno = #{telno,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="website != null" >
+        website = #{website,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeId != null" >
+        trade_id = #{tradeId,jdbcType=INTEGER},
+      </if>
+      <if test="organizationNo != null" >
+        organization_no = #{organizationNo,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationPic != null" >
+        organization_pic = #{organizationPic,jdbcType=VARCHAR},
+      </if>
+      <if test="taxRegNo != null" >
+        tax_reg_no = #{taxRegNo,jdbcType=VARCHAR},
+      </if>
+      <if test="taxRegPic != null" >
+        tax_reg_pic = #{taxRegPic,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicenseNo != null" >
+        business_license_no = #{businessLicenseNo,jdbcType=VARCHAR},
+      </if>
+      <if test="businessLicensePic != null" >
+        business_license_pic = #{businessLicensePic,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null and status != ''" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="comment != null and comment != ''" >
+        comment = #{comment,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

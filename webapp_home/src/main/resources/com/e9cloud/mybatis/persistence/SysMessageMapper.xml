@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SysMessage_Mapper">
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SysMessage">
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="msg_code" property="msgCode" jdbcType="VARCHAR" />
+    <result column="send_id" property="sendId" jdbcType="VARCHAR" />
+    <result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
+    <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
+    <result column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="temp_id" property="tempId" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, title, content, msg_code, send_id, send_time, read_time, uid, status, create_time, 
+    bus_type, temp_id
+  </sql>
+
+  <sql id="Page_Column_List" >
+    id, title, content, msg_code msgCode, send_time sendTime, read_time readTime, uid, status
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+    select 
+    id, title, content, msg_code, send_time, read_time, status, create_time
+    from tb_sys_message
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="pageMsg" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      <include refid="Page_Column_List"/>
+    FROM tb_sys_message sm
+    WHERE sm.uid = #{params.uid,jdbcType=VARCHAR}
+    <if test="params.status != null" >
+      AND sm.`status` = #{params.status,jdbcType=CHAR}
+    </if>
+      AND sm.`status` in ('0','1')
+    ORDER BY sm.send_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="countHadRead" resultType="String" parameterType="java.lang.String">
+    SELECT COUNT(*)
+    FROM tb_sys_message sm
+    WHERE sm.uid = #{params.uid,jdbcType=VARCHAR}
+    AND sm.`status` = 1
+  </select>
+
+  <select id="countUnRead" resultType="String" parameterType="java.lang.String">
+    SELECT COUNT(*)
+    FROM tb_sys_message sm
+    WHERE sm.uid = #{params.uid,jdbcType=VARCHAR}
+    AND sm.`status` = 0
+  </select>
+
+  <update id="updateByid" parameterType="java.lang.String" >
+    update tb_sys_message set status='1',read_time = now() where id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </update>
+
+  <update id="readUpStatus" parameterType="java.lang.String" >
+    update tb_sys_message set status='1',read_time = now() where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <update id="deleteStatusBylink" parameterType="java.lang.String" >
+    update tb_sys_message set status='2' where id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </update>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_sys_message
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SysMessage" >
+    insert into tb_sys_message
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="msgCode != null" >
+        msg_code,
+      </if>
+      <if test="sendId != null" >
+        send_id,
+      </if>
+      <if test="sendTime != null" >
+        send_time,
+      </if>
+      <if test="readTime != null" >
+        read_time,
+      </if>
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="busType != null" >
+        bus_type,
+      </if>
+      <if test="tempId != null" >
+        temp_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="msgCode != null" >
+        #{msgCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sendId != null" >
+        #{sendId,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTime != null" >
+        #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="readTime != null" >
+        #{readTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uid != null" >
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="busType != null" >
+        #{busType,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        #{tempId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SysMessage">
+    update tb_sys_message
+    <set >
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="msgCode != null" >
+        msg_code = #{msgCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sendId != null" >
+        send_id = #{sendId,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTime != null" >
+        send_time = #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="readTime != null" >
+        read_time = #{readTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uid != null" >
+        uid = #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="busType != null" >
+        bus_type = #{busType,jdbcType=VARCHAR},
+      </if>
+      <if test="tempId != null" >
+        temp_id = #{tempId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id IN (#{id,jdbcType=VARCHAR})
+  </update>
+
+</mapper>

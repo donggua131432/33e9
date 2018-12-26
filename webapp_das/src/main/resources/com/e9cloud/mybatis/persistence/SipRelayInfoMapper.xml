@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SipRelayInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipRelayInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="sub_name" property="subName" jdbcType="VARCHAR" />
+    <result column="num_flag" property="numFlag" jdbcType="VARCHAR" />
+    <result column="called_type" property="calledType" jdbcType="INTEGER" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="start_date" property="startDate" jdbcType="DATE" />
+    <result column="end_date" property="endDate" jdbcType="DATE" />
+    <result column="forever" property="forever" jdbcType="BIT" />
+    <result column="cycle" property="cycle" jdbcType="INTEGER" />
+    <result column="per6" property="per6" jdbcType="DECIMAL" />
+    <result column="per6_discount" property="per6Discount" jdbcType="INTEGER" />
+    <result column="per60" property="per60" jdbcType="DECIMAL" />
+    <result column="per60_discount" property="per60Discount" jdbcType="INTEGER" />
+    <result column="perx" property="perx" jdbcType="DECIMAL" />
+    <result column="recording" property="recording" jdbcType="DECIMAL" />
+    <result column="recording_discount" property="recordingDiscount" jdbcType="INTEGER" />
+  </resultMap>
+
+  <sql id="Base_SipRelay_Column_List" >
+    id, appid, subid, relay_num, sub_name, num_flag, called_type, max_concurrent, status, create_time,
+  </sql>
+
+  <sql id="Base_SipRate_Column_List" >
+    feeid, start_date, end_date, forever, cycle, per6, per6_discount,per60, per60_discount, perx, recording, recording_discount
+  </sql>
+
+  <select id="selectSipRateByFeeid" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_SipRate_Column_List"/>
+    from rms_sip_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectSipRelayInfoListBySid" resultMap="BaseResultMap" parameterType="java.lang.String">
+    select a.appid, a.subid, a.relay_num, a.sub_name
+    from tb_sip_relayinfo a, tb_app_info b
+    where a.appid = b.appid and a.status='00' and b.bus_type = '03' and b.status = '00'
+    <if test="_parameter!=null and ''!=_parameter">
+      and b.sid = #{_parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="selectSipRelayUnionRateBySubid" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select a.*,<include refid="Base_SipRate_Column_List" />
+    from tb_sip_relayinfo a LEFT JOIN rms_sip_rate b on a.subid = b.subid
+    where a.status = '00' and a.subid = #{subid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectSipRelayInfoByObj" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select a.*,<include refid="Base_SipRate_Column_List" />
+    from tb_sip_relayinfo a LEFT JOIN rms_sip_rate b on a.subid = b.subid
+    where a.status = '00'
+    <if test="params.createTime!=null and ''!=params.createTime">
+      and a.create_time &gt;= str_to_date(#{params.createTime,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.createTime1!=null and ''!=params.createTime1">
+      and a.create_time &lt;= str_to_date(#{params.createTime1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.subName!=null and ''!=params.subName">
+      and a.sub_name like "%"#{params.subName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.relayNum!=null and ''!=params.relayNum">
+      and a.relay_num = #{params.relayNum,jdbcType=VARCHAR}
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and a.subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and a.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    ORDER  BY a.create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <select id="selectSipRelayInfoBySid" resultType="map" parameterType="map">
+    select a.appid,b.subid,b.sub_name from
+    tb_app_info a LEFT JOIN
+    (SELECT * FROM tb_sip_relayinfo WHERE (
+    (create_time &lt;= #{startDay,jdbcType=TIMESTAMP} AND del_time &gt;= #{endDay,jdbcType=TIMESTAMP}) OR
+    (create_time &gt;= #{startDay,jdbcType=TIMESTAMP} AND create_time &lt;= #{endDay,jdbcType=TIMESTAMP}) OR
+    (del_time &gt;= #{startDay,jdbcType=TIMESTAMP} AND del_time &lt;= #{endDay,jdbcType=TIMESTAMP}) OR
+    `status` = '00')
+    ) b
+    on a.appid=b.appid where a.bus_type='03' and a.sid = #{sid,jdbcType=VARCHAR};
+
+  </select>
+
+</mapper>

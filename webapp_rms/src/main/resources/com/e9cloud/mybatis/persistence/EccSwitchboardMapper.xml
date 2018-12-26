@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="EccSwitchboard_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.EccSwitchboard" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="eccid" property="eccid" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="ResultMap1" extends="BaseResultMap"  type="com.e9cloud.mybatis.domain.EccSwitchboard">
+    <result column="pcode" property="pcode" jdbcType="VARCHAR" />
+    <result column="ccode" property="ccode" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, eccid, cityid, number, status, addtime, updatetime
+  </sql>
+
+  <!-- 分页选取总机号码列表 -->
+  <select id="pageEccSwitchboardList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ss.id,
+    ss.number,
+    ss.cityid,
+    ss.addtime,
+    ss.updatetime,
+    ac.name companyName,
+    ua.sid,
+    ai.appid appId,
+    ai.app_name appName,
+    tp.pname,
+    tc.cname,
+    ss.`status`
+    FROM
+    tb_ecc_switchboard ss
+    LEFT JOIN tb_telno_city tc ON ss.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_app_info ai ON ss.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ua.sid = ai.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE
+    ss.number IS NOT NULL
+
+    <if test="params.number != null  and params.number !=''" >
+      and ss.number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.status != null and params.status !=''" >
+      and ss.status = #{params.status,jdbcType=CHAR}
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId !=''" >
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    order by ss.updatetime DESC ,ss.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="getEccSwitchBoardByNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_ecc_switchboard es
+    where 1=1
+    <if test="_parameter!=null and _parameter!=''">
+      and es.number = #{_parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_ecc_switchboard
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectById" resultMap="ResultMap1" parameterType="java.lang.String" >
+    select
+    es.id, appid, eccid, cityid, number, status, addtime, updatetime,tc.ccode,tc.pcode
+    from tb_ecc_switchboard es
+    LEFT JOIN tb_telno_city tc ON es.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    where es.id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteEccSwitchBoradByIds" parameterType="java.lang.String" >
+    delete from tb_ecc_switchboard
+    where id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+
+  <!-- 导出总机号码列表 -->
+  <select id="downloadEccSwitchBoardList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ss.id,
+    ss.number,
+    ss.cityid,
+    ss.addtime,
+    ss.updatetime,
+    ac.name companyName,
+    ua.sid,
+    ai.appid appId,
+    ai.app_name appName,
+    tp.pname,
+    tc.cname,
+    ss.`status`
+    FROM
+    tb_ecc_switchboard ss
+    LEFT JOIN tb_telno_city tc ON ss.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_app_info ai ON ss.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ua.sid = ai.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE
+    ss.number IS NOT NULL
+
+    <if test="params.number != null  and params.number !=''" >
+      and ss.number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.status != null and params.status !=''" >
+      and ss.status = #{params.status,jdbcType=CHAR}
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId !=''" >
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+
+    order by ss.updatetime DESC ,ss.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    delete from tb_ecc_switchboard
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.EccSwitchboard" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    insert into tb_ecc_switchboard (id, appid, eccid, 
+      cityid, number, status, 
+      addtime, updatetime)
+    values (#{id,jdbcType=VARCHAR}, #{appid,jdbcType=VARCHAR}, #{eccid,jdbcType=VARCHAR}, 
+      #{cityid,jdbcType=VARCHAR}, #{number,jdbcType=VARCHAR}, #{status,jdbcType=CHAR}, 
+      #{addtime,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.EccSwitchboard" >
+    insert into tb_ecc_switchboard
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="eccid != null" >
+        eccid,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      replace(uuid(),'-',''),
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="eccid != null" >
+        #{eccid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.EccSwitchboard" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update tb_ecc_switchboard
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="eccid != null" >
+        eccid = #{eccid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.EccSwitchboard" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update tb_ecc_switchboard
+    set appid = #{appid,jdbcType=VARCHAR},
+      eccid = #{eccid,jdbcType=VARCHAR},
+      cityid = #{cityid,jdbcType=VARCHAR},
+      number = #{number,jdbcType=VARCHAR},
+      status = #{status,jdbcType=CHAR},
+      addtime = #{addtime,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

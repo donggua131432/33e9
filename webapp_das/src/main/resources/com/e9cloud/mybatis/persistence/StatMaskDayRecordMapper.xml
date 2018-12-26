@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatMaskDayRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatMaskDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="DATE" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="jflyscsum" property="jflyscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="rcd_time" property="rcdTime" jdbcType="INTEGER" />
+    <result column="rcd_cnt" property="rcdCnt" jdbcType="INTEGER" />
+    <result column="rcd_bill_cnt" property="rcdBillCnt" jdbcType="INTEGER" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, appid, subid, feeid, abline, callcnt, succcnt, thscsum, jfscsum, jflyscsum, 
+    fee, recordingfee, answercnt, rcd_time, rcd_cnt, rcd_bill_cnt, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_mask_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectMask" resultType="map" parameterType="java.util.HashMap">
+    SELECT case mr.abline when 'C' then '回呼' when'A' then 'A路' when 'B' then 'B路' end as abline,SUM(mr.thscsum) thscsum,SUM(mr.jfscsum) as jfscsum,
+    case when sum(mr.answercnt)=0 then '0' else ROUND(sum(mr.thscsum)/sum(mr.answercnt),0) end as pjsc,
+    SUM(mr.rcd_time) as rcdTime,SUM(mr.jflyscsum) as jflyscsum,CONCAT(CAST((sum(mr.succcnt)/sum(mr.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(mr.answercnt)/sum(mr.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    FROM stat_mask_day_record mr
+    WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(mr.statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(mr.statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    GROUP BY mr.abline;
+  </select>
+  <select id="selectMaskNum" resultType="map" parameterType="java.util.HashMap">
+    select count(*)as maskNum from tb_mask_num_pool where 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(addtime,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(addtime,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+  </select>
+  <select id="selectRcdBillRateA" resultType="map" parameterType="java.util.HashMap">
+    select IFNULL(CONCAT(CAST((sum(rcd_cnt)/sum(rcd_bill_cnt))*100 AS DECIMAL(5,2)),'%'),'') as rcdBillRateA
+    from stat_mask_day_record WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    AND (abline='A' or abline='B')
+  </select>
+  <select id="selectRcdBillRateC" resultType="map" parameterType="java.util.HashMap">
+    select IFNULL(CONCAT(CAST((sum(rcd_cnt)/sum(rcd_bill_cnt))*100 AS DECIMAL(5,2)),'%'),'') as rcdBillRateC
+    from stat_mask_day_record WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    AND abline='C'
+  </select>
+
+  <!-- 按天统计 专号通 话务走势 的话务情况 -->
+  <select id="countMaskScanByDay" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(if(sr.abline='A',sr.thscsum,0)) thscsumA,
+      SUM(if(sr.abline='B',sr.thscsum,0)) thscsumB,
+      SUM(if(sr.abline='C',sr.thscsum,0)) thscsumC,
+
+      SUM(if(sr.abline='A',sr.thscsum,0))/SUM(if(sr.abline='A',sr.succcnt,0)) thscAvgA,
+      SUM(if(sr.abline='B',sr.thscsum,0))/SUM(if(sr.abline='B',sr.succcnt,0)) thscAvgB,
+      SUM(if(sr.abline='C',sr.thscsum,0))/SUM(if(sr.abline='C',sr.succcnt,0)) thscAvgC,
+
+      SUM(sr.jfscsum) jfscsum,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(if(sr.abline='A',sr.succcnt,0))/SUM(if(sr.abline='A',sr.callcnt,0)) succcntA,
+      SUM(if(sr.abline='B',sr.succcnt,0))/SUM(if(sr.abline='B',sr.callcnt,0)) succcntB,
+      SUM(if(sr.abline='C',sr.succcnt,0))/SUM(if(sr.abline='C',sr.callcnt,0)) succcntC,
+
+      SUM(if(sr.abline='A',sr.answercnt,0))/SUM(if(sr.abline='A',sr.callcnt,0)) answercntA,
+      SUM(if(sr.abline='B',sr.answercnt,0))/SUM(if(sr.abline='B',sr.callcnt,0)) answercntB,
+      SUM(if(sr.abline='C',sr.answercnt,0))/SUM(if(sr.abline='C',sr.callcnt,0)) answercntC,
+
+      DATE_FORMAT(sr.statday,'%Y-%m-%d') d
+    FROM stat_mask_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageMaskReportList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT r.statday, '专号通' AS businessName, ua.sid, ac.NAME AS companyName, r.abline, sum(r.callcnt) callcnt, sum(r.succcnt) succcnt,
+    CONCAT( CAST(( sum(r.succcnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS callCompletingRate,
+    CONCAT( CAST(( sum(r.answercnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS answerRate,
+    sum(r.thscsum) thscsum, sum(r.jfscsum) jfscsum, sum(r.jflyscsum) jflyscsum, sum(r.fee) fee, sum(r.recordingfee) recordingfee, sum(r.rcd_time) rcd_time,
+    CASE WHEN sum(succcnt) = 0 THEN '0' ELSE ROUND( SUM(thscsum) / sum(succcnt), 0 ) END AS pjsc,
+    CASE WHEN sum(r.rcd_bill_cnt) = 0 THEN '0' ELSE CONCAT( CAST(( sum(r.rcd_cnt) / sum(r.rcd_bill_cnt)) * 100 AS DECIMAL (5, 2)), '%' ) END AS rcRate,
+    (select sum(callcnt) from stat_mask_day_record where feeid = r.feeid and statday = r.statday) as allCallCnt
+
+    FROM stat_mask_day_record r, tb_user_admin_authen_company ac, tb_user_admin ua
+    WHERE r.feeid = ua.feeid AND ua.uid = ac.uid
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.abline != null and params.abline != ''">
+      and r.abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.feeid,r.abline
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.abline
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.abline
+    </if>
+    ORDER BY r.statday DESC, allCallCnt DESC, r.feeid, r.abline
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出选取话务报表列表 -->
+  <select id="downloadMaskReport" resultType="map" parameterType="Page">
+    SELECT r.statday, '专号通' AS businessName, ua.sid, ac. NAME AS companyName, r.abline, sum(r.callcnt) callcnt, sum(r.succcnt) succcnt,
+    CONCAT( CAST(( sum(r.succcnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS callCompletingRate,
+    CONCAT( CAST(( sum(r.answercnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS answerRate,
+    sum(r.thscsum) thscsum, sum(r.jfscsum) jfscsum, sum(r.jflyscsum) jflyscsum, sum(r.fee) fee, sum(r.recordingfee) recordingfee, sum(r.rcd_time) rcd_time,
+    CASE WHEN sum(succcnt) = 0 THEN '0' ELSE ROUND( SUM(thscsum) / sum(succcnt), 0 ) END AS pjsc,
+    CASE WHEN sum(r.rcd_bill_cnt) = 0 THEN '0' ELSE CONCAT( CAST(( sum(r.rcd_cnt) / sum(r.rcd_bill_cnt)) * 100 AS DECIMAL (5, 2)), '%' ) END AS rcRate,
+    (select sum(callcnt) from stat_mask_day_record where feeid = r.feeid and statday = r.statday) as allCallCnt
+    FROM stat_mask_day_record r, tb_user_admin_authen_company ac, tb_user_admin ua
+    WHERE r.feeid = ua.feeid AND ua.uid = ac.uid
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.abline != null and params.abline != ''">
+      and r.abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.feeid,r.abline
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.abline
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.abline
+    </if>
+    ORDER BY r.statday DESC, allCallCnt DESC, r.feeid, r.abline
+  </select>
+
+</mapper>

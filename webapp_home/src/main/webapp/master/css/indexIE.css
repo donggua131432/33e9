@@ -1,0 +1,11 @@
+.head_main .main1{
+    height:1015px;
+}
+/*.change {*/
+/*filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=9, Color='#ffff00');*/
+/*border:none;*/
+/*}*/
+#parent1{
+    display:none;
+}
+.head_main{background:url("../img/StartpageBg.png") 0 0 no-repeat;padding-top:50px;}

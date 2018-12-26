@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="NumberBlack_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.NumberBlack" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, create_time, number, remark
+  </sql>
+
+  <select id="selectNumberBlackById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_number_black where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="selectNumberBlackListByNumbers" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_number_black where number in
+    <foreach collection="array" item="number" open="(" close=")" separator=",">
+      #{number}
+    </foreach>
+  </select>
+
+
+  <select id="pageNumberBlack" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_number_black
+    where 1=1
+    <if test="params.id!=null and ''!=params.id">
+      and id = #{params.id,jdbcType=INTEGER}
+    </if>
+    <if test="params.number!=null and ''!=params.number">
+      and number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.createTime!=null and ''!=params.createTime">
+      and create_time &gt;= str_to_date(#{params.createTime,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.createTime1!=null and ''!=params.createTime1">
+      and create_time &lt;= str_to_date(#{params.createTime1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    order by id DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteNumberBlack" parameterType="java.lang.Integer" >
+    delete from tb_number_black
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+
+  <insert id="saveNumberBlack" parameterType="java.util.List" >
+    insert into tb_number_black (create_time, number, remark) values
+    <foreach collection="list" item="item" index="index" separator="," >
+      (now(), #{item.number}, #{item.remark})
+    </foreach>
+  </insert>
+
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.NumberBlack" >
+    insert into tb_number_black
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.NumberBlack" >
+    update tb_number_black
+    <set >
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

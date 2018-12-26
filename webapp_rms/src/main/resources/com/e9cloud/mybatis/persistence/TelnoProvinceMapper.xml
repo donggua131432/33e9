@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ProvinceManager_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.TelnoProvince" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="pcode" property="pcode" jdbcType="VARCHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, pcode,  pname
+  </sql>
+
+  <select id="selectProvinceManagerById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_telno_province
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectProvinceManagerByCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_telno_province
+    where 1 = '1'
+    <if test="_parameter != null and _parameter != ''">
+      AND pcode = #{_parameter,jdbcType=VARCHAR}
+    </if>
+    ORDER BY pinyin ASC
+  </select>
+  <select id="findProvince" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.TelnoProvince">
+    select
+    <include refid="Base_Column_List" />
+    from tb_telno_province
+    where 1 = '1'
+    <if test="pname != null and pname != ''">
+      AND pname like "%"#{pname,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="pcode != null and pcode != ''">
+      AND pcode = #{pcode,,jdbcType=VARCHAR}
+    </if>
+    ORDER BY pcode ASC
+  </select>
+
+  <!-- 查询所有省份列表 -->
+  <select id="queryProvinceList" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    tb_telno_province
+    ORDER BY pinyin ASC
+  </select>
+
+  <!-- 根据省份名称模糊查询省份列表 -->
+  <select id="queryProvinceListByPname" resultMap="BaseResultMap" parameterType="Page">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM
+    tb_telno_province
+    where 1=1
+    <if test="params.pname != null and params.pname != ''">
+      AND pname LIKE CONCAT('%',#{params.pname,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY pinyin ASC
+  </select>
+
+</mapper>

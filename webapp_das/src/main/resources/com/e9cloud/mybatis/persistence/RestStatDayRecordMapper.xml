@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RestStatDayRecord_Mapper" >
+  <!-- 消费统计 -->
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RestStatDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stafday" property="stafDay" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abLine" jdbcType="CHAR" />
+    <result column="callcnt" property="callCnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succCnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscSum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscSum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingFee" jdbcType="DECIMAL" />
+    <result column="total_fee" property="totalFee" jdbcType="DECIMAL" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="account_fee" property="accountFee" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, stafday, appid, subid, feeid, abline, callcnt, succcnt, thscsum, jfscsum, fee, recordingfee
+  </sql>
+  <select id="selectRestStatDayRecordByObj" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.RestStatDayRecord" >
+    select
+    <include refid="Base_Column_List" />
+    from stat_rest_day_record
+    where 1=1
+    <if test="id!=null and ''!=id">
+      and id = #{id,jdbcType=INTEGER}
+    </if>
+    <if test="stafDay!=null and ''!=stafDay">
+      and stafday = #{stafDay,jdbcType=TIMESTAMP}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+
+  <!-- 获取每个月的消费概况 -->
+  <select id="selectMonthRestOverview" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select stafday,sum(jfscsum) as jfscsum,sum(fee) as fee, sum(recordingfee) as recordingfee, sum(fee+recordingfee) as total_fee
+    from stat_rest_day_record
+    where 1=1
+    <if test="stafDay != null">
+      and date_format(stafday,'%Y-%m')=date_format(#{stafDay,jdbcType=TIMESTAMP},'%Y-%m')
+    </if>
+    group by date_format(stafday, '%Y-%m');
+  </select>
+
+
+  <!-- 根据时间范围获取消费概况 -->
+  <select id="selectRestDayRangeRecordInfo" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+    select feeid,
+    sum(callcnt) as callcnt,
+    sum(succcnt) as succcnt,
+    sum(thscsum) as thscsum,
+    sum(jfscsum) as jfscsum,
+    sum(fee) as fee,
+    sum(recordingfee) as recordingfee,
+    sum(fee+recordingfee) as total_fee
+    from stat_rest_day_record
+    where stafday &gt;= str_to_date(#{statDay,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    and stafday &lt;= str_to_date(#{statDay1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+  </select>
+
+
+  <!-- 根据时间范围获取客户消费TOP10 -->
+  <select id="selectRestDayRangeRecordTopTen" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      a.feeid,b.sid as sid, c.`name` as `name`,
+      sum(a.callcnt) AS callcnt,
+      sum(a.succcnt) AS succcnt,
+      sum(a.thscsum) AS thscsum,
+      sum(a.jfscsum) AS jfscsum,
+      sum(a.fee) AS fee,
+      sum(a.recordingfee) AS recordingfee,
+      sum(a.fee + a.recordingfee) AS total_fee
+    FROM stat_rest_day_record a
+    LEFT JOIN tb_user_admin b ON a.feeid = b.feeid
+    LEFT JOIN tb_user_admin_authen_company c ON b.uid = c.uid
+    WHERE a.stafday &gt;= str_to_date(#{params.statDay,jdbcType=TIMESTAMP},'%Y-%m-%d') AND a.stafday &lt;= str_to_date(#{params.statDay1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    GROUP BY a.feeid
+    ORDER BY total_fee desc
+    LIMIT 0,10
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- 获取专线语音日报表信息 -->
+  <select id="selectRestRecordDayReportList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+      SELECT
+          a.feeid, a.stafday,
+          sum(a.thscsum) AS thscsum,
+          sum(a.jfscsum) AS jfscsum,
+          sum(a.fee) AS fee,
+          sum(a.recordingfee) AS recordingfee,
+          sum(a.fee+a.recordingfee) AS total_fee,
+          b.sid, b.fee as account_fee, c.`name`
+      FROM stat_rest_day_record a
+      LEFT JOIN tb_user_admin_history b ON a.feeid = b.feeid AND date_format(a.stafday, '%Y-%m-%d') = str_to_date(b.cday, '%Y-%m-%d')
+      LEFT JOIN tb_user_admin_authen_company c ON b.uid = c.uid
+      WHERE 1 = 1
+      <if test="params.stafDay!=null and  ''!=params.stafDay">
+        and a.stafday &gt;= str_to_date(#{params.stafDay,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.stafDay1!=null and  ''!=params.stafDay1">
+        and a.stafday &lt;= str_to_date(#{params.stafDay1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.sid!=null and ''!=params.sid">
+        and b.sid = #{params.sid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.name!=null and ''!=params.name">
+        and c.name like "%"#{params.name,jdbcType=VARCHAR}"%"
+      </if>
+      GROUP BY a.feeid,a.stafday
+      ORDER BY a.stafday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 获取专线语音月报表信息 -->
+  <select id="selectRestRecordMonthReportList" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select a.feeid, stafday,
+        sum(a.thscsum) as thscsum,
+        sum(a.jfscsum) as jfscsum,
+        sum(a.fee) as fee,
+        sum(a.recordingfee) as recordingfee,
+        sum(a.fee+a.recordingfee) as total_fee,
+        b.sid, c.`name` as `name`,
+        (select fee from tb_user_admin_history where feeid = a.feeid and date_format(cday,'%Y-%m')=date_format( a.stafday,'%Y-%m') order by cday desc limit 1) as account_fee
+    from stat_rest_day_record  a
+    left join tb_user_admin b on a.feeid = b.feeid
+    left join tb_user_admin_authen_company c on b.uid = c.uid
+    where 1=1
+    <if test="params.stafDay!=null and '' != params.stafDay">
+      and date_format(a.stafday,'%Y-%m')=date_format(CONCAT(#{params.stafDay,jdbcType=TIMESTAMP},'-01'),'%Y-%m')
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and b.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name!=null and ''!=params.name">
+      and c.name like "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    group by a.feeid,date_format(a.stafday,'%Y-%m')
+    order by a.stafday desc
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 获取专线语音日报表应付款总额 -->
+  <select id="selectRestRecordDayTotalFee" resultType="map" parameterType="Page" >
+    SELECT sum(a.fee+a.recordingfee) AS total_fee
+    FROM stat_rest_day_record a
+    LEFT JOIN tb_user_admin_history b ON a.feeid = b.feeid AND date_format(a.stafday, '%Y-%m-%d') = str_to_date(b.cday, '%Y-%m-%d')
+    LEFT JOIN tb_user_admin_authen_company c ON b.uid = c.uid
+    WHERE 1 = 1
+    <if test="params.stafDay!=null and  ''!=params.stafDay">
+      and a.stafday &gt;= str_to_date(#{params.stafDay,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.stafDay1!=null and  ''!=params.stafDay1">
+      and a.stafday &lt;= str_to_date(#{params.stafDay1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and b.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name!=null and ''!=params.name">
+      and c.name like "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+  </select>
+
+
+  <!-- 获取专线语音月报表应付款总额 -->
+  <select id="selectRestRecordMonthTotalFee" resultType="map" parameterType="Page" >
+    SELECT
+    sum(a.fee + a.recordingfee) AS total_fee
+    FROM stat_rest_day_record a
+    LEFT JOIN tb_user_admin b ON a.feeid = b.feeid
+    LEFT JOIN tb_user_admin_authen_company c ON b.uid = c.uid
+    WHERE 1 = 1
+    <if test="params.stafDay!=null and '' != params.stafDay">
+      and date_format(a.stafday,'%Y-%m')=date_format(CONCAT(#{params.stafDay,jdbcType=TIMESTAMP},'-01'),'%Y-%m')
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and b.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name!=null and ''!=params.name">
+      and c.name like "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+  </select>
+
+  <!-- 大盘总览-话务总览-专线语音 -->
+  <select id="selectRest" resultType="map" parameterType="java.util.HashMap">
+    SELECT sr.abline as abline,SUM(sr.thscsum) as thscsum,SUM(sr.jfscsum) as jfscsum,case when sum(sr.answercnt)=0 then '0' else ROUND(sum(sr.thscsum)/sum(sr.answercnt),0) end as pjsc,
+    SUM(sr.rcd_time) as rcdTime,SUM(sr.jflyscsum) as jflyscsum,CONCAT(CAST((sum(sr.succcnt)/sum(sr.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(sr.answercnt)/sum(sr.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    FROM stat_rest_day_record sr WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(sr.stafday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(sr.stafday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    GROUP BY sr.abline
+  </select>
+  <select id="selectRcdBillRate" resultType="map" parameterType="java.util.HashMap">
+    select IFNULL(CONCAT(CAST((sum(rcd_cnt)/sum(rcd_bill_cnt))*100 AS DECIMAL(5,2)),'%'),'') as rcdBillRate  from stat_rest_day_record
+    WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(stafday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(stafday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+  </select>
+</mapper>
+
+

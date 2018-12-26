@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MaskNum_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.MaskNum" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, cityid, number, status, addtime, updatetime
+  </sql>
+
+  <!-- 根据号码查询隐私号信息 -->
+  <select id="selectMaskNumberByNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List"/>
+    from tb_mask_num
+    where number = #{number,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 根据状态查询隐私号信息 -->
+  <select id="selectMaskNumberByStatus" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List"/>
+    from tb_mask_num
+    where status = #{status,jdbcType=VARCHAR}
+  </select>
+
+
+
+  <!-- 根据条件查询单个隐私号信息 -->
+  <select id="selectMaskNumberByObj" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.MaskNum" >
+    select
+    <include refid="Base_Column_List"/>
+    from tb_mask_num
+    where 1 = 1
+    <if test="id!=null and ''!=id">
+      and id = #{id,jdbcType=VARCHAR}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="cityid!=null and ''!=cityid">
+      and cityid = #{cityid,jdbcType=VARCHAR}
+    </if>
+    <if test="number!=null and ''!=number">
+      and number = #{number,jdbcType=VARCHAR}
+    </if>
+    <if test="status!=null and ''!=status">
+      and status = #{status,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <delete id="deleteMaskNumber" parameterType="java.lang.String" >
+    delete from tb_mask_num
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+
+  <insert id="insetMaskNumber" parameterType="com.e9cloud.mybatis.domain.MaskNum" >
+    insert into tb_mask_num
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+        addtime,
+        updatetime,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+        now(),
+        now(),
+    </trim>
+  </insert>
+
+  <update id="updateMaskNumber" parameterType="com.e9cloud.mybatis.domain.MaskNum" >
+    update tb_mask_num
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+        updatetime = now(),
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <!-- 根据APPID  更改状态 -->
+  <update id="updateMaskNumberByAppId" parameterType="java.util.HashMap" >
+    update tb_mask_num set
+      status = #{status,jdbcType=CHAR},
+      updatetime = now()
+    where appid = #{appid,jdbcType=VARCHAR}
+  </update>
+</mapper>

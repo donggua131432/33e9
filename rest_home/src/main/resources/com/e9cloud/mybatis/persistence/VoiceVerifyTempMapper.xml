@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VoiceVerifyTemp_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.VoiceVerifyTemp" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="CHAR" />
+    <result column="language" property="language" jdbcType="VARCHAR" />
+    <result column="play_num" property="playNum" jdbcType="TINYINT" />
+    <result column="called_max" property="calledMax" jdbcType="TINYINT" />
+    <result column="audit_status" property="auditStatus" jdbcType="CHAR" />
+    <result column="audit_common" property="auditCommon" jdbcType="VARCHAR" />
+    <result column="audit_time" property="auditTime" jdbcType="TIMESTAMP" />
+    <result column="v_url" property="vUrl" jdbcType="VARCHAR" />
+    <result column="v_size" property="vSize" jdbcType="VARCHAR" />
+    <result column="t_content" property="tContent" jdbcType="VARCHAR" />
+    <result column="atime" property="atime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="v_path" property="vPath" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, appid, name, type, language, play_num, called_max, audit_status, audit_common, 
+    audit_time, v_url, v_size, t_content, atime, status, v_path
+  </sql>
+  <select id="selectVoiceVerifyTemp" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_voiceverify_temp
+    where id = #{id,jdbcType=INTEGER} and appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="selectDisplayNumPool" resultType="java.lang.String" parameterType="java.lang.String" >
+    select b.number
+    from tb_voiceverify_num a, tb_voiceverify_num_pool b
+    where a.num_id = b.id and a.appid = #{appid,jdbcType=VARCHAR} and a.status='00'
+  </select>
+</mapper>

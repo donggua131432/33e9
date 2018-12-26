@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatIvrHourRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatIvrHourRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stathour" property="stathour" jdbcType="DATE" />
+    <result column="rcdtype" property="rcdtype" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="lyscsum" property="lyscsum" jdbcType="INTEGER" />
+    <result column="jflyscsum" property="jflyscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, stathour, rcdtype, abline, sid, feeid, appid, callcnt, succcnt, answercnt, thscsum, 
+    jfscsum, lyscsum, jflyscsum, fee, recordingfee, ctime
+  </sql>
+
+  <!-- 按小时统计 云总机 话务走势 的话务情况 -->
+  <select id="countEccScanByHour" resultType="map" parameterType="map">
+    SELECT
+    SUM(sr.thscsum) thscsum,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.thscsum,0)) thscsumS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.thscsum,0)) thscsumNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.thscsum,0)) thscsumD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.thscsum,0)) thscsumL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.thscsum,0)) thscsumNL,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.thscsum,0))/SUM(if(sr.rcdtype='CallInSip',sr.succcnt,0)) thscAvgS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.thscsum,0))/SUM(if(sr.rcdtype='CallInNonSip',sr.succcnt,0)) thscAvgNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.thscsum,0))/SUM(if(sr.rcdtype='CallInDirect',sr.succcnt,0)) thscAvgD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.thscsum,0))/SUM(if(sr.rcdtype='CallOutLocal',sr.succcnt,0)) thscAvgL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.thscsum,0))/SUM(if(sr.rcdtype='CallOutNonLocal',sr.succcnt,0)) thscAvgNL,
+
+    SUM(sr.jfscsum) jfscsum,
+
+    SUM(sr.callcnt) callcnt,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.succcnt,0))/SUM(if(sr.rcdtype='CallInSip',sr.callcnt,0)) succcntS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.succcnt,0))/SUM(if(sr.rcdtype='CallInNonSip',sr.callcnt,0)) succcntNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.succcnt,0))/SUM(if(sr.rcdtype='CallInDirect',sr.callcnt,0)) succcntD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.succcnt,0))/SUM(if(sr.rcdtype='CallOutLocal',sr.callcnt,0)) succcntL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.succcnt,0))/SUM(if(sr.rcdtype='CallOutNonLocal',sr.callcnt,0)) succcntNL,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.answercnt,0))/SUM(if(sr.rcdtype='CallInSip',sr.callcnt,0)) answercntS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.answercnt,0))/SUM(if(sr.rcdtype='CallInNonSip',sr.callcnt,0)) answercntNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.answercnt,0))/SUM(if(sr.rcdtype='CallInDirect',sr.callcnt,0)) answercntD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.answercnt,0))/SUM(if(sr.rcdtype='CallOutLocal',sr.callcnt,0)) answercntL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.answercnt,0))/SUM(if(sr.rcdtype='CallOutNonLocal',sr.callcnt,0)) answercntNL,
+
+    DATE_FORMAT(sr.stathour,'%H') h,
+    DATE_FORMAT(sr.stathour,'%Y-%m-%d %H') d
+    FROM stat_ivr_hour_record sr
+    WHERE sr.stathour &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.stathour &lt; #{endDay,jdbcType=TIMESTAMP}
+    AND sr.abline = 'B'
+    GROUP BY d
+  </select>
+</mapper>

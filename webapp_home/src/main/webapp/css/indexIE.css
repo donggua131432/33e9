@@ -1,0 +1,10 @@
+.head_main .main1{
+    height:1015px;
+}
+.change {
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=10, Direction=135, Color='#ffff00');
+    border:none;
+}
+#parent1{
+    display:none;
+}

@@ -1,0 +1,131 @@
+
+
+/***************公共样式********************/
+label.error{display:inline-block;background:url("../img/cuo.png") 0 0 no-repeat;padding-left:2em;color:#EA5153 !important;font-weight:normal;font-size:1.1em !important;height:1.6em;line-height: 1.6em;margin:0 0 0 8px;float: left}
+label.valid{background: url("../img/dui.png") 0 0 no-repeat;}
+.fw,.rg{ position:absolute;left:50px;top:-20px;z-index:110;font-size: 28px;color:#DFE0E2;}
+.row1{position: relative;left:27px;}
+#stepBar{margin-top:88px;}
+.btn_center{text-align: center;}
+.login_btn{ display:inline-block;width:130px; height:35px;font-size:20px;border:none; border-radius: 3px; background:#5691e1;color: #fff;}
+.login_btn:hover{background:#4586ce;}
+.tip_text_box{display:inline-block;width:400px;height:30px;vertical-align: bottom}
+.test_label_left{margin-left:-260px;}
+.tip_text{display:inline-block;background:url("../img/dui.png") 0 0 no-repeat;width:22px; height:22px;margin-left:-360px;margin-top:2px;}
+/*.login2_one h3{margin-top:50px;}*/
+.register2_one>p>span{color:#517AB5;margin:0 15px 0 15px;}
+.login1_row2,.login2_row2,.login3_row2,.register3_row2{margin-top:80px;}
+.register1_row2{margin-top:80px;}
+.register2_one>p{letter-spacing:4px;font-size: 22px;color:#FFFFFF;}
+.login4_row2,.register4_row2{margin-top:120px;}
+.LSpace{letter-spacing:2px;}
+.website_container{background:#3F4857;padding-top: 87px;text-align: center;min-height:680px;}
+input{border-color:white;border-radius:3px;padding-left:10px;vertical-align: middle;width:260px;height:30px;font-size:15px;background:#323A46; color:#ffffff;}
+input{letter-spacing: 1px;font-family: "Microsoft Yahei";}
+button{cursor:pointer;}
+/***************登录页面样式***********************/
+.login_row1{margin-top:80px;}
+.login_row1>p{ color:#fff; font-size:20px; padding-top:25px; margin-bottom:40px;}
+.login_account>label,.login_password>label{font-size:16px;margin-right:10px;color:#EFEFEE;}
+.login_row2 .login_password{margin-top:30px;margin-bottom:5px;}
+.int{margin-left:-12px;}
+.rr_account{width:13px;margin-left:39px;}
+.F_password{margin-bottom:5px;}
+.F_password>label{color:#F3F4F4;margin-left:5px;margin-right:102px;}
+.F_password a{color:#CD64EA;}
+.mark_txt{display: inline-block;width:12px;height: 12px;background:url("../img/mark.png") 0 0 no-repeat;vertical-align: -2px;}
+.login_tip{margin-left:5px;margin-top:25px;height:30px;}
+.login_btn{margin-top:10px;margin-bottom:62px;font-family:"Microsoft Yahei";}
+.loginO_btn{margin-bottom:120px;}
+/*****************找回密码1填写邮箱页面样式******************/
+.login_common_row1{height:150px;margin-top:30px;margin-bottom:20px;}
+.login1_row2 input{background:#323A46; color:#ffffff;!important;}
+.Registered_mail{margin-left:272px;}
+.Test_code{margin-top:40px;margin-left:378px;}
+.login1_row2 label{color:#F3F4F4;font-size:16px;margin-right:5px;font-weight: normal;letter-spacing: 2px;}
+.T_one{width:110px;}
+.label_left{margin-left:-230px;margin-top:3px;}
+.T_tow{display: inline-block;min-width:80px;height:33px;line-height:33px;vertical-align: bottom;background:#FFFFFF;border-radius: 3px;}
+.upDate{border:none;border-radius:3px;width:60px; height:32px;background:#558BF0;color:#FFFFFF;font-size: 15px; }
+.login1_btn{margin:40px auto 178px;}
+
+
+/****************找回密码2页面样式*******************/
+.mail_note{display:inline-block;margin-top:15px;letter-spacing:2px;font-size: 15px !important;;color:#B6B5B7;}
+.mail_send{letter-spacing: 4px;}
+.login2_btn{margin:80px 0 180px 0;font-weight: normal;}
+
+/****************找回密码3页面样式***********************/
+.login3_one{margin-bottom:35px;}
+.login3_two input{font-size:15px;color:#FFFFFF;}
+.login3_paw{margin-left:346px;margin-bottom:30px;}
+.login_r_paw{margin-left:310px;margin-bottom:30px;}
+.label3_left{margin-left:-280px;margin-top:3px;}
+.login3_label{margin-right:8px;font-weight:normal;font-size:16px;letter-spacing:2px;color:#F5F6F6;}
+.login3_btn{margin-bottom:125px;}
+.register1_btn{margin-bottom:88px;}
+/****************找回密码4页面样式***********************/
+.login4-img{margin-bottom:45px;}
+/*.login4_account{margin:35px 0 45px 0;}*/
+.login4_btn{margin:35px 0 229px 0;}
+
+/*****************注册页面1样式*************************/
+.register_send{margin-bottom:60px;}
+.RE_one{margin:0 0 15px 380px;}
+.RE_one>label{margin-right:5px;font-size:16px;font-weight: normal;color:#F3F4F4;}
+.RE_one input{color:#FFFFFF;}
+.RE_two{margin:0 0 30px -125px;}
+.terms{margin-left:5px;font-size:12px;color:#EDEDEE;}
+.terms a{font-weight:600;text-decoration:underline;color:#0B80DA;}
+.terms a:hover{color:#ffffff;}
+/******************注册页面2样式******************/
+.register2_btn{margin:40px 0 215px 0;font-weight: normal;}
+
+/******************注册页面3样式******************/
+/*.register3_row2{margin-top:-30px;}*/
+.register3_zc .top{margin-top:30px;}
+.register3_zc .top>label{margin-right:10px;font-size:16px;font-weight: normal;color:#F3F4F4;}
+.code_left{margin-right:45px !important;letter-spacing: 2px;}
+.mar_left{margin-left:350px;}
+.mar-right{margin-left:-60px;}
+.R_paw{margin-right:8px;letter-spacing: 2px;}
+.phone_left{margin-right:26px !important;letter-spacing: 2px;}
+.register3_zc input{font-size:0.8em;color:#FFFFFF;}
+.send_test_code{margin-left:-112px;border:none;border-radius:2px;width:130px;height:35px;font-size:16px;background:#548BEF;color:#FFFFFF;}
+.sending_test_code{margin-left:-82px;border:none;border-radius:2px;width:160px;height:35px;font-size:16px;background:#CFCFCF;color:#7E7E7E;}
+#phone,#test_code{margin-left:0.2em;}
+.r_account{width:13px;margin-left:12px;}
+.rg_left{margin-left:18px;}
+.rg_left span{margin-right:38px;color:#EDEDEE;font-size:16px;}
+.rg_left b{display:inline-block;vertical-align:middle;margin-left:8px;margin-right:35px;font-weight:normal;color:#EBECEB;}
+.register3_btn{margin:50px 0 120px -95px;}
+
+/********************注册页面4样式*********************/
+.register4-img{margin-bottom:45px;}
+.register4_btn{margin:35px 0 229px 0;}
+
+/********************关于我们********************/
+.about_us{height:1353px;background:url("../img/aboutUS_bg.jpg") 0 0 no-repeat;}
+.aboutUS_row1{margin-top:60px;text-align: left;}
+.aboutUS_row1>p{letter-spacing:20px;font-size:38px;color:#6E6F6E;}
+.aboutUS_row1>span{display:inline-block;border-top:1px solid #6797EC;padding-top:15px;padding-right:1px;margin-top:15px;width:120px;letter-spacing:1px;font-size:18px;color:#BFBCB2;}
+.aboutUS_row2{margin-top:610px;text-align: left;}
+.aboutUS_row2>span,.aboutUs{display:inline-block;padding-bottom:10px;border-bottom:1px solid #466EB3;letter-spacing:2px;font-size:24px;color:#BFBCB2;}
+.aboutUS_row2>p{margin-top:25px;padding-right:240px;letter-spacing:3px;text-indent:40px;font-size: 16px;color:#8E9295}
+/*.aboutUS_row2>p:last-child{}*/
+
+/********************联系我们********************/
+.contact_us{position:relative;z-index:10;height:1265px;background:url("../img/contactUS_bj.jpg") 0 0 no-repeat;}
+.contact_head{position:absolute;z-index:20;width:100%;height:190px;opacity:0.5;background:#212832;}
+.contact_row1{text-align:left;padding-left:25px;}
+.contact_row1>p{margin-top:40px;letter-spacing:20px;font-size:38px;color:#DBDBDC;}
+.con_us{display:inline-block;border-top:1px solid #6797EC;padding-top:20px;padding-right:1px;margin-top:15px;letter-spacing:1px;font-size:15px;color:#97999C;}
+.Customer_phone{margin-left:410px;font-size:48px;color:#4C7BD1;}
+.Customer_phone>b{margin-right:10px;font-size:16px;color:#707173;}
+.contact_img{height:500px; text-align:left;}
+.contact_row2{margin-top:220px;padding-left:25px;}
+.contact_foot{margin-top:35px;text-align:left;}
+.contact_foot>p{margin-top:10px;letter-spacing:3px;font-size:18px;color:#858990;}
+.contact_foot img{margin-left:20px;vertical-align: middle;}
+input[type=checkbox]{background-color:transparent;}
+input[type=checkbox]:focus{border:none;outline:medium;}

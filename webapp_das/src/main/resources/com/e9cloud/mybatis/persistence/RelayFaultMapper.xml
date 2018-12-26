@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RelayFault_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RelayFault" >
+    <id column="faultName" property="faultName" />
+    <result column="recordRate1" property="recordRate1" />
+  </resultMap>
+
+  <select id="getRelayFault" resultMap="BaseResultMap" parameterType="map" >
+    select d.name faultName , d.code as dcode
+    , ifnull(sum(f.record_cnt),0) / ifnull( (select sum(record_cnt) from stat_ims_failure where date_format(statday , '%Y-%m') = date_format(date_add(date_add('1900-01-01',INTERVAL (ifnull(#{myYear},date_format(CURDATE() , '%Y'))-1900) YEAR),INTERVAL #{month} MONTH) , '%Y-%m')),1) *100 as recordRate1
+    from stat_ims_failure_define d
+    left join stat_ims_reason_code r on r.dcode = d.code
+    left join stat_ims_failure f on f.reason_code &gt;= r.code_start and f.reason_code &lt;= r.code_end and date_format(f.statday , '%Y-%m') = date_format(date_add(date_add('1900-01-01',INTERVAL (ifnull(#{myYear},date_format(CURDATE() , '%Y'))-1900) YEAR),INTERVAL #{month} MONTH) , '%Y-%m')
+    group by d.name, d.code order by d.code
+  </select>
+</mapper>

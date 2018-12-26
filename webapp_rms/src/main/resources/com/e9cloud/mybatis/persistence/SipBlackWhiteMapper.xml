@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SubWhiteBlack_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipBlackWhite" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="num_type" property="numType" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, subid, number, num_type, remark, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_sip_blackwhite
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteNumber" parameterType="java.lang.Integer" >
+    delete from tb_sip_blackwhite
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.SipBlackWhite" >
+    insert into tb_sip_blackwhite (id, subid, number, 
+      num_type, remark, create_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{subid,jdbcType=VARCHAR}, #{number,jdbcType=VARCHAR}, 
+      #{numType,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SipBlackWhite" >
+    insert into tb_sip_blackwhite
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="numType != null" >
+        num_type,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="numType != null" >
+        #{numType,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SipBlackWhite" >
+    update tb_sip_blackwhite
+    <set >
+      <if test="subid != null" >
+        subid = #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="numType != null" >
+        num_type = #{numType,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.SipBlackWhite" >
+    update tb_sip_blackwhite
+    set subid = #{subid,jdbcType=VARCHAR},
+      number = #{number,jdbcType=VARCHAR},
+      num_type = #{numType,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="selectNumberById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_blackwhite where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="selectNumberListByNumbers" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_blackwhite where subid = #{subid,jdbcType=VARCHAR} and number in
+    <foreach collection="numbers" index="index" item="number" open="(" close=")" separator=",">
+      #{number}
+    </foreach>
+  </select>
+
+
+  <select id="pageNumber" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_blackwhite
+    where subid = #{params.subid,jdbcType=VARCHAR}
+    <if test="params.id!=null and ''!=params.id">
+      and id = #{params.id,jdbcType=INTEGER}
+    </if>
+    <if test="params.numType!=null and ''!=params.numType">
+      and num_type = #{params.numType,jdbcType=VARCHAR}
+    </if>
+    order by id DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <insert id="saveNumber" parameterType="java.util.List" >
+    insert into tb_sip_blackwhite (create_time, subid,number,num_type,remark) values
+    <foreach collection="list" item="item" index="index" separator="," >
+      (now(), #{item.subid}, #{item.number},#{item.numType}, #{item.remark})
+    </foreach>
+  </insert>
+</mapper>

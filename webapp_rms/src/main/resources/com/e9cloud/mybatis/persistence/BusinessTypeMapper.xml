@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BusinessType_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.BusinessType" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, sid, bus_type, status, create_date
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_business_type
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="checkBusinessInfo" resultMap="BaseResultMap" parameterType="map" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_business_type  where status = '00' and  bus_type = #{busType,jdbcType=VARCHAR} and sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="busTypesBySid" resultType="string" parameterType="string">
+    select
+    group_concat(DISTINCT bus_type separator ',')
+    from tb_business_type
+    WHERE sid = #{_parameter} AND `status` = '00'
+  </select>
+
+  <select id="countApp" resultType="String" parameterType="map" >
+    select
+    COUNT(*)
+    from tb_app_info  where status = '00' and bus_type = #{busType,jdbcType=VARCHAR} and sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="countAxb" resultType="String" parameterType="map" >
+    select count(*)
+    from  tb_app_info  a ,tb_axb_num  b where  a.sid = #{sid,jdbcType=VARCHAR} and a.appid = b.appid  and b.`status` = '00'
+  </select>
+
+
+  <select id="count1" resultType="String" parameterType="java.lang.String" >
+    select COUNT(*) from tb_user_admin a ,tb_business_type b where b.status = '00' and a.sid = b.sid  and b.bus_type = '01'
+         and a.uid = #{uid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="count3" resultType="String" parameterType="java.lang.String" >
+    select COUNT(*) from tb_user_admin a ,tb_business_type b where b.status = '00' and a.sid = b.sid  and b.bus_type = '03'
+         and a.uid = #{uid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="countAppForbidden" resultType="String" parameterType="map" >
+    select
+    COUNT(*)
+    from tb_app_info  where status IN('01','02') and bus_type = #{busType,jdbcType=VARCHAR} and sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_business_type
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.BusinessType" >
+    insert into tb_business_type (id, sid, bus_type,
+      status, create_date)
+    values (#{id,jdbcType=INTEGER}, #{sid,jdbcType=VARCHAR}, #{busType,jdbcType=VARCHAR}, 
+      #{status,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP})
+  </insert>
+
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.BusinessType" >
+    insert into tb_business_type
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="busType != null" >
+        bus_type,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="busType != null" >
+        #{busType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.BusinessType" >
+    update tb_business_type
+    <set >
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="busType != null" >
+        bus_type = #{busType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.BusinessType" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update tb_business_type
+    set sid = #{sid,jdbcType=VARCHAR},
+      bus_type = #{busType,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateStatus" parameterType="com.e9cloud.mybatis.domain.BusinessType">
+    UPDATE tb_business_type SET status = #{status,jdbcType=VARCHAR} WHERE sid = #{sid,jdbcType=VARCHAR} AND bus_type = #{busType,jdbcType=VARCHAR}
+  </update>
+
+  <!-- 根据条件查询单个号码池信息 -->
+  <select id="getBusinessTypeInfo" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.BusinessType" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_business_type
+    where 1=1
+    <if test="sid != null" >
+      AND sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="busType != null" >
+     AND bus_type = #{busType,jdbcType=VARCHAR}
+    </if>
+    <if test="status != null" >
+     AND status = #{status,jdbcType=VARCHAR}
+    </if>
+    <if test="createDate != null" >
+     AND create_date = #{createDate,jdbcType=TIMESTAMP}
+    </if>
+  </select>
+
+</mapper>

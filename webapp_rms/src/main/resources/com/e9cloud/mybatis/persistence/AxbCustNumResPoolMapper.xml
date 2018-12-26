@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AxbCustNumResPool_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AxbCustNumber" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="axb_num_id" property="axbNumId" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="PoolResultMap" type="com.e9cloud.mybatis.domain.AxbAppPool" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <!-- 分页联合查询号码池信息 -->
+  <select id="selectAxbAppPoolList" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select a.id, b.name, a.sid, c.app_name, a.appid
+    from tb_axb_app_pool a, tb_user_admin_authen_company b, tb_app_info c
+    where a.uid = b.uid  and a.appid = c.appid
+    <if test="params.name!=null and ''!=params.name">
+      and b.name LIKE "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and a.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and a.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName!=null and ''!=params.appName">
+      and c.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    order by a.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 根据条件查询单个号码池信息 -->
+  <select id="selectAxbAppPoolByObj" resultMap="PoolResultMap" parameterType="com.e9cloud.mybatis.domain.AxbAppPool" >
+    select a.id, a.uid, a.sid, a.appid, a.addtime, b.name, c.app_name
+    from tb_axb_app_pool a,tb_user_admin_authen_company b, tb_app_info c,tb_user_admin d
+    where a.appid = c.appid AND c.sid = d.sid AND d.uid = b.uid
+    <if test="id!=null and ''!=id">
+      and a.id = #{id,jdbcType=VARCHAR}
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and a.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and a.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <insert id="insetAxbCustAppPool" parameterType="com.e9cloud.mybatis.domain.AxbAppPool" >
+    insert into tb_axb_app_pool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      addtime,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="uid != null" >
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      now(),
+    </trim>
+  </insert>
+
+  <insert id="insetAxbCustNumberPool" parameterType="com.e9cloud.mybatis.domain.AxbCustNumber" >
+    insert into tb_axb_num
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="axbNumId != null" >
+        axb_num_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      replace(uuid(),'-',''),
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="axbNumId != null" >
+        #{axbNumId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <!-- 根据条件查询单个号码信息 -->
+  <select id="selectAxbCustNumberPoolByObj" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.AxbCustNumber" >
+    select a.id, b.name, d.sid, a.appid,a.axb_num_id, c.app_name
+    from tb_axb_num a, tb_user_admin_authen_company b, tb_app_info c,tb_user_admin d
+    where a.appid = c.appid AND c.sid = d.sid AND d.uid = b.uid
+    <if test="id!=null and ''!=id">
+      and a.id = #{id,jdbcType=VARCHAR}
+    </if>
+    <if test="axbNumId!=null and ''!=axbNumId">
+      and a.axb_num_id =#{axbNumId,jdbcType=VARCHAR}
+    </if>
+    <if test="name!=null and ''!=name">
+      and b.name LIKE "%"#{name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and d.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and a.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 分页联合查询用户号码信息列表 -->
+  <select id="selectAxbCustNumberList" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select a.id, a.appid, b.cityid, b.number, a.status, c.area_code
+    from (SELECT * FROM tb_axb_num tn WHERE tn.appid = #{params.appid,jdbcType=VARCHAR} AND tn.`status` != '02') a
+    LEFT JOIN tb_axb_num_pool b ON a.axb_num_id = b.id
+    LEFT JOIN tb_telno_city c ON b.cityid = c.ccode AND c.ctype = 0
+    WHERE 1 = 1
+    <if test="params.number!=null and ''!=params.number">
+      and b.number LIKE "%" #{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.areaCode!=null and ''!=params.areaCode">
+      and c.area_code = #{params.areaCode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status!=null and ''!=params.status">
+      and a.status = #{params.status,jdbcType=VARCHAR}
+    </if>
+    order by a.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="checkHasNumber" resultType="int" parameterType="java.lang.String" >
+    select
+    count(1)
+    from tb_axb_num
+    where (`status`='00' OR `status`='01') AND appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 删除号码池信息 -->
+  <delete id="deleteAxbCUstAppPool" parameterType="java.lang.String" >
+    delete from tb_axb_app_pool
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <resultMap id="RelationResultMap" type="com.e9cloud.mybatis.domain.AxbNumRelation" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="requestId" property="requestId" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="num_a" property="numA" jdbcType="VARCHAR" />
+    <result column="num_x" property="numX" jdbcType="VARCHAR" />
+    <result column="num_b" property="numB" jdbcType="VARCHAR" />
+    <result column="area_code" property="areaCode" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="add_time" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="second_length" property="secondLength" jdbcType="INTEGER" />
+    <result column="out_time" property="outtime" jdbcType="TIMESTAMP" />
+    <result column="lock_time" property="locktime" jdbcType="TIMESTAMP" />
+    <result column="rid_time" property="ridtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <!-- 根据号码查询隐私号信息 -->
+  <select id="getAxbNumRelationByNum" resultMap="RelationResultMap" parameterType="java.lang.String" >
+    select
+    id,
+    requestId,
+    appid,
+    num_a,
+    num_x,
+    num_b,
+    area_code,
+    subid,
+    add_time,
+    second_length,
+    max(out_time) out_time,
+    lock_time,
+    rid_time
+    from tb_axb_num_relation
+    where num_x = #{number,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteAxbCustNum" parameterType="com.e9cloud.mybatis.domain.AxbCustNumber">
+    delete from tb_axb_num  where id = #{id}
+  </delete>
+
+  <update id="updateAxbCustNumByStatus" parameterType="com.e9cloud.mybatis.domain.AxbCustNumber">
+    UPDATE tb_axb_num SET status= #{status,jdbcType=VARCHAR} where id = #{id}
+  </update>
+
+  <update id="updateAxbNumRelationByObj" parameterType="com.e9cloud.mybatis.domain.AxbNumRelation">
+    UPDATE tb_axb_num_relation
+    SET lock_time = #{locktime,jdbcType=TIMESTAMP},
+        rid_time = #{ridtime,jdbcType=TIMESTAMP}
+    where id = #{id}
+  </update>
+</mapper>

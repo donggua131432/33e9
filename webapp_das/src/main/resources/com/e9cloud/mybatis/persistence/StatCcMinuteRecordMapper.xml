@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatCcMinuteRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatCcMinuteRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statmin" property="statmin" jdbcType="TIMESTAMP" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="CHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="ringingsum" property="ringringsum" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statmin, feeid, appid, subid, abline, operator, pname, cname, callcnt, succcnt, 
+    answercnt, ringingsum, thscsum, jfscsum, fee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_cc_minute_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 按分钟统计 智能云调度 话务走势 的话务情况 -->
+  <select id="countCcScanByMin" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(if(sr.abline='I',sr.thscsum,0)) thscsumI,
+      SUM(if(sr.abline='O',sr.thscsum,0)) thscsumO,
+
+      SUM(if(sr.abline='I',sr.thscsum,0))/SUM(if(sr.abline='I',sr.succcnt,0)) thscAvgI,
+      SUM(if(sr.abline='O',sr.thscsum,0))/SUM(if(sr.abline='O',sr.succcnt,0)) thscAvgO,
+
+      SUM(sr.jfscsum) jfscsum,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(if(sr.abline='I',sr.succcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) succcntI,
+      SUM(if(sr.abline='O',sr.succcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) succcntO,
+
+      SUM(if(sr.abline='I',sr.answercnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) answercntI,
+      SUM(if(sr.abline='O',sr.answercnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) answercntO,
+
+      SUM(if(sr.abline='I' AND sr.operator='00',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI00,
+      SUM(if(sr.abline='I' AND sr.operator='01',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI01,
+	  SUM(if(sr.abline='I' AND sr.operator='02',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI02,
+	  SUM(if(sr.abline='I' AND sr.operator='06',sr.callcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) callcntI06,
+
+	  SUM(if(sr.abline='O' AND sr.operator='00',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO00,
+      SUM(if(sr.abline='O' AND sr.operator='01',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO01,
+	  SUM(if(sr.abline='O' AND sr.operator='02',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO02,
+	  SUM(if(sr.abline='O' AND sr.operator='06',sr.callcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) callcntO06,
+
+      DATE_FORMAT(sr.statmin,'%H:%i') d
+    FROM stat_cc_minute_record sr
+    WHERE sr.statmin &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statmin &lt; #{endDay,jdbcType=TIMESTAMP}
+    <if test="appid!=null and ''!=appid">
+      AND sr.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="subid!=null and ''!=subid and '-1'!=subid">
+      AND sr.subid = #{subid,jdbcType=VARCHAR}
+    </if>
+    <if test="sid != null and sid != '-1' and sid != ''">
+      AND sr.feeid = (SELECT feeid FROM tb_user_admin WHERE sid = #{sid,jdbcType=VARCHAR})
+    </if>
+    GROUP BY d
+  </select>
+
+
+  <!-- 智能云调度呼入地区分布统计统计 -->
+  <select id="countCcScanByProv"  resultType="map" parameterType="map">
+    SELECT
+
+    sr.pname name,
+    SUM(if(sr.abline='I',sr.callcnt,0)) value
+
+    FROM stat_cc_minute_record sr
+    WHERE sr.statmin &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statmin &lt; #{endDay,jdbcType=TIMESTAMP}
+    <if test="appid!=null and ''!=appid">
+      AND sr.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="subid!=null and ''!=subid">
+      AND sr.subid = #{subid,jdbcType=VARCHAR}
+    </if>
+    GROUP BY sr.pname
+
+  </select>
+</mapper>

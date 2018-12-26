@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="VoiceRate_Mapper">
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.VoiceRate">
+    <id column="feeid" jdbcType="VARCHAR" property="feeid" />
+    <result column="start_date" jdbcType="DATE" property="startDate" />
+    <result column="end_date" jdbcType="DATE" property="endDate" />
+    <result column="forever" jdbcType="BIT" property="forever" />
+    <result column="cycle" jdbcType="INTEGER" property="cycle" />
+    <result column="per6" jdbcType="DECIMAL" property="per6" />
+    <result column="per6_discount" jdbcType="INTEGER" property="per6Discount" />
+    <result column="per60" jdbcType="DECIMAL" property="per60" />
+    <result column="per60_discount" jdbcType="INTEGER" property="per60Discount" />
+    <result column="perx" jdbcType="DECIMAL" property="perx" />
+    <result column="recording" jdbcType="DECIMAL" property="recording" />
+    <result column="recording_discount" jdbcType="INTEGER" property="recordingDiscount" />
+    <result column="addtime" jdbcType="TIMESTAMP" property="addtime" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    feeid, start_date, end_date, forever,cycle,per6,per6_discount, per60, per60_discount, perx,
+    recording, recording_discount, addtime
+  </sql>
+
+  <select id="selectVoiceRateByFeeId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from rms_voice_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="findVoiceRateByFeeid" resultMap="BaseResultMap" parameterType="java.lang.String" >
+   SELECT DD.per6, ifnull( CC.per6_discount, DD.per6_discount ) per6_discount, DD.per60, ifnull( CC.per60_discount, DD.per60_discount ) per60_discount,
+      DD.recording, ifnull( CC.recording_discount, DD.recording_discount ) recording_discount
+      FROM ( SELECT AA.per6, AA.per6_discount, AA.per60, AA.per60_discount, AA.recording, AA.recording_discount, 'e9cloud' e9cloud
+      FROM rms_voice_rate AA WHERE AA.feeid = #{feeid,jdbcType=VARCHAR}) CC RIGHT JOIN ( SELECT BB.per6, BB.per6_discount, BB.per60, BB.per60_discount,
+      BB.recording, BB.recording_discount, 'e9cloud' e9cloud
+     FROM rms_voice_rate BB WHERE BB.feeid = '0' ) DD ON CC.e9cloud = DD.e9cloud;
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from rms_mask_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertVoiceRate" parameterType="com.e9cloud.mybatis.domain.VoiceRate">
+    insert into rms_voice_rate
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="feeid != null">
+        feeid,
+      </if>
+      <if test="startDate != null">
+        start_date,
+      </if>
+      <if test="endDate != null">
+        end_date,
+      </if>
+      <if test="forever != null">
+        forever,
+      </if>
+      <if test="cycle != null">
+        cycle,
+      </if>
+      <if test="per6 != null">
+        per6,
+      </if>
+      <if test="per6Discount != null">
+        per6_discount,
+      </if>
+      <if test="per60 != null">
+        per60,
+      </if>
+      <if test="per60Discount != null">
+        per60_discount,
+      </if>
+      <if test="perx != null">
+        perx,
+      </if>
+      <if test="recording != null">
+        recording,
+      </if>
+      <if test="recordingDiscount != null">
+        recording_discount,
+      </if>
+      addtime,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="feeid != null">
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null">
+        #{forever,jdbcType=BIT},
+      </if>
+      <if test="cycle != null">
+        #{cycle,jdbcType=INTEGER},
+      </if>
+      <if test="per6 != null">
+        #{per6,jdbcType=DECIMAL},
+      </if>
+      <if test="per6Discount != null">
+        #{per6Discount,jdbcType=INTEGER},
+      </if>
+      <if test="per60 != null">
+        #{per60,jdbcType=DECIMAL},
+      </if>
+      <if test="per60Discount != null">
+        #{per60Discount,jdbcType=INTEGER},
+      </if>
+      <if test="perx != null">
+        #{perx,jdbcType=DECIMAL},
+      </if>
+      <if test="recording != null">
+        #{recording,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingDiscount != null">
+        #{recordingDiscount,jdbcType=INTEGER},
+      </if>
+      NOW(),
+    </trim>
+  </insert>
+
+  <update id="updateVoiceRate" parameterType="com.e9cloud.mybatis.domain.VoiceRate">
+    update rms_voice_rate
+    <set>
+      <if test="forever != null" >
+        start_date = #{startDate,jdbcType=DATE},
+        end_date = #{endDate,jdbcType=DATE},
+        forever = #{forever,jdbcType=BIT},
+      </if>
+      <if test="per60 != null">
+        per60 = #{per60,jdbcType=DECIMAL},
+      </if>
+      <if test="per60Discount != null">
+        per60_discount = #{per60Discount,jdbcType=INTEGER},
+      </if>
+      <if test="addtime != null">
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </update>
+
+
+
+  <!-- ==================== 费率信息分页联表查询rms_call_rate,tb_user_admin_authen_company,tb_user_admin  start ==================== -->
+  <select id="selectPageVoiceRateUnion" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select a.*,b.name,c.uid,c.sid
+    from rms_voice_rate as a, tb_user_admin_authen_company as b, tb_user_admin as c
+    where a.feeid = c.feeid and c.uid = b.uid
+    <if test="params.uid!=null and ''!=params.uid">
+      and c.uid = #{params.uid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and c.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and c.feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name!=null and ''!=params.name">
+      and b.name LIKE "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.addtime!=null and ''!=params.addtime">
+      and a.addtime &gt;= str_to_date(#{params.addtime,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.addtime1!=null and ''!=params.addtime1">
+      and a.addtime &lt;= str_to_date(#{params.addtime1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.forever!=null and ''!=params.forever">
+      and a.forever = #{params.forever,jdbcType=BIT}
+    </if>
+    order by a.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+
+</mapper>

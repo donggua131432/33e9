@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatRestApiMinuteResp_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatApiResponse" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stat_time" property="statTime" jdbcType="TIMESTAMP" />
+    <result column="req_type" property="reqType" jdbcType="VARCHAR" />
+    <result column="req_name" property="reqName" jdbcType="VARCHAR" />
+    <result column="resp_code" property="respCode" jdbcType="VARCHAR" />
+    <result column="resp_cnt" property="respCnt" jdbcType="INTEGER" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, stat_time, req_type, req_name, resp_code, resp_cnt, ctime
+  </sql>
+
+  <!-- 按分钟统计 Rest接口 的错误码情况 -->
+  <select id="countRestApiScanByMin" resultType="map" parameterType="map">
+    SELECT
+    <!-- 请求总数 -->
+    SUM(sr.resp_cnt) respCntSum,
+    <!-- 请求请求成功数 -->
+    SUM(if(sr.resp_code='000000',sr.resp_cnt,0)) respSuccCntsum,
+    <!-- 通用接口 -->
+    SUM(if(sr.req_type='1',sr.resp_cnt,0)) currency,
+    <!-- 专线语音 -->
+    SUM(if(sr.req_type='2',sr.resp_cnt,0)) rest,
+    <!-- 专号通 -->
+    SUM(if(sr.req_type='3',sr.resp_cnt,0)) mask,
+    <!-- 物联网卡 -->
+    SUM(if(sr.req_type='4',sr.resp_cnt,0)) card,
+    <!-- 虚拟号 -->
+    SUM(if(sr.req_type='5',sr.resp_cnt,0)) vn,
+    <!-- 语音通知 -->
+    SUM(if(sr.req_type='6',sr.resp_cnt,0)) voice,
+    <!-- SipPhone -->
+    SUM(if(sr.req_type='7',sr.resp_cnt,0)) sipPhone,
+
+    DATE_FORMAT(sr.stat_time,'%H:%i') d
+    FROM stat_api_response sr
+    WHERE sr.stat_time &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.stat_time &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+
+  <select id="countRestApiCodeStat" resultType="map" parameterType="map">
+    SELECT
+    sr.resp_code,  SUM(sr.resp_cnt) respCodeSum
+    FROM stat_api_response sr
+    WHERE sr.stat_time &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.stat_time &lt; #{endDay,jdbcType=TIMESTAMP}  AND sr.resp_code != '000000'
+    GROUP BY sr.resp_code ORDER BY SUM(sr.resp_cnt) ASC
+  </select>
+
+</mapper>

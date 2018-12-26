@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatVnDayRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatVnDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, statday, appid, feeid, callcnt, succcnt, answercnt, thscsum, jfscsum, fee
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_vn_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="selectStatVnDayRecordByMap" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select
+    <include refid="Base_Column_List" />
+    from stat_vn_day_record
+    where  feeid = #{feeid,jdbcType=VARCHAR} and date_format(statday,'%Y-%m-%d') &gt; str_to_date(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+  </select>
+
+
+
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from stat_vn_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.StatVnDayRecord" >
+    insert into stat_vn_day_record (id, statday, appid, 
+      feeid, callcnt, succcnt, 
+      answercnt, thscsum, jfscsum, 
+      fee)
+    values (#{id,jdbcType=INTEGER}, #{statday,jdbcType=TIMESTAMP}, #{appid,jdbcType=VARCHAR}, 
+      #{feeid,jdbcType=VARCHAR}, #{callcnt,jdbcType=INTEGER}, #{succcnt,jdbcType=INTEGER},
+      #{answercnt,jdbcType=INTEGER}, #{thscsum,jdbcType=INTEGER}, #{jfscsum,jdbcType=INTEGER}, 
+      #{fee,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.StatVnDayRecord" >
+    insert into stat_vn_day_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="statday != null" >
+        statday,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="callcnt != null" >
+        callcnt,
+      </if>
+      <if test="succcnt != null" >
+        succcnt,
+      </if>
+      <if test="answercnt != null" >
+        answercnt,
+      </if>
+      <if test="thscsum != null" >
+        thscsum,
+      </if>
+      <if test="jfscsum != null" >
+        jfscsum,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="statday != null" >
+        #{statday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="callcnt != null" >
+        #{callcnt,jdbcType=INTEGER},
+      </if>
+      <if test="succcnt != null" >
+        #{succcnt,jdbcType=INTEGER},
+      </if>
+      <if test="answercnt != null" >
+        #{answercnt,jdbcType=INTEGER},
+      </if>
+      <if test="thscsum != null" >
+        #{thscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jfscsum != null" >
+        #{jfscsum,jdbcType=INTEGER},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.StatVnDayRecord" >
+    update stat_vn_day_record
+    <set >
+      <if test="statday != null" >
+        statday = #{statday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="callcnt != null" >
+        callcnt = #{callcnt,jdbcType=INTEGER},
+      </if>
+      <if test="succcnt != null" >
+        succcnt = #{succcnt,jdbcType=INTEGER},
+      </if>
+      <if test="answercnt != null" >
+        answercnt = #{answercnt,jdbcType=INTEGER},
+      </if>
+      <if test="thscsum != null" >
+        thscsum = #{thscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jfscsum != null" >
+        jfscsum = #{jfscsum,jdbcType=INTEGER},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.StatVnDayRecord" >
+    update stat_vn_day_record
+    set statday = #{statday,jdbcType=TIMESTAMP},
+      appid = #{appid,jdbcType=VARCHAR},
+      feeid = #{feeid,jdbcType=VARCHAR},
+      callcnt = #{callcnt,jdbcType=INTEGER},
+      succcnt = #{succcnt,jdbcType=INTEGER},
+      answercnt = #{answercnt,jdbcType=INTEGER},
+      thscsum = #{thscsum,jdbcType=INTEGER},
+      jfscsum = #{jfscsum,jdbcType=INTEGER},
+      fee = #{fee,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

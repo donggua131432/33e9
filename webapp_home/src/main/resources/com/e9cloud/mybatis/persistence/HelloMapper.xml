@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Hello_Mapper" >
+
+  <select id="selectValueByKey" resultType="string" parameterType="string" >
+    select 
+    `value`
+    from hello
+    where `key` = #{key,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectDataByPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    `value`
+    from hello
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+</mapper>

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CcInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CcInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="ccname" property="ccname" jdbcType="VARCHAR" />
+    <result column="relay1" property="relay1" jdbcType="VARCHAR" />
+    <result column="relay2" property="relay2" jdbcType="VARCHAR" />
+    <result column="life_relay" property="lifeRelay" jdbcType="VARCHAR" />
+    <result column="cco_max_num" property="ccoMaxNum" jdbcType="INTEGER" />
+    <result column="dtmf_num" property="dtmfNum" jdbcType="VARCHAR" />
+    <result column="default_cc" property="defaultCc" jdbcType="BIT" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sid, appid, subid, ccname, relay1, relay2, life_relay, cco_max_num, dtmf_num,
+    default_cc, status, remark, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap"   parameterType="java.lang.String">
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_info
+    where status = '00' AND sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="selectAll1" resultMap="BaseResultMap"   parameterType="java.lang.String">
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_info
+    where  sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAllWithDelete" resultMap="BaseResultMap"   parameterType="java.lang.String">
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_info
+    where sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="checkDefaultCc" resultType="int"   parameterType="java.lang.String">
+    select
+    COUNT(1)
+    from tb_cc_info  where default_cc = '1'
+    AND sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="countCallCenterBySubId" resultType="long" parameterType="java.lang.String" >
+    select
+    count(1)
+    from tb_cc_info
+    where 1=1 AND status = '00'
+    AND subid = #{subid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getCcInfoByDefault" resultMap="BaseResultMap"   parameterType="java.lang.String">
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_info  where default_cc = '1'
+    AND sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="pageCallList" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select a.appid,a.ccname,a.cco_max_num ,b.app_name , b.call_no ,a.ctime ,a.default_cc  from  tb_cc_info a LEFT JOIN tb_app_info b ON  a.appid = b.appid
+    where b.`status` = '00'  and b.bus_type = '01' and a.`status` = '00'
+    and a.sid = #{params.sid,jdbcType=VARCHAR}
+    <if test="params.ccname != null and params.ccname != null">
+      and a.ccname like  CONCAT('%',#{params.ccname,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY  a.ctime DESC
+
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!--<update id="updateDefault" parameterType="com.e9cloud.mybatis.domain.CcInfo">-->
+  <!--UPDATE tb_cc_info SET default_cc = if(sid = '${sid}' and subid = '${subid}' ,1,0)-->
+  <!--</update>-->
+
+
+  <!-- 更改缺省设置 -->
+  <update id="updateDefault" parameterType="com.e9cloud.mybatis.domain.CcInfo">
+    UPDATE tb_cc_info SET default_cc = 1 WHERE sid = #{sid,jdbcType=VARCHAR} AND subid = #{subid,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateDefault2" parameterType="com.e9cloud.mybatis.domain.CcInfo">
+    UPDATE tb_cc_info SET default_cc = 0 WHERE sid = #{sid,jdbcType=VARCHAR} AND subid != #{subid,jdbcType=VARCHAR}
+  </update>
+
+
+  <update id="setDefault" parameterType="com.e9cloud.mybatis.domain.CcInfo">
+    UPDATE tb_cc_info SET default_cc = 0 where sid = #{sid,jdbcType=VARCHAR}
+  </update>
+
+
+
+  <select id="selectCcInfoListBySid" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_info
+    where sid = #{sid} and status = '00'
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_cc_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.CcInfo" >
+    insert into tb_cc_info (id, sid, appid,
+      subid, ccname, relay1, 
+      relay2, life_relay, cco_max_num, 
+      dtmf_num, default_cc, status, 
+      remark, ctime)
+    values (#{id,jdbcType=INTEGER}, #{sid,jdbcType=VARCHAR}, #{appid,jdbcType=VARCHAR}, 
+      #{subid,jdbcType=VARCHAR}, #{ccname,jdbcType=VARCHAR}, #{relay1,jdbcType=VARCHAR}, 
+      #{relay2,jdbcType=VARCHAR}, #{lifeRelay,jdbcType=VARCHAR}, #{ccoMaxNum,jdbcType=INTEGER}, 
+      #{dtmfNum,jdbcType=VARCHAR}, #{defaultCc,jdbcType=BIT}, #{status,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{ctime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.CcInfo" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    insert into tb_cc_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="ccname != null" >
+        ccname,
+      </if>
+      <if test="relay1 != null" >
+        relay1,
+      </if>
+      <if test="relay2 != null" >
+        relay2,
+      </if>
+      <if test="lifeRelay != null" >
+        life_relay,
+      </if>
+      <if test="ccoMaxNum != null" >
+        cco_max_num,
+      </if>
+      <if test="dtmfNum != null" >
+        dtmf_num,
+      </if>
+      <if test="defaultCc != null" >
+        default_cc,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="ccname != null" >
+        #{ccname,jdbcType=VARCHAR},
+      </if>
+      <if test="relay1 != null" >
+        #{relay1,jdbcType=VARCHAR},
+      </if>
+      <if test="relay2 != null" >
+        #{relay2,jdbcType=VARCHAR},
+      </if>
+      <if test="lifeRelay != null" >
+        #{lifeRelay,jdbcType=VARCHAR},
+      </if>
+      <if test="ccoMaxNum != null" >
+        #{ccoMaxNum,jdbcType=INTEGER},
+      </if>
+      <if test="dtmfNum != null" >
+        #{dtmfNum,jdbcType=VARCHAR},
+      </if>
+      <if test="defaultCc != null" >
+        #{defaultCc,jdbcType=BIT},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.CcInfo" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update tb_cc_info
+    <set >
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="subid != null" >
+        subid = #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="ccname != null" >
+        ccname = #{ccname,jdbcType=VARCHAR},
+      </if>
+      <if test="relay1 != null" >
+        relay1 = #{relay1,jdbcType=VARCHAR},
+      </if>
+      <if test="relay2 != null" >
+        relay2 = #{relay2,jdbcType=VARCHAR},
+      </if>
+      <if test="lifeRelay != null" >
+        life_relay = #{lifeRelay,jdbcType=VARCHAR},
+      </if>
+      <if test="ccoMaxNum != null" >
+        cco_max_num = #{ccoMaxNum,jdbcType=INTEGER},
+      </if>
+      <if test="dtmfNum != null" >
+        dtmf_num = #{dtmfNum,jdbcType=VARCHAR},
+      </if>
+      <if test="defaultCc != null" >
+        default_cc = #{defaultCc,jdbcType=BIT},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.CcInfo" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update tb_cc_info
+    set sid = #{sid,jdbcType=VARCHAR},
+      appid = #{appid,jdbcType=VARCHAR},
+      subid = #{subid,jdbcType=VARCHAR},
+      ccname = #{ccname,jdbcType=VARCHAR},
+      relay1 = #{relay1,jdbcType=VARCHAR},
+      relay2 = #{relay2,jdbcType=VARCHAR},
+      life_relay = #{lifeRelay,jdbcType=VARCHAR},
+      cco_max_num = #{ccoMaxNum,jdbcType=INTEGER},
+      dtmf_num = #{dtmfNum,jdbcType=VARCHAR},
+      default_cc = #{defaultCc,jdbcType=BIT},
+      status = #{status,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      ctime = #{ctime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

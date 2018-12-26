@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="IvrRate_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.IvrRate" >
+    <id column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="start_date" property="startDate" jdbcType="DATE" />
+    <result column="end_date" property="endDate" jdbcType="DATE" />
+    <result column="forever" property="forever" jdbcType="BIT" />
+    <result column="callin_sip" property="callinSip" jdbcType="DECIMAL" />
+    <result column="callin_sip_discount" property="callinSipDiscount" jdbcType="SMALLINT" />
+    <result column="callin_nonsip" property="callinNonsip" jdbcType="DECIMAL" />
+    <result column="callin_nonsip_discount" property="callinNonsipDiscount" jdbcType="SMALLINT" />
+    <result column="callin_direct" property="callinDirect" jdbcType="DECIMAL" />
+    <result column="callin_direct_discount" property="callinDirectDiscount" jdbcType="SMALLINT" />
+    <result column="callin_recording" property="callinRecording" jdbcType="DECIMAL" />
+    <result column="callin_recording_discount" property="callinRecordingDiscount" jdbcType="SMALLINT" />
+    <result column="callout_local" property="calloutLocal" jdbcType="DECIMAL" />
+    <result column="callout_local_discount" property="calloutLocalDiscount" jdbcType="SMALLINT" />
+    <result column="callout_nonlocal" property="calloutNonlocal" jdbcType="DECIMAL" />
+    <result column="callout_nonlocal_discount" property="calloutNonlocalDiscount" jdbcType="SMALLINT" />
+    <result column="callout_recording" property="calloutRecording" jdbcType="DECIMAL" />
+    <result column="callout_recording_discount" property="calloutRecordingDiscount" jdbcType="SMALLINT" />
+    <result column="ivr_rent" property="ivrRent" jdbcType="DECIMAL" />
+    <result column="sipnum_rent" property="sipnumRent" jdbcType="DECIMAL" />
+    <result column="sipnum_rent_discount" property="sipnumRentDiscount" jdbcType="INTEGER" />
+    <result column="sipnum_min_cost" property="sipnumMinCost" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    feeid, start_date, end_date, forever, callin_sip, callin_sip_discount, callin_nonsip, 
+    callin_nonsip_discount, callin_direct, callin_direct_discount, callin_recording, 
+    callin_recording_discount, callout_local, callout_local_discount, callout_nonlocal, 
+    callout_nonlocal_discount, callout_recording, callout_recording_discount, ivr_rent, 
+    sipnum_rent, sipnum_rent_discount, sipnum_min_cost, ctime
+  </sql>
+
+  <select id="selectIvrRateByFeeId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from rms_ivr_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </select>
+
+
+  <!-- ==================== 费率信息联表查询rms_mask_rate,tb_user_admin_authen_company,tb_user_admin  start ==================== -->
+  <resultMap id="IvrRateUnionResult" type="com.e9cloud.mybatis.domain.IvrRate" extends="BaseResultMap">
+    <association property="userAdmin" column="feeid" javaType="com.e9cloud.mybatis.domain.UserAdmin">
+      <id column="uid" property="uid" jdbcType="VARCHAR" />
+      <result column="sid" property="sid" jdbcType="VARCHAR" />
+      <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    </association>
+    <association property="authenCompany" column="uid" javaType="com.e9cloud.mybatis.domain.AuthenCompany">
+      <id column="id" property="id" jdbcType="INTEGER" />
+      <result column="uid" property="uid" jdbcType="VARCHAR" />
+      <result column="name" property="name" jdbcType="VARCHAR" />
+      <result column="address" property="address" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+
+  <select id="selectIvrRateUnionInfo" resultMap="IvrRateUnionResult" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    select a.*,b.name,c.uid,c.sid from rms_ivr_rate as a, tb_user_admin_authen_company as b, tb_user_admin as c where a.feeid = c.feeid and c.uid = b.uid
+    <if test="uid!=null and ''!=uid">
+      and c.uid = #{uid,jdbcType=VARCHAR}
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and c.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and c.feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+
+  <!-- ==================== 费率信息分页联表查询rms_sipphone_rate,tb_user_admin_authen_company,tb_user_admin  start ==================== -->
+  <select id="selectPageIvrRateUnion" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select a.*,b.name,c.uid,c.sid
+    from rms_ivr_rate as a, tb_user_admin_authen_company as b, tb_user_admin as c
+    where a.feeid = c.feeid and c.uid = b.uid
+    <if test="params.uid!=null and ''!=params.uid">
+      and c.uid = #{params.uid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and c.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and c.feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name!=null and ''!=params.name">
+      and b.name LIKE "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.endDate!=null and ''!=params.endDate">
+      and a.end_date &gt;= str_to_date(#{params.endDate,jdbcType=DATE},'%Y-%m-%d')
+    </if>
+    <if test="params.endDate1!=null and ''!=params.endDate1">
+      and a.end_date &lt;= str_to_date(#{params.endDate1,jdbcType=DATE},'%Y-%m-%d')
+    </if>
+
+    <if test="params.ctime!=null and ''!=params.ctime">
+      and a.ctime &gt;= str_to_date(#{params.ctime,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.ctime1!=null and ''!=params.ctime1">
+      and a.ctime &lt;= str_to_date(#{params.ctime1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    order by a.ctime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from rms_ivr_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.IvrRate" >
+    insert into rms_ivr_rate (feeid, start_date, end_date, 
+      forever, callin_sip, callin_sip_discount, 
+      callin_nonsip, callin_nonsip_discount, callin_direct, 
+      callin_direct_discount, callin_recording, 
+      callin_recording_discount, callout_local, 
+      callout_local_discount, callout_nonlocal, 
+      callout_nonlocal_discount, callout_recording, 
+      callout_recording_discount, ivr_rent, sipnum_rent, 
+      sipnum_rent_discount, sipnum_min_cost, ctime
+      )
+    values (#{feeid,jdbcType=VARCHAR}, #{startDate,jdbcType=DATE}, #{endDate,jdbcType=DATE}, 
+      #{forever,jdbcType=BIT}, #{callinSip,jdbcType=DECIMAL}, #{callinSipDiscount,jdbcType=SMALLINT}, 
+      #{callinNonsip,jdbcType=DECIMAL}, #{callinNonsipDiscount,jdbcType=SMALLINT}, #{callinDirect,jdbcType=DECIMAL}, 
+      #{callinDirectDiscount,jdbcType=SMALLINT}, #{callinRecording,jdbcType=DECIMAL}, 
+      #{callinRecordingDiscount,jdbcType=SMALLINT}, #{calloutLocal,jdbcType=DECIMAL}, 
+      #{calloutLocalDiscount,jdbcType=SMALLINT}, #{calloutNonlocal,jdbcType=DECIMAL}, 
+      #{calloutNonlocalDiscount,jdbcType=SMALLINT}, #{calloutRecording,jdbcType=DECIMAL}, 
+      #{calloutRecordingDiscount,jdbcType=SMALLINT}, #{ivrRent,jdbcType=DECIMAL}, #{sipnumRent,jdbcType=DECIMAL}, 
+      #{sipnumRentDiscount,jdbcType=INTEGER}, #{sipnumMinCost,jdbcType=DECIMAL}, #{ctime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.IvrRate" >
+    insert into rms_ivr_rate
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="startDate != null" >
+        start_date,
+      </if>
+      <if test="endDate != null" >
+        end_date,
+      </if>
+      <if test="forever != null" >
+        forever,
+      </if>
+      <if test="callinSip != null" >
+        callin_sip,
+      </if>
+      <if test="callinSipDiscount != null" >
+        callin_sip_discount,
+      </if>
+      <if test="callinNonsip != null" >
+        callin_nonsip,
+      </if>
+      <if test="callinNonsipDiscount != null" >
+        callin_nonsip_discount,
+      </if>
+      <if test="callinDirect != null" >
+        callin_direct,
+      </if>
+      <if test="callinDirectDiscount != null" >
+        callin_direct_discount,
+      </if>
+      <if test="callinRecording != null" >
+        callin_recording,
+      </if>
+      <if test="callinRecordingDiscount != null" >
+        callin_recording_discount,
+      </if>
+      <if test="calloutLocal != null" >
+        callout_local,
+      </if>
+      <if test="calloutLocalDiscount != null" >
+        callout_local_discount,
+      </if>
+      <if test="calloutNonlocal != null" >
+        callout_nonlocal,
+      </if>
+      <if test="calloutNonlocalDiscount != null" >
+        callout_nonlocal_discount,
+      </if>
+      <if test="calloutRecording != null" >
+        callout_recording,
+      </if>
+      <if test="calloutRecordingDiscount != null" >
+        callout_recording_discount,
+      </if>
+      <if test="ivrRent != null" >
+        ivr_rent,
+      </if>
+      <if test="sipnumRent != null" >
+        sipnum_rent,
+      </if>
+      <if test="sipnumRentDiscount != null" >
+        sipnum_rent_discount,
+      </if>
+      <if test="sipnumMinCost != null" >
+        sipnum_min_cost,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null" >
+        #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null" >
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null" >
+        #{forever,jdbcType=BIT},
+      </if>
+      <if test="callinSip != null" >
+        #{callinSip,jdbcType=DECIMAL},
+      </if>
+      <if test="callinSipDiscount != null" >
+        #{callinSipDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="callinNonsip != null" >
+        #{callinNonsip,jdbcType=DECIMAL},
+      </if>
+      <if test="callinNonsipDiscount != null" >
+        #{callinNonsipDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="callinDirect != null" >
+        #{callinDirect,jdbcType=DECIMAL},
+      </if>
+      <if test="callinDirectDiscount != null" >
+        #{callinDirectDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="callinRecording != null" >
+        #{callinRecording,jdbcType=DECIMAL},
+      </if>
+      <if test="callinRecordingDiscount != null" >
+        #{callinRecordingDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="calloutLocal != null" >
+        #{calloutLocal,jdbcType=DECIMAL},
+      </if>
+      <if test="calloutLocalDiscount != null" >
+        #{calloutLocalDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="calloutNonlocal != null" >
+        #{calloutNonlocal,jdbcType=DECIMAL},
+      </if>
+      <if test="calloutNonlocalDiscount != null" >
+        #{calloutNonlocalDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="calloutRecording != null" >
+        #{calloutRecording,jdbcType=DECIMAL},
+      </if>
+      <if test="calloutRecordingDiscount != null" >
+        #{calloutRecordingDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="ivrRent != null" >
+        #{ivrRent,jdbcType=DECIMAL},
+      </if>
+      <if test="sipnumRent != null" >
+        #{sipnumRent,jdbcType=DECIMAL},
+      </if>
+      <if test="sipnumRentDiscount != null" >
+        #{sipnumRentDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="sipnumMinCost != null" >
+        #{sipnumMinCost,jdbcType=DECIMAL},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.IvrRate" >
+    update rms_ivr_rate
+    <set >
+      <if test="startDate != null" >
+        start_date = #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null" >
+        end_date = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null" >
+        forever = #{forever,jdbcType=BIT},
+      </if>
+      <if test="callinSip != null" >
+        callin_sip = #{callinSip,jdbcType=DECIMAL},
+      </if>
+      <if test="callinSipDiscount != null" >
+        callin_sip_discount = #{callinSipDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="callinNonsip != null" >
+        callin_nonsip = #{callinNonsip,jdbcType=DECIMAL},
+      </if>
+      <if test="callinNonsipDiscount != null" >
+        callin_nonsip_discount = #{callinNonsipDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="callinDirect != null" >
+        callin_direct = #{callinDirect,jdbcType=DECIMAL},
+      </if>
+      <if test="callinDirectDiscount != null" >
+        callin_direct_discount = #{callinDirectDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="callinRecording != null" >
+        callin_recording = #{callinRecording,jdbcType=DECIMAL},
+      </if>
+      <if test="callinRecordingDiscount != null" >
+        callin_recording_discount = #{callinRecordingDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="calloutLocal != null" >
+        callout_local = #{calloutLocal,jdbcType=DECIMAL},
+      </if>
+      <if test="calloutLocalDiscount != null" >
+        callout_local_discount = #{calloutLocalDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="calloutNonlocal != null" >
+        callout_nonlocal = #{calloutNonlocal,jdbcType=DECIMAL},
+      </if>
+      <if test="calloutNonlocalDiscount != null" >
+        callout_nonlocal_discount = #{calloutNonlocalDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="calloutRecording != null" >
+        callout_recording = #{calloutRecording,jdbcType=DECIMAL},
+      </if>
+      <if test="calloutRecordingDiscount != null" >
+        callout_recording_discount = #{calloutRecordingDiscount,jdbcType=SMALLINT},
+      </if>
+      <if test="ivrRent != null" >
+        ivr_rent = #{ivrRent,jdbcType=DECIMAL},
+      </if>
+      <if test="sipnumRent != null" >
+        sipnum_rent = #{sipnumRent,jdbcType=DECIMAL},
+      </if>
+      <if test="sipnumRentDiscount != null" >
+        sipnum_rent_discount = #{sipnumRentDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="sipnumMinCost != null" >
+        sipnum_min_cost = #{sipnumMinCost,jdbcType=DECIMAL},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.IvrRate" >
+    update rms_ivr_rate
+    set start_date = #{startDate,jdbcType=DATE},
+      end_date = #{endDate,jdbcType=DATE},
+      forever = #{forever,jdbcType=BIT},
+      callin_sip = #{callinSip,jdbcType=DECIMAL},
+      callin_sip_discount = #{callinSipDiscount,jdbcType=SMALLINT},
+      callin_nonsip = #{callinNonsip,jdbcType=DECIMAL},
+      callin_nonsip_discount = #{callinNonsipDiscount,jdbcType=SMALLINT},
+      callin_direct = #{callinDirect,jdbcType=DECIMAL},
+      callin_direct_discount = #{callinDirectDiscount,jdbcType=SMALLINT},
+      callin_recording = #{callinRecording,jdbcType=DECIMAL},
+      callin_recording_discount = #{callinRecordingDiscount,jdbcType=SMALLINT},
+      callout_local = #{calloutLocal,jdbcType=DECIMAL},
+      callout_local_discount = #{calloutLocalDiscount,jdbcType=SMALLINT},
+      callout_nonlocal = #{calloutNonlocal,jdbcType=DECIMAL},
+      callout_nonlocal_discount = #{calloutNonlocalDiscount,jdbcType=SMALLINT},
+      callout_recording = #{calloutRecording,jdbcType=DECIMAL},
+      callout_recording_discount = #{calloutRecordingDiscount,jdbcType=SMALLINT},
+      ivr_rent = #{ivrRent,jdbcType=DECIMAL},
+      sipnum_rent = #{sipnumRent,jdbcType=DECIMAL},
+      sipnum_rent_discount = #{sipnumRentDiscount,jdbcType=INTEGER},
+      sipnum_min_cost = #{sipnumMinCost,jdbcType=DECIMAL},
+      ctime = #{ctime,jdbcType=TIMESTAMP}
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </update>
+</mapper>

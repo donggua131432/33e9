@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CcAreaCity_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CcAreaCity" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="area_id" property="areaId" jdbcType="VARCHAR" />
+    <result column="city_code" property="cityCode" jdbcType="VARCHAR" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, sid, area_id, city_code, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_cc_area_city
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_cc_area_city
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.CcAreaCity" >
+    insert into tb_cc_area_city
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="areaId != null" >
+        area_id,
+      </if>
+      <if test="cityCode != null" >
+        city_code,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="areaId != null" >
+        #{areaId,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.CcAreaCity" >
+    update tb_cc_area_city
+    <set >
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="areaId != null" >
+        area_id = #{areaId,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        city_code = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="pctree" resultType="com.e9cloud.core.common.Tree" parameterType="com.e9cloud.mybatis.domain.CcAreaCity">
+    SELECT CONCAT('p',pcode) AS id, 'p0' as pId , pname as name FROM tb_telno_province
+    <if test="sid != null and sid != ''">
+      WHERE pcode IN ( SELECT DISTINCT
+      pcode
+      FROM tb_telno_city
+
+      WHERE ccode NOT IN ( SELECT city_code FROM tb_cc_area_city ac
+      WHERE ac.sid = #{sid,jdbcType=VARCHAR}
+      <if test="areaId != null and areaId != ''">
+        AND area_id != #{areaId,jdbcType=VARCHAR}
+      </if>)
+      AND (ccode &lt; 1000 OR sid = #{sid,jdbcType=VARCHAR})
+      )
+    </if>
+
+    UNION ALL
+
+    SELECT CONCAT('c',ccode) AS id, CONCAT('p',pcode) AS pId, cname as name FROM tb_telno_city
+    <if test="sid != null and sid != ''">
+      WHERE ccode NOT IN (
+      SELECT city_code FROM tb_cc_area_city ac
+      WHERE ac.sid = #{sid,jdbcType=VARCHAR}
+      <if test="areaId != null and areaId != ''">
+        AND area_id != #{areaId,jdbcType=VARCHAR}
+      </if>
+      )
+      AND (ccode &lt; 1000 OR sid = #{sid,jdbcType=VARCHAR})
+    </if>
+  </select>
+
+  <!-- 判断城市是否有冲突 -->
+  <select id="filteAreaCity" resultType="com.e9cloud.core.common.Tree" parameterType="map">
+    SELECT DISTINCT CONCAT('c',ac.city_code) as id, CONCAT('p',tc.pcode) AS pId, cname as name FROM
+    tb_cc_area_city ac LEFT JOIN tb_telno_city tc ON ac.city_code = tc.ccode
+    WHERE
+    ac.sid = #{sid,jdbcType=VARCHAR}
+    AND ac.city_code IN
+    <foreach collection="codes" item="code" index="index" open="(" separator="," close=")">#{code}</foreach>
+    <if test="areaId != null and areaId != ''">
+      AND ac.area_id != #{areaId,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 某个区域 的 城市 树 -->
+  <select id="atree" resultType="com.e9cloud.core.common.Tree" parameterType="string">
+    SELECT
+    CONCAT('c',tc.ccode) AS id, CONCAT('p', tc.pcode) AS pId, tc.cname as name
+    FROM tb_cc_area_city ac INNER JOIN tb_telno_city tc ON ac.city_code = tc.ccode
+    WHERE ac.area_id = #{areaId,jdbcType=VARCHAR}
+
+    UNION ALL
+
+    SELECT
+    CONCAT('p',tp.pcode) AS id, 'p0' as pId , tp.pname as name
+    FROM tb_telno_province tp WHERE tp.pcode in (
+    SELECT tc.pcode FROM tb_cc_area_city ac INNER JOIN tb_telno_city tc ON ac.city_code = tc.ccode
+    WHERE ac.area_id = #{areaId,jdbcType=VARCHAR}
+    )
+  </select>
+
+  <delete id="deleteByAreaId" parameterType="java.lang.String" >
+    delete from tb_cc_area_city
+    where area_id = #{areaId,jdbcType=VARCHAR}
+  </delete>
+</mapper>

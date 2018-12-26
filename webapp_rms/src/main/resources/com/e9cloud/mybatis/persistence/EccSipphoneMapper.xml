@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="EccSipphone_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.EccSipphone" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="sip_phone" property="sipPhone" jdbcType="VARCHAR" />
+    <result column="impi" property="impi" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+    <result column="ip_port" property="ipPort" jdbcType="VARCHAR" />
+    <result column="sip_realm" property="sipRealm" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, sip_phone, impi, cityid, pwd, ip_port, sip_realm, status, addtime, updatetime
+  </sql>
+
+  <!-- 分页选取公共号码资源池sipphone列表 -->
+  <select id="pageEccSipphoneList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ss.id,
+    sip_phone sipPhone,
+    impi,
+    ss.cityid,
+    ss.pwd,
+    ip_port ipPort,
+    sip_realm sipRealm,
+    ss.addtime,
+    ss.updatetime,
+    ac.name companyName,
+    ua.sid,
+    ai.appid appId,
+    ai.app_name appName,
+    tp.pname,
+    tc.cname,
+    ss.`status`
+    FROM
+    tb_ecc_sipphone ss
+    LEFT JOIN tb_telno_city tc ON ss.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_ecc_extention san ON ss.id = san.sipphone_id AND san. STATUS != '01'
+    LEFT JOIN tb_app_info ai ON san.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ua.sid = ai.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE
+    sip_phone IS NOT NULL
+
+    <if test="params.sipPhone != null  and params.sipPhone !=''" >
+      and sip_phone LIKE "%"#{params.sipPhone,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.impi != null and params.impi !=''" >
+      and impi = #{params.impi,jdbcType=VARCHAR}
+    </if>
+    <if test="params.cityid != null and params.cityid !=''" >
+      and ss.cityid = #{params.cityid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.pwd != null and params.pwd !=''" >
+      and pwd = #{params.pwd,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ipPort != null and params.ipPort !=''" >
+      and ip_port = #{params.ipPort,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sipRealm != null and params.sipRealm !=''" >
+      and sip_realm = #{params.sipRealm,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status !=''" >
+      and ss.status = #{params.status,jdbcType=CHAR}
+    </if>
+    <if test="params.addtime != null" >
+      and addtime = #{params.addtime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.updatetime != null" >
+      and updatetime = #{params.updatetime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId !=''" >
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    order by ss.updatetime DESC ,ss.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="getSipPhoneBySipPhone" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_ecc_sipphone
+    where 1=1
+    <if test="_parameter!=null and _parameter!=''">
+      and sip_phone = #{_parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.EccSipphone" >
+    insert into tb_ecc_sipphone
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      id,
+      <if test="sipPhone != null" >
+        sip_phone,
+      </if>
+      <if test="impi != null" >
+        impi,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="pwd != null" >
+        pwd,
+      </if>
+      <if test="ipPort != null" >
+        ip_port,
+      </if>
+      <if test="sipRealm != null" >
+        sip_realm,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      replace(uuid(),'-',''),
+      <if test="sipPhone != null" >
+        #{sipPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="impi != null" >
+        #{impi,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="ipPort != null" >
+        #{ipPort,jdbcType=VARCHAR},
+      </if>
+      <if test="sipRealm != null" >
+        #{sipRealm,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.EccSipphone" >
+    update tb_ecc_sipphone
+    <set >
+      <if test="sipPhone != null" >
+        sip_phone = #{sipPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="impi != null" >
+        impi = #{impi,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        pwd = #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="ipPort != null" >
+        ip_port = #{ipPort,jdbcType=VARCHAR},
+      </if>
+      <if test="sipRealm != null" >
+        sip_realm = #{sipRealm,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_ecc_sipphone
+    where 1=1
+    <if test="_parameter!=null and _parameter!=''">
+      AND id = #{_parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <delete id="deleteSipPhoneByIds" parameterType="java.lang.String" >
+    delete from tb_ecc_sipphone
+    where id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+
+  <!-- 导出公共号码资源池sipphone列表 -->
+  <select id="downloadSipPhoneList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ss.id,
+    sip_phone sipPhone,
+    impi,
+    ss.cityid,
+    ss.pwd,
+    ip_port ipPort,
+    sip_realm sipRealm,
+    ss.addtime,
+    ss.updatetime,
+    ac.name companyName,
+    ua.sid,
+    ai.appid appId,
+    ai.app_name appName,
+    tp.pname,
+    tc.cname,
+    ss.`status`
+    FROM
+    tb_ecc_sipphone ss
+    LEFT JOIN tb_telno_city tc ON ss.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_ecc_extention san ON ss.id = san.sipphone_id AND san. STATUS != '01'
+    LEFT JOIN tb_app_info ai ON san.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ua.sid = ai.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE
+    sip_phone IS NOT NULL
+
+    <if test="params.sipPhone != null  and params.sipPhone !=''" >
+      and sip_phone LIKE "%"#{params.sipPhone,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.impi != null and params.impi !=''" >
+      and impi = #{params.impi,jdbcType=VARCHAR}
+    </if>
+    <if test="params.cityid != null and params.cityid !=''" >
+      and ss.cityid = #{params.cityid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.pwd != null and params.pwd !=''" >
+      and pwd = #{params.pwd,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ipPort != null and params.ipPort !=''" >
+      and ip_port = #{params.ipPort,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sipRealm != null and params.sipRealm !=''" >
+      and sip_realm = #{params.sipRealm,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status !=''" >
+      and ss.status = #{params.status,jdbcType=CHAR}
+    </if>
+    <if test="params.addtime != null" >
+      and addtime = #{params.addtime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.updatetime != null" >
+      and updatetime = #{params.updatetime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId !=''" >
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    order by updatetime DESC ,addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="selectIPPortList" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select DISTINCT
+    ip_port
+    from tb_ecc_sipphone
+    WHERE ip_port is NOT NULL AND ip_port != ''
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_ecc_sipphone
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.EccSipphone" >
+    insert into tb_ecc_sipphone (id, sip_phone, impi, 
+      cityid, pwd, ip_port, 
+      sip_realm, status, addtime, 
+      updatetime)
+    values (#{id,jdbcType=VARCHAR}, #{sipPhone,jdbcType=VARCHAR}, #{impi,jdbcType=VARCHAR}, 
+      #{cityid,jdbcType=VARCHAR}, #{pwd,jdbcType=VARCHAR}, #{ipPort,jdbcType=VARCHAR}, 
+      #{sipRealm,jdbcType=VARCHAR}, #{status,jdbcType=CHAR}, #{addtime,jdbcType=TIMESTAMP}, 
+      #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+
+</mapper>

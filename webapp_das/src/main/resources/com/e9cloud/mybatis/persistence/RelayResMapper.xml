@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RelayRes_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RelayRes" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sup_id" property="supId" jdbcType="VARCHAR" />
+    <result column="res_name" property="resName" jdbcType="VARCHAR" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="relay_cnt" property="relayCnt" jdbcType="INTEGER" />
+    <result column="relay_rent" property="relayRent" jdbcType="DECIMAL" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="sign_type" property="signType" jdbcType="VARCHAR" />
+    <result column="cycle" property="cycle" jdbcType="INTEGER" />
+    <result column="per" property="per" jdbcType="DECIMAL" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, sup_id, res_name, relay_num, relay_cnt, relay_rent, cityid, operator, sign_type, cycle,
+    per, status, addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+    select 
+    <include refid="Base_Column_List" />
+    from tb_relay_res
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectAllRelayRes" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM tb_relay_res
+  </select>
+
+</mapper>

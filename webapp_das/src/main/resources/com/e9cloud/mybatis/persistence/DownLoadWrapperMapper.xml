@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DownLoadWrapper_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mongodb.domain.DownLoadWrapper" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="conds" property="conds" jdbcType="VARCHAR" />
+    <result column="fileName" property="fileName" jdbcType="VARCHAR" />
+    <result column="filePath" property="filePath" jdbcType="VARCHAR" />
+    <result column="source" property="source" jdbcType="VARCHAR" />
+    <result column="userId" property="userId" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="pageCount" property="pageCount" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, conds, fileName,filePath, source, userId, feeid, status,pageCount,createTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_record_download
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_record_download
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insertSelective" parameterType="com.e9cloud.mongodb.domain.DownLoadWrapper"  useGeneratedKeys="true" keyProperty="id">
+    insert into tb_record_download
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="conds != null" >
+        conds,
+      </if>
+      <if test="fileName != null" >
+        fileName,
+      </if>
+      <if test="filePath != null" >
+        filePath,
+      </if>
+      <if test="source != null" >
+        source,
+      </if>
+      <if test="userId != null" >
+        userId,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="pageCount != null" >
+        pageCount,
+      </if>
+      <if test="createTime != null" >
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="conds != null" >
+        #{conds,jdbcType=VARCHAR},
+      </if>
+      <if test="fileName != null" >
+        #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="filePath != null" >
+        #{filePath,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="pageCount != null" >
+        #{pageCount,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mongodb.domain.DownLoadWrapper" >
+    update tb_record_download
+    <set >
+      <if test="conds != null" >
+        conds = #{conds,jdbcType=VARCHAR},
+      </if>
+      <if test="fileName != null" >
+        fileName = #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="filePath != null" >
+        filePath = #{filePath,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        source = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        userId = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="findNotDelList" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_record_download
+    <![CDATA[
+    where status <>  '02' order by createTime desc
+    ]]>
+    <include refid="com.e9cloud.suf"/>
+
+  </select>
+
+
+  <select id="findDownList" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_record_download
+    where status = '00' order by createTime
+  </select>
+
+  <select id="checkFile" resultMap="BaseResultMap"  parameterType="String">
+    select
+    <include refid="Base_Column_List" />
+    from tb_record_download
+    <![CDATA[
+    where status <>  '02' and fileName = #{fileName,jdbcType=VARCHAR}
+    ]]>
+  </select>
+
+</mapper>

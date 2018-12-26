@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CustomerManager_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CustomerManager" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="account_id" property="accountId" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="trade" property="trade" jdbcType="VARCHAR" />
+    <result column="province" property="province" jdbcType="VARCHAR" />
+    <result column="city" property="city" jdbcType="VARCHAR" />
+    <result column="signed" property="signed" jdbcType="VARCHAR" />
+    <result column="business_type" property="businessType" jdbcType="VARCHAR" />
+    <result column="customer_manager" property="customerManager" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, create_time, account_id, customer_name, trade, province, city, business_type, signed,
+    customer_manager
+  </sql>
+
+  <select id="selectCustomerManagerById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_customer_manager
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectCustomerManagerByAccountId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_customer_manager
+    where account_id = #{accountId,jdbcType=VARCHAR}
+  </select>
+
+  <select id="pageCustomerManagerList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_customer_manager
+    where 1=1
+    <if test="params.id!=null and ''!=params.id">
+      and id = #{params.id,jdbcType=VARCHAR}
+    </if>
+    <if test="params.accountId!=null and ''!=params.accountId">
+      and account_id = #{params.accountId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.customerName!=null and ''!=params.customerName">
+      and customer_name LIKE "%"#{params.customerName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.trade!=null and ''!=params.trade">
+      and trade = #{params.trade,jdbcType=VARCHAR}
+    </if>
+    <if test="params.province!=null and ''!=params.province">
+      and province = #{params.province,jdbcType=VARCHAR}
+    </if>
+    <if test="params.city!=null and ''!=params.city">
+      and city = #{params.city,jdbcType=VARCHAR}
+    </if>
+    <if test="params.businessType!=null and ''!=params.businessType">
+      and business_type LIKE "%"#{params.businessType,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.customerManager!=null and ''!=params.customerManager">
+      and customer_manager LIKE "%"#{params.customerManager,jdbcType=VARCHAR}"%"
+    </if>
+    order by create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteCustomerManager" parameterType="java.lang.String" >
+    delete from tb_customer_manager
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="saveCustomerManager" parameterType="com.e9cloud.mybatis.domain.CustomerManager" >
+    insert into tb_customer_manager
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        id,
+        create_time,
+      <if test="accountId != null" >
+        account_id,
+      </if>
+      <if test="customerName != null" >
+        customer_name,
+      </if>
+      <if test="trade != null" >
+        trade,
+      </if>
+      <if test="province != null" >
+        province,
+      </if>
+      <if test="city != null" >
+        city,
+      </if>
+      <if test="businessType != null" >
+        business_type,
+      </if>
+      <if test="signed != null" >
+        signed,
+      </if>
+      <if test="customerManager != null" >
+        customer_manager,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      REPLACE(UUID(),'-',''),
+      NOW(),
+      <if test="accountId != null" >
+        #{accountId,jdbcType=VARCHAR},
+      </if>
+      <if test="customerName != null" >
+        #{customerName,jdbcType=VARCHAR},
+      </if>
+      <if test="trade != null" >
+        #{trade,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="businessType != null" >
+        #{businessType,jdbcType=VARCHAR},
+      </if>
+      <if test="signed != null" >
+        #{signed,jdbcType=VARCHAR},
+      </if>
+      <if test="customerManager != null" >
+        #{customerManager,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateCustomerManager" parameterType="com.e9cloud.mybatis.domain.CustomerManager" >
+    update tb_customer_manager
+    <set >
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="accountId != null" >
+        account_id = #{accountId,jdbcType=VARCHAR},
+      </if>
+      <if test="customerName != null" >
+        customer_name = #{customerName,jdbcType=VARCHAR},
+      </if>
+      <if test="trade != null" >
+        trade = #{trade,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        province = #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        city = #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="businessType != null" >
+        business_type = #{businessType,jdbcType=VARCHAR},
+      </if>
+      <if test="signed != null" >
+        signed = #{signed,jdbcType=VARCHAR},
+      </if>
+      <if test="customerManager != null" >
+        customer_manager = #{customerManager,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Menu_Mapper">
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.Menu">
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="CHAR" />
+    <result column="level" property="level" jdbcType="CHAR" />
+    <result column="order_by" property="orderBy" jdbcType="INTEGER" />
+    <result column="sys_type" property="sysType" jdbcType="VARCHAR" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="BaseResultMapWithAction" type="com.e9cloud.mybatis.domain.Menu" extends="BaseResultMap">
+    <collection property="actions" javaType="ArrayList" ofType="com.e9cloud.mybatis.domain.Action" column="id" select="Action_Mapper.selectByMId"/>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, parent_id, name, url, icon, state, level, order_by, create_by, create_date, update_by,
+    update_date, sys_type
+  </sql>
+
+  <sql id="Page_Column_List" >
+    id, parent_id parentId, name, url, icon, state, level, order_by orderBy, sys_type sysType, create_by createBy, create_date createDate, update_by updateBy,
+    update_date updateDate
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from rms_sys_menu
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 加载用户的所属菜单 -->
+  <select id="selectMenusByUserID" resultMap="BaseResultMap" parameterType="map" >
+    SELECT * FROM rms_sys_menu m
+    WHERE sys_type = #{sysType,jdbcType=VARCHAR}
+    AND m.id IN (
+    SELECT DISTINCT a.menu_id FROM rms_sys_user_role ur, rms_sys_action a, rms_sys_role_action ra
+    WHERE ra.role_id = ur.role_id AND a.id = ra.action_id AND ur.user_id = #{userId,jdbcType=INTEGER}
+    )
+  </select>
+
+  <select id="selectMenusByParentId" resultMap="BaseResultMap" parameterType="string" >
+    select
+    <include refid="Base_Column_List" />
+    from rms_sys_menu
+    where 1 = 1
+    <if test="_parameter != null" >
+      AND parent_id = #{parentId,jdbcType=VARCHAR}
+    </if>
+    <if test="_parameter == null" >
+      AND parent_id is NULL
+    </if>
+    order by order_by
+  </select>
+
+  <select id="page" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+      select
+      <include refid="Page_Column_List" />
+      from rms_sys_menu
+      WHERE sys_type = 'D'
+      order by level, parent_id, order_by
+    <include refid="com.e9cloud.suf"/>
+  </select>
+  <select id="pageMenuWithAction" resultMap="BaseResultMapWithAction" parameterType="com.e9cloud.mybatis.domain.Menu" >
+    <include refid="com.e9cloud.pre"/>
+    SELECT * FROM rms_sys_menu m
+    WHERE m.url is NOT NULL
+    AND m.url != ''
+    AND m.sys_type = 'R'
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="countMenuWithAction" resultType="long" parameterType="com.e9cloud.mybatis.domain.Menu" >
+    SELECT count(1) FROM rms_sys_menu m
+    WHERE m.url is NOT NULL
+    AND m.url != ''
+    AND m.sys_type = 'R'
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from rms_sys_menu
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.Menu" >
+    insert into rms_sys_menu
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="icon != null" >
+        icon,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="level != null" >
+        level,
+      </if>
+      <if test="orderBy != null" >
+        order_by,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="sysType != null" >
+        sys_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="level != null" >
+        #{level,jdbcType=CHAR},
+      </if>
+      <if test="orderBy != null" >
+        #{orderBy,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sysType != null" >
+        #{sysType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.Menu">
+    update rms_sys_menu
+    <set >
+      <if test="parentId != null" >
+        parent_id = #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=CHAR},
+      </if>
+      <if test="level != null" >
+        level = #{level,jdbcType=CHAR},
+      </if>
+      <if test="orderBy != null" >
+        order_by = #{orderBy,jdbcType=INTEGER},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <select id="selectMenusByMap" resultMap="BaseResultMap" parameterType="map" >
+    select
+    <include refid="Base_Column_List" />
+    from rms_sys_menu
+    where 1 = 1
+    <if test="parentId != null" >
+      AND parent_id = #{parentId,jdbcType=VARCHAR}
+    </if>
+    <if test="parentId == null" >
+      AND parent_id is NULL
+    </if>
+    <if test="sysType != null" >
+      AND sys_type = #{sysType,jdbcType=VARCHAR}
+    </if>
+    order by order_by
+  </select>
+
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="app_type" property="appType" jdbcType="VARCHAR" />
+    <result column="call_no" property="callNo" jdbcType="VARCHAR" />
+    <result column="callback_url" property="callbackUrl" jdbcType="VARCHAR" />
+    <result column="associate_type" property="associateType" jdbcType="VARCHAR" />
+    <result column="url_status" property="urlStatus" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="sub_name" property="subName" jdbcType="VARCHAR" />
+
+    <result column="quota" property="quota" jdbcType="DECIMAL" />
+    <result column="limit_flag" property="limitFlag" jdbcType="VARCHAR" />
+
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, sid, bus_type, app_name, app_type, call_no, callback_url, associate_type,
+    url_status, status, create_date, update_date,quota,limit_flag
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="findAppListCountByMap" resultType="Integer" parameterType="java.util.HashMap" >
+    select  count(1)
+    from
+    tb_app_info a
+    where a.sid =  #{sid,jdbcType=VARCHAR}
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appName)">
+      and a.app_name like  CONCAT('%',#{appName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appType)">
+      and a.app_type = #{appType,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(busType)">
+      and a.bus_type = #{busType,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(status)">
+      and a.status = #{status,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="findAppListByMap" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select  id, appid, sid, app_name,  b.name as app_type ,status, create_date,quota,limit_flag
+    from
+    tb_app_info a left join (select name,code from tb_dic_data where typekey = 'appType') b on  a.app_type = b.code
+    where a.sid =  #{sid,jdbcType=VARCHAR}
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appName)">
+      and a.app_name like  CONCAT('%',#{appName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appType)">
+      and a.app_type = #{appType,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(busType)">
+      and a.bus_type = #{busType,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(status)">
+      and a.status in (#{status,jdbcType=VARCHAR})
+    </if>
+    order by status,create_date  desc
+    limit  #{start,jdbcType=DECIMAL},#{pageSize,jdbcType=DECIMAL}
+  </select>
+
+  <resultMap id="appWithDicResultMap" type="com.e9cloud.mybatis.domain.AppInfo" extends="BaseResultMap">
+    <association property="dicData" column="id" javaType="com.e9cloud.mybatis.domain.DicData">
+      <id column="id" property="id" jdbcType="VARCHAR" />
+      <result column="name" property="name" jdbcType="VARCHAR" />
+      <result column="code" property="code" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+
+  <select id="findAppInfoByAppId" resultMap="appWithDicResultMap" parameterType="java.lang.String" >
+    select id,
+    appid, sid, bus_type, app_name, app_type,b.name, call_no, callback_url,
+    url_status, status, create_date,quota,limit_flag
+    from tb_app_info a left join (select name,code from tb_dic_data where typekey = 'appType') b on  a.app_type = b.code
+    where appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAppInfoUnionSubApp" resultMap="BaseResultMap" parameterType="java.lang.String">
+    select b.subid, b.sub_name
+    from tb_app_info a, tb_sub_app b
+    where a.appid = b.appid and a.sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAllAppInfo" resultMap="BaseResultMap" parameterType="java.lang.String">
+    select <include refid="Base_Column_List" />
+    from tb_app_info
+    where  status = '00' and bus_type = '02'
+    <if test=" _parameter != null and ''!= _parameter">
+      and sid = #{ _parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 根据参数获取AppInfo信息 -->
+  <select id="selectAppInfoListByMap" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_info
+    where sid =  #{sid,jdbcType=VARCHAR}
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appName)">
+      and app_name like  CONCAT('%',#{appName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appType)">
+      and app_type = #{appType,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(busType)">
+      and bus_type = #{busType,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(status)">
+      and status in (#{status,jdbcType=VARCHAR})
+    </if>
+    order by status,create_date desc
+  </select>
+
+  <select id="findAllApp" resultMap="BaseResultMap" >
+    select appid,app_name
+    from tb_app_info where status = '00'
+  </select>
+
+  <select id="getAllSpInfo" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select <include refid="Base_Column_List" />
+    from tb_app_info
+    WHERE status='00'
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(sid)">
+      AND sid LIKE CONCAT('%',#{sid,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(busType)">
+      AND bus_type = #{busType,jdbcType=VARCHAR}
+    </if>
+  </select>
+</mapper>

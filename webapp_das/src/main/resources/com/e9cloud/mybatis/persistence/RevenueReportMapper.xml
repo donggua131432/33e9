@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RevenueReport_Mapper" >
+
+  <select id="pageDaysCount" resultType="long" parameterType="Page" >
+    SELECT COUNT(1) FROM (
+      SELECT
+        1
+      FROM vi_stat_day_platform dp
+      LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+      LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+      WHERE 1 = 1
+      <if test="datemin!=null">
+        AND dp.statday &gt;= #{datemin,jdbcType=TIMESTAMP}
+      </if>
+      <if test="datemax!=null">
+        AND dp.statday &lt;= #{datemax,jdbcType=TIMESTAMP}
+      </if>
+      <if test="params.sid!=null and ''!=params.sid">
+        AND ua.sid = #{params.sid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.companyName!=null and ''!=params.companyName">
+        AND ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+      </if>
+      GROUP BY dp.statday,dp.feeid
+    ) t
+  </select>
+
+  <select id="pageDays" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      dp.feeid, SUM(dp.fee + dp.recordingfee) fee, group_concat(DISTINCT(yw)) yw , statday, ac.`name` companyName, ua.sid,
+      (
+        SELECT SUM(p.fee + p.recordingfee) fee	FROM vi_stat_day_platform p
+        WHERE p.statday &lt;= dp.statday AND p.feeid = dp.feeid
+        GROUP BY p.feeid
+      ) tfee,
+      (
+        SELECT DISTINCT(h.fee) FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(dp.statday,'%Y-%m-%d') AND h.feeid = dp.feeid
+        ORDER BY ctime DESC LIMIT 1
+      ) balance
+    FROM vi_stat_day_platform dp
+    LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE 1 = 1
+    <if test="datemin!=null">
+      AND dp.statday &gt;= DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="datemax!=null">
+      AND dp.statday &lt;=DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      AND ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName!=null and ''!=params.companyName">
+      AND ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+
+    GROUP BY dp.statday,dp.feeid
+    ORDER BY dp.statday DESC, fee DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="downloadDays" resultType="map" parameterType="Page" >
+
+    SELECT
+    dp.feeid, SUM(dp.fee + dp.recordingfee) fee, group_concat(DISTINCT(yw)) yw , statday, ac.`name` companyName, ua.sid,
+    (
+    SELECT SUM(p.fee + p.recordingfee) fee	FROM vi_stat_day_platform p
+    WHERE p.statday &lt;= dp.statday AND p.feeid = dp.feeid
+    GROUP BY p.feeid
+    ) tfee,
+    (
+      SELECT DISTINCT(h.fee) FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(dp.statday,'%Y-%m-%d') AND h.feeid = dp.feeid
+      ORDER BY ctime DESC LIMIT 1
+    ) balance
+    FROM vi_stat_day_platform dp
+    LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE 1 = 1
+    <if test="datemin!=null">
+      AND dp.statday &gt;= DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="datemax!=null">
+      AND dp.statday &lt;= DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      AND ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName!=null and ''!=params.companyName">
+      AND ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+
+    GROUP BY dp.statday,dp.feeid
+    ORDER BY dp.statday DESC, fee DESC
+
+  </select>
+
+  <select id="pageMonthCount" resultType="long" parameterType="Page" >
+    SELECT COUNT(1) FROM (
+      SELECT
+        1
+      FROM vi_stat_day_platform dp
+      LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+      LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+      WHERE 1 = 1
+      AND dp.statday &gt; #{datemin,jdbcType=TIMESTAMP}
+      AND dp.statday &lt;= #{datemax,jdbcType=TIMESTAMP}
+      <if test="params.sid!=null and ''!=params.sid">
+        AND ua.sid = #{params.sid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.companyName!=null and ''!=params.companyName">
+        AND ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+      </if>
+      GROUP BY dp.feeid
+    ) t
+
+  </select>
+
+  <select id="pageMonth" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    dp.feeid, SUM(dp.fee + dp.recordingfee) fee, dp.statday, ac.`name` companyName, ua.sid, DATE_FORMAT(dp.statday,'%Y-%m') ym,
+    (
+      SELECT SUM(p.fee + p.recordingfee) fee	FROM vi_stat_day_platform p
+      WHERE p.statday &lt;= #{datemax,jdbcType=TIMESTAMP} AND p.feeid = dp.feeid
+      GROUP BY p.feeid
+    ) tfee,
+    (
+      SELECT h.fee FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d') AND h.feeid = dp.feeid
+    ) pbalance,
+    (
+      SELECT h.fee FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d') AND h.feeid = dp.feeid
+    ) bbalance
+    FROM vi_stat_day_platform dp
+    LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE 1 = 1
+      AND dp.statday &gt; DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      AND dp.statday &lt;= DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    <if test="params.sid!=null and ''!=params.sid">
+      AND ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName!=null and ''!=params.companyName">
+      AND ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    GROUP BY dp.feeid
+    ORDER BY fee DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="downloadMonth" resultType="map" parameterType="Page" >
+
+    SELECT
+    dp.feeid, SUM(dp.fee + dp.recordingfee) fee, dp.statday, ac.`name` companyName, ua.sid, DATE_FORMAT(dp.statday,'%Y-%m') ym,
+    (
+    SELECT SUM(p.fee + p.recordingfee) fee	FROM vi_stat_day_platform p
+    WHERE p.statday &lt;= #{datemax,jdbcType=TIMESTAMP} AND p.feeid = dp.feeid
+    GROUP BY p.feeid
+    ) tfee,
+    (
+    SELECT h.fee FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d') AND h.feeid = dp.feeid
+    ) pbalance,
+    (
+    SELECT h.fee FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d') AND h.feeid = dp.feeid
+    ) bbalance
+    FROM vi_stat_day_platform dp
+    LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE 1 = 1
+    AND dp.statday &gt; DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    AND dp.statday &lt;= DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    <if test="params.sid!=null and ''!=params.sid">
+      AND ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName!=null and ''!=params.companyName">
+      AND ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    GROUP BY dp.feeid
+    ORDER BY fee DESC
+  </select>
+
+  <select id="monthByFeeid" resultType="map" parameterType="map" >
+
+    SELECT
+    dp.feeid, SUM(dp.fee + dp.recordingfee) fee, dp.statday, ac.`name` companyName, ua.sid, DATE_FORMAT(dp.statday,'%Y-%m') ym,
+    (
+      SELECT SUM(p.fee + p.recordingfee) fee	FROM vi_stat_day_platform p
+      WHERE p.statday &lt;= DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d') AND p.feeid = dp.feeid
+      GROUP BY p.feeid
+    ) tfee,
+    (
+      SELECT h.fee FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d') AND h.feeid = dp.feeid
+    ) pbalance,
+    (
+      SELECT h.fee FROM tb_user_admin_history h WHERE h.cday = DATE_FORMAT(#{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d') AND h.feeid = dp.feeid
+    ) bbalance,
+    (
+      SELECT SUM(money) FROM tb_recharge_records WHERE DATE_FORMAT(recharge_time, '%Y-%m') = #{ym,jdbcType=VARCHAR} AND sid = #{sid,jdbcType=VARCHAR}
+    ) recharge
+    FROM vi_stat_day_platform dp
+    LEFT JOIN tb_user_admin ua ON dp.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE 1 = 1
+    AND DATE_FORMAT(dp.statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND dp.feeid = #{feeid,jdbcType=VARCHAR}
+
+    GROUP BY dp.feeid
+
+  </select>
+
+  <select id="restMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+        abline, SUM(thscsum) thscsum, SUM(jfscsum) jfscsum, SUM(jflyscsum) jflyscsum, SUM(fee) fee, SUM(recordingfee) recordingfee
+    FROM stat_rest_day_record
+    WHERE DATE_FORMAT(stafday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND feeid = #{feeid,jdbcType=VARCHAR}
+    GROUP BY abline
+    ORDER BY abline
+  </select>
+
+  <select id="maskMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+     abline, SUM(thscsum) thscsum, SUM(jfscsum) jfscsum, SUM(jflyscsum) jflyscsum, SUM(fee) fee, SUM(recordingfee) recordingfee
+    FROM stat_mask_day_record
+    WHERE DATE_FORMAT(statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND feeid = #{feeid,jdbcType=VARCHAR}
+    GROUP BY abline
+    ORDER BY abline
+  </select>
+
+  <select id="ccMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+        abline, operator, SUM(thscsum) thscsum, SUM(jfscsum) jfscsum, SUM(fee) fee
+    FROM stat_cc_day_record
+    WHERE DATE_FORMAT(statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND feeid = #{feeid,jdbcType=VARCHAR}
+    GROUP BY abline, operator
+    ORDER BY abline, operator
+  </select>
+
+  <select id="sipMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+        dr.*, sr.sub_name subName
+    FROM (
+        SELECT
+            subid, SUM(thscsum) thscsum, SUM(IF(cycle=6,jfscsum,0)) jfscsum6, SUM(IF(cycle=60,jfscsum,0)) jfscsum60, SUM(fee) fee
+        FROM stat_sip_day_record
+        WHERE DATE_FORMAT(statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+        AND feeid =  #{feeid,jdbcType=VARCHAR}
+    GROUP BY subid) dr
+    LEFT JOIN tb_sip_relayinfo sr ON dr.subid = sr.subid
+  </select>
+
+  <select id="spMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+     abline, sipa, sipb, SUM(thscsum) thscsum, SUM(jfscsum) jfscsum, SUM(jflyscsum) jflyscsum, SUM(fee) fee, SUM(recordingfee) recordingfee,
+     CASE WHEN rcdtype='sipprest' and sipa!=sipb and abline='A' THEN 'restA'
+		  WHEN rcdtype='sipprest' and sipa!=sipb and abline='B' THEN 'restB'
+          WHEN rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A' THEN 'sipA'
+          WHEN rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B' THEN 'sipB'
+          WHEN rcdtype='sippout'  and sipa!=sipb THEN 'restO'
+          WHEN rcdtype='sippout' and sipa=1 and sipa=sipb THEN 'sipO'
+          WHEN rcdtype='sippin' THEN 'C'
+		  ELSE 'other'
+		  END AS type
+    FROM stat_sp_day_record
+    WHERE DATE_FORMAT(statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND feeid = #{feeid,jdbcType=VARCHAR}
+    GROUP BY abline,sipa,sipb
+    ORDER BY FIELD(type, 'restA', 'restB', 'sipA', 'sipB', 'restO', 'sipO', 'C', 'other')
+  </select>
+
+  <select id="eccMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+    SUM(thscsum) thscsum, SUM(jfscsum) jfscsum, SUM(jflyscsum) jflyscsum, SUM(fee) fee, SUM(recordingfee) recordingfee,
+    rcdType AS type
+    FROM stat_ivr_day_record
+    WHERE DATE_FORMAT(statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND abline = 'B'
+    AND feeid = #{feeid,jdbcType=VARCHAR}
+    GROUP BY rcdType
+    ORDER BY FIELD(rcdtype, 'CallInSip', 'CallInNonSip', 'CallInDirect', 'CallOutLocal', 'CallOutNonLocal')
+  </select>
+
+
+  <select id="voiceVerifyMonthDetails" resultType="map" parameterType="map" >
+    SELECT
+    fee_mode as feemode, SUM(thscsum) thscsum, SUM(jfscsum) jfscsum, SUM(callcnt) callcnt, SUM(fee) fee
+    FROM stat_voiceverify_day_record
+    WHERE DATE_FORMAT(statday, '%Y-%m') = #{ym,jdbcType=VARCHAR}
+    AND feeid = #{feeid,jdbcType=VARCHAR}
+    GROUP BY fee_mode
+    ORDER BY FIELD(fee_mode, '00','01')
+  </select>
+
+
+  <select id="selectRents" resultType="map" parameterType="map" >
+    SELECT * FROM vi_stat_day_platform
+    WHERE feeid = #{feeid,jdbcType=VARCHAR}
+    AND DATE_FORMAT(statday,'%Y-%m') = #{ym,jdbcType=VARCHAR}
+  </select>
+
+</mapper>

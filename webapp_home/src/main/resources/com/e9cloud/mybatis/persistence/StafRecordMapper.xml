@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StafRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StafRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="area" property="area" jdbcType="VARCHAR" />
+    <result column="call_center" property="callCenter" jdbcType="VARCHAR" />
+    <result column="dispatch_area" property="dispatchArea" jdbcType="VARCHAR" />
+    <result column="call_type" property="callType" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="CHAR" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="conn" property="conn" jdbcType="CHAR" />
+    <result column="fee" property="fee" jdbcType="VARCHAR" />
+    <result column="thsc" property="thsc" jdbcType="NUMERIC" />
+    <result column="jfsc" property="jfsc" jdbcType="NUMERIC" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, area, call_center, dispatch_area, call_type, operator, start_time, end_time, 
+    conn, fee, thsc, jfsc
+  </sql>
+
+  <sql id="Page_Column_List" >
+    sr.id, call_center, dispatch_area dispatchArea, call_type callType, operator, start_time startTime, end_time endTime,
+    conn, fee, thsc, jfsc
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_staf_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="pageRecentCall" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Page_Column_List" />, cc.name callCenter, sa.name as area
+    from tb_staf_record sr
+    left join tb_call_center cc on (sr.call_center = cc.id)
+    left join rms_swf_area sa on (sr.area = sa.id)
+    where 1 = 1
+    <if test="params.callCenter != null and params.callCenter != ''">
+      AND cc.id = #{params.callCenter,jdbcType=VARCHAR}
+    </if>
+    <if test="params.conn != null and params.conn != ''">
+      AND sr.conn = #{params.conn,jdbcType=VARCHAR}
+    </if>
+    <if test="params.operator != null and params.operator != ''">
+      AND sr.operator = #{params.operator,jdbcType=VARCHAR}
+    </if>
+    <if test="params.callType != null and params.callType != ''">
+      AND sr.call_type = #{params.callType,jdbcType=VARCHAR}
+    </if>
+    <if test="params.area != null and params.area != ''">
+      AND sa.id = #{params.area,jdbcType=VARCHAR}
+    </if>
+    <if test="sTime != null and eTime != null">
+      AND sr.end_time BETWEEN #{sTime,jdbcType=TIMESTAMP} AND #{eTime,jdbcType=TIMESTAMP}
+    </if>
+    order by start_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="procMonth" resultType="map" parameterType="map">
+    select cc.name as callCenter, a.call_type callType, a.operator, FORMAT(a.conn,0) conn, FORMAT(a.sjfee,3) sjfee,FORMAT(a.fee,3) fee, thsc, jfsc from
+    (SELECT
+      sr.call_center,
+      sr.call_type,
+      sr.operator,
+      sum(sr.thsc) thsc,
+      sum(sr.jfsc) jfsc,
+      sum(sr.conn) conn,
+      sr.fee sjfee,
+      sum(sr.fee) fee
+    FROM
+    tb_staf_record sr
+    WHERE 1 = 1
+    <if test="cc != null and cc != ''">
+      AND sr.call_center = #{cc,jdbcType=VARCHAR}
+    </if>
+    <if test="ym != null and ym != ''">
+      AND DATE_FORMAT(sr.end_time,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+    </if>
+    group by sr.call_center,sr.call_type,sr.operator) a
+    left join tb_call_center cc on a.call_center = cc.id
+
+  </select>
+
+  <select id="getMonthRecordByCallCenter" resultType="map" parameterType="map">
+    select cc.name as callCenter, FORMAT(a.fee,3) fee from (
+      SELECT sr.call_center, sum(sr.fee) fee FROM tb_staf_record sr
+      WHERE 1 = 1 AND DATE_FORMAT(sr.end_time,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+      group by sr.call_center
+      ) a right join tb_call_center cc on a.call_center = cc.id
+  </select>
+
+  <select id="getMonthRecordByDay" resultType="map" parameterType="map">
+    SELECT FORMAT(sum(sr.fee),3) fee,DATE_FORMAT(sr.end_time,'%d') d FROM tb_staf_record sr
+    WHERE 1 = 1
+    AND DATE_FORMAT(sr.end_time,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+    group by  d
+  </select>
+
+  <select id="getMonthRecordTotal" resultType="string" parameterType="map">
+     SELECT FORMAT(sum(sr.fee),3) fee FROM tb_staf_record sr
+      WHERE 1 = 1
+      AND DATE_FORMAT(sr.end_time,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+  </select>
+
+  <select id="pageCallOut" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+      select cc.name as callCenter, FORMAT(a.conn,0) conn, connT, thsc, d
+      from (
+        SELECT sr.call_center, sr.call_type, count(sr.conn) connT, sum(sr.conn) conn, sum(sr.thsc) thsc, DATE_FORMAT(sr.end_time,'%Y-%m-%d') d
+        FROM tb_staf_record sr
+        WHERE 1 = 1
+        and sr.call_type = '2'
+        <if test="startTime != null and endTime != null">
+          and ( sr.end_time BETWEEN #{startTime,jdbcType=TIMESTAMP} AND DATE_ADD(#{endTime,jdbcType=TIMESTAMP},INTERVAL 1 DAY) )
+        </if>
+        <if test="params.callCenter != null and params.callCenter != ''">
+          and sr.call_center = #{params.callCenter,jdbcType=VARCHAR}
+        </if>
+        group by d, sr.call_center
+      ) a left join tb_call_center cc on a.call_center = cc.id
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="pageCallIn" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+      SELECT sr.call_center callCenter, count(sr.conn) connT, sum(sr.conn) conn, sum(sr.thsc) thsc, DATE_FORMAT(sr.end_time,'%Y-%m-%d') d
+      FROM tb_staf_record sr
+      WHERE 1 = 1
+      and sr.call_type = '1'
+      <if test="startTime != null and endTime != null">
+        and ( sr.end_time BETWEEN #{startTime,jdbcType=TIMESTAMP} AND DATE_ADD(#{endTime,jdbcType=TIMESTAMP},INTERVAL 1 DAY) )
+      </if>
+      <if test="params.callCenter != null and params.callCenter != ''">
+        and sr.call_center = #{params.callCenter,jdbcType=VARCHAR}
+      </if>
+      group by d,sr.call_center
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="countAllInOutByDay" resultType="map" parameterType="map">
+    SELECT
+      sum(if(sr.call_type=1,1,0)) allin,
+
+      sum(if(sr.call_type=1,sr.conn,0)) connin,
+
+      sum(if(sr.call_type=2,1,0)) allout,
+
+      sum(if(sr.call_type=2,sr.conn,0)) connout,
+
+    DATE_FORMAT(sr.end_time,'%Y-%m-%d') d
+    FROM
+    tb_staf_record sr
+    where 1 = 1
+    <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+      AND sr.end_time BETWEEN str_to_date(#{startDate,jdbcType=VARCHAR},'%Y-%m-%d') AND DATE_ADD(str_to_date(#{endDate,jdbcType=VARCHAR},'%Y-%m-%d'),INTERVAL 1 DAY)
+    </if>
+    <if test="callCenter != null and callCenter!= ''">
+      and sr.call_center = #{callCenter,jdbcType=VARCHAR}
+    </if>
+    group by d
+  </select>
+
+  <select id="countAllConnByDay" resultType="map" parameterType="map">
+    SELECT
+    count(sr.conn) connT,
+    sum(sr.conn) conn,
+    sum(sr.thsc) thsc,
+    DATE_FORMAT(sr.end_time,'%Y-%m-%d') d
+    FROM
+    tb_staf_record sr
+    where 1 = 1
+    <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+      AND sr.end_time BETWEEN str_to_date(#{startDate,jdbcType=VARCHAR},'%Y-%m-%d') AND DATE_ADD(str_to_date(#{endDate,jdbcType=VARCHAR},'%Y-%m-%d'),INTERVAL 1 DAY)
+    </if>
+    <if test="callCenter != null and callCenter!= ''">
+      and sr.call_center = #{callCenter,jdbcType=VARCHAR}
+    </if>
+    group by d
+  </select>
+
+  <select id="countAllByCC" resultType="map" parameterType="map">
+    select name callCenter,connT from tb_call_center cc left join (
+      SELECT
+      sr.call_center,
+      count(sr.conn) connT
+      FROM
+      tb_staf_record sr
+      where 1 = 1
+      <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+      AND sr.end_time BETWEEN str_to_date(#{startDate,jdbcType=VARCHAR},'%Y-%m-%d') AND DATE_ADD(str_to_date(#{endDate,jdbcType=VARCHAR},'%Y-%m-%d'),INTERVAL 1 DAY)
+      </if>
+      group by call_center
+    ) a on cc.id = a.call_center
+    WHERE 1 = 1
+    <if test="callCenter != null and callCenter!= ''">
+      and cc.id = #{callCenter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.StafRecord" >
+    insert into tb_staf_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="area != null" >
+        area,
+      </if>
+      <if test="callCenter != null" >
+        call_center,
+      </if>
+      <if test="dispatchArea != null" >
+        dispatch_area,
+      </if>
+      <if test="callType != null" >
+        call_type,
+      </if>
+      <if test="operator != null" >
+        operator,
+      </if>
+      <if test="startTime != null" >
+        start_time,
+      </if>
+      <if test="endTime != null" >
+        end_time,
+      </if>
+      <if test="conn != null" >
+        conn,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="thsc != null" >
+        thsc,
+      </if>
+      <if test="jfsc != null" >
+        jfsc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="area != null" >
+        #{area,jdbcType=VARCHAR},
+      </if>
+      <if test="callCenter != null" >
+        #{callCenter,jdbcType=VARCHAR},
+      </if>
+      <if test="dispatchArea != null" >
+        #{dispatchArea,jdbcType=VARCHAR},
+      </if>
+      <if test="callType != null" >
+        #{callType,jdbcType=CHAR},
+      </if>
+      <if test="operator != null" >
+        #{operator,jdbcType=CHAR},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="conn != null" >
+        #{conn,jdbcType=CHAR},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=VARCHAR},
+      </if>
+      <if test="thsc != null" >
+        #{thsc,jdbcType=NUMERIC},
+      </if>
+      <if test="jfsc != null" >
+        #{jfsc,jdbcType=NUMERIC},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>

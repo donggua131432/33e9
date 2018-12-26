@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VoiceReq_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.rest.obt.VoiceReq" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appId" property="appId" jdbcType="VARCHAR" />
+    <result column="voiceRecId" property="voiceRecId" jdbcType="VARCHAR" />
+    <result column="requestId" property="requestId" jdbcType="VARCHAR" />
+    <result column="dtmfFlag" property="dtmfFlag" jdbcType="INTEGER" />
+    <result column="orderFlag" property="orderFlag" jdbcType="INTEGER" />
+    <result column="orderTime" property="orderTime" jdbcType="VARCHAR" />
+    <result column="moduleParams" property="moduleParams" jdbcType="VARCHAR" />
+    <result column="toNum" property="toNum" jdbcType="VARCHAR" />
+    <result column="displayNum" property="displayNum" jdbcType="VARCHAR" />
+    <result column="voicePath" property="voicePath" jdbcType="VARCHAR" />
+    <result column="syncFlag" property="syncFlag" jdbcType="INTEGER" />
+    <result column="snCode" property="snCode" jdbcType="VARCHAR" />
+    <result column="batchFlag" property="batchFlag" jdbcType="VARCHAR" />
+    <result column="ipPort" property="ipPort" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, appId, voiceRecId, requestId, dtmfFlag, orderFlag, orderTime, moduleParams, toNum,
+    displayNum, voicePath, syncFlag, snCode,batchFlag,ipPort
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_voicenotify_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectVoiceList" resultMap="BaseResultMap" parameterType="String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_voicenotify_info
+    where syncFlag = 0 and  #{snCode,jdbcType=VARCHAR}
+  </select>
+
+  <select id="queryVoice" resultMap="BaseResultMap" parameterType="com.e9cloud.rest.obt.VoiceReq" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_voicenotify_info
+    where 1=1
+    <if test="requestId!=null and ''!=requestId">
+      and requestId = #{requestId,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.rest.obt.VoiceReq" >
+    insert into tb_voicenotify_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appId != null" >
+        appId,
+      </if>
+      <if test="voiceRecId != null" >
+        voiceRecId,
+      </if>
+      <if test="requestId != null" >
+        requestId,
+      </if>
+      <if test="dtmfFlag != null" >
+        dtmfFlag,
+      </if>
+      <if test="orderFlag != null" >
+        orderFlag,
+      </if>
+      <if test="orderTime != null" >
+        orderTime,
+      </if>
+      <if test="moduleParams != null" >
+        moduleParams,
+      </if>
+      <if test="toNum != null" >
+        toNum,
+      </if>
+      <if test="displayNum != null" >
+        displayNum,
+      </if>
+      <if test="voicePath != null" >
+        voicePath,
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag,
+      </if>
+      <if test="snCode != null" >
+        snCode,
+      </if>
+      <if test="batchFlag != null" >
+        batchFlag,
+      </if>
+      <if test="ipPort != null" >
+        ipPort,
+      </if>
+
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="appId != null" >
+        #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="voiceRecId != null" >
+        #{voiceRecId,jdbcType=VARCHAR},
+      </if>
+      <if test="requestId != null" >
+        #{requestId,jdbcType=VARCHAR},
+      </if>
+      <if test="dtmfFlag != null" >
+        #{dtmfFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderFlag != null" >
+        #{orderFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderTime != null" >
+        #{orderTime,jdbcType=VARCHAR},
+      </if>
+      <if test="moduleParams != null" >
+        #{moduleParams,jdbcType=VARCHAR},
+      </if>
+      <if test="toNum != null" >
+        #{toNum,jdbcType=VARCHAR},
+      </if>
+      <if test="displayNum != null" >
+        #{displayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="voicePath != null" >
+        #{voicePath,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="snCode != null" >
+        #{snCode,jdbcType=VARCHAR},
+      </if>
+      <if test="batchFlag != null" >
+        #{batchFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="ipPort != null" >
+        #{ipPort,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.rest.obt.VoiceReq" >
+    update tb_voicenotify_info
+    <set >
+      <if test="appId != null" >
+        appId = #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="voiceRecId != null" >
+        voiceRecId = #{voiceRecId,jdbcType=VARCHAR},
+      </if>
+      <if test="requestId != null" >
+        requestId = #{requestId,jdbcType=VARCHAR},
+      </if>
+      <if test="dtmfFlag != null" >
+        dtmfFlag = #{dtmfFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderFlag != null" >
+        orderFlag = #{orderFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderTime != null" >
+        orderTime = #{orderTime,jdbcType=VARCHAR},
+      </if>
+      <if test="moduleParams != null" >
+        moduleParams = #{moduleParams,jdbcType=VARCHAR},
+      </if>
+      <if test="toNum != null" >
+        toNum = #{to,jdbcType=VARCHAR},
+      </if>
+      <if test="displayNum != null" >
+        displayNum = #{displayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="voicePath != null" >
+        voicePath = #{voicePath,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="snCode != null" >
+        snCode = #{snCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+
+  <update id="updateVoice" parameterType="com.e9cloud.rest.obt.VoiceReq" >
+    update tb_voicenotify_info
+    <set >
+      <if test="appId != null" >
+        appId = #{appId,jdbcType=VARCHAR},
+      </if>
+      <if test="voiceRecId != null" >
+        voiceRecId = #{voiceRecId,jdbcType=VARCHAR},
+      </if>
+      <if test="requestId != null" >
+        requestId = #{requestId,jdbcType=VARCHAR},
+      </if>
+      <if test="dtmfFlag != null" >
+        dtmfFlag = #{dtmfFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderFlag != null" >
+        orderFlag = #{orderFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderTime != null" >
+        orderTime = #{orderTime,jdbcType=VARCHAR},
+      </if>
+      <if test="moduleParams != null" >
+        moduleParams = #{moduleParams,jdbcType=VARCHAR},
+      </if>
+      <if test="toNum != null" >
+        toNum = #{toNum,jdbcType=VARCHAR},
+      </if>
+      <if test="displayNum != null" >
+        displayNum = #{displayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="voicePath != null" >
+        voicePath = #{voicePath,jdbcType=VARCHAR},
+      </if>
+      <if test="syncFlag != null" >
+        syncFlag = #{syncFlag,jdbcType=INTEGER},
+      </if>
+      <if test="snCode != null" >
+        snCode = #{snCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+
+  </update>
+
+</mapper>

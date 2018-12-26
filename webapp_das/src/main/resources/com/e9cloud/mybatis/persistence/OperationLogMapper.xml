@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="OperationLog_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.OperationLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="log_name" property="logName" jdbcType="VARCHAR" />
+    <result column="log_content" property="logContent" jdbcType="VARCHAR" />
+    <result column="log_type" property="logType" jdbcType="CHAR" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="nick" property="nick" jdbcType="VARCHAR" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="PageResultMap" type="com.e9cloud.mybatis.domain.OperationLog" extends="BaseResultMap">
+    <result column="rowNO" property="rowNO" jdbcType="BIGINT" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, log_name, log_content, log_type, user_id, username, nick, ip, sid, role_name, create_time
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from rms_sys_log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <!-- 分页统计 -->
+  <select id="countLog" resultType="long" parameterType="Page" >
+    select
+    count(1)
+    from rms_sys_log
+    WHERE 1 = 1
+    <if test="timemin != null">
+      AND create_time &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND create_time &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="fuzzy != null and fuzzy != '%%'">
+      AND username LIKE #{fuzzy,jdbcType=VARCHAR}
+    </if>
+    <if test="params.logType != null and params.logType != ''">
+      AND log_type = #{params.logType,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 分页查询 -->
+  <select id="pageLog" resultMap="PageResultMap" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from rms_sys_log
+    WHERE 1 = 1
+    <if test="timemin != null">
+      AND create_time &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND create_time &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.logType != null and params.logType != ''">
+      AND log_type = #{params.logType,jdbcType=VARCHAR}
+    </if>
+    <if test="fuzzy != null and fuzzy != '%%'">
+      AND username LIKE #{fuzzy,jdbcType=VARCHAR}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <if test="sidx == null or sidx == ''">
+      order by create_time DESC
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.OperationLog" >
+    insert into rms_sys_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="logName != null" >
+        log_name,
+      </if>
+      <if test="logContent != null" >
+        log_content,
+      </if>
+      <if test="logType != null" >
+        log_type,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="nick != null" >
+        nick,
+      </if>
+      <if test="ip != null" >
+        ip,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="roleName != null" >
+        role_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="logName != null" >
+        #{logName,jdbcType=VARCHAR},
+      </if>
+      <if test="logContent != null" >
+        #{logContent,jdbcType=VARCHAR},
+      </if>
+      <if test="logType != null" >
+        #{logType,jdbcType=CHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="nick != null" >
+        #{nick,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="roleName != null" >
+        #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.OperationLog" >
+    update rms_sys_log
+    <set >
+      <if test="logName != null" >
+        log_name = #{logName,jdbcType=VARCHAR},
+      </if>
+      <if test="logContent != null" >
+        log_content = #{logContent,jdbcType=VARCHAR},
+      </if>
+      <if test="logType != null" >
+        log_type = #{logType,jdbcType=CHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="nick != null" >
+        nick = #{nick,jdbcType=VARCHAR},
+      </if>
+      <if test="ip != null" >
+        ip = #{ip,jdbcType=VARCHAR},
+      </if>
+      <if test="roleName != null" >
+        role_name = #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+</mapper>

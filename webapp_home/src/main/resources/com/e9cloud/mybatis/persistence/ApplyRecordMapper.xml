@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ApplyRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipPhoneApply" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="INTEGER" />
+    <result column="rate" property="rate" jdbcType="INTEGER" />
+    <result column="audit_status" property="auditStatus" jdbcType="VARCHAR" />
+    <result column="audit_common" property="auditCommon" jdbcType="VARCHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="getAllApplyRecord" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT sp.id id,sp.atime atime,p.pname pname,c.cname cname,sp.amount amount,sp.rate rate,sp.audit_status auditStatus
+    FROM tb_sp_apply sp,tb_telno_city c,tb_telno_province p
+    WHERE sp.cityid=c.ccode AND c.pcode = p.pcode
+    AND sp.appid = #{params.appid,jdbcType=VARCHAR}
+    <if test="params.id != null and params.id != ''">
+      and a.id = #{params.id,jdbcType=VARCHAR}
+    </if>
+    ORDER BY FIELD(sp.audit_status,'00','01','02'),sp.atime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="getApplyRecordById" resultMap="BaseResultMap" parameterType="java.lang.String">
+    SELECT sp.id id,sp.appid appid,sp.atime atime,p.pname pname,c.cname cname,sp.amount amount,CONCAT(sp.rate,':1') rate,sp.audit_status auditStatus,sp.audit_common auditCommon
+    FROM tb_sp_apply sp,tb_telno_city c,tb_telno_province p
+    WHERE sp.cityid=c.ccode AND c.pcode = p.pcode
+    and sp.id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="delApplyRecord" parameterType="java.lang.String" >
+    delete from tb_sp_apply
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="saveSipPhoneApply" parameterType="com.e9cloud.mybatis.domain.SipPhoneApply" >
+    insert into tb_sp_apply
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        id,
+        audit_status,
+        operator,
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="ccode != null" >
+        cityid,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="rate != null" >
+        rate,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      replace(uuid(),'-',''),
+      '00',
+      '00',
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="ccode != null" >
+        #{ccode,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=VARCHAR},
+      </if>
+      <if test="rate != null" >
+        #{rate,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <insert id="saveShowNumToAudio" parameterType="com.e9cloud.mybatis.domain.SpApplyNum" >
+    insert into tb_sp_num_audit
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      audit_status,
+      <if test="id != null" >
+        shownum_id,
+      </if>
+      <if test="showNum != null" >
+        show_num,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      '00',
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="showNum != null" >
+        #{showNum,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>

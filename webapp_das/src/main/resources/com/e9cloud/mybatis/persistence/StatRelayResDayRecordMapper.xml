@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatRelayResDayRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatRelayResDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="DATE" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="collection" property="collection" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="res_id" property="resId" jdbcType="INTEGER" />
+    <result column="res_supid" property="resSupid" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="call_type" property="callType" jdbcType="VARCHAR" />
+    <result column="area_code" property="areaCode" jdbcType="VARCHAR" />
+    <result column="num_type" property="numType" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="cycle" property="cycle" jdbcType="INTEGER" />
+    <result column="call_cnt" property="callCnt" jdbcType="INTEGER" />
+    <result column="succ_cnt" property="succCnt" jdbcType="INTEGER" />
+    <result column="answer_cnt" property="answerCnt" jdbcType="INTEGER" />
+    <result column="jfsc_sum" property="jfscSum" jdbcType="INTEGER" />
+    <result column="thsc_sum" property="thscSum" jdbcType="INTEGER" />
+    <result column="cycle_times" property="cycleTimes" jdbcType="INTEGER" />
+    <result column="cost_fee" property="costFee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, sid, collection, abline, relay_num, res_id, res_supid, operator, call_type, 
+    area_code, num_type, price, cycle, call_cnt, succ_cnt, answer_cnt, jfsc_sum, thsc_sum, 
+    cycle_times, cost_fee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_relay_res_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 按天统计 -->
+  <select id="countRecord" resultType="long" parameterType="Page">
+    SELECT COUNT(*) FROM(
+      SELECT
+       dr.id
+      FROM stat_relay_res_day_record dr
+      LEFT JOIN tb_relay_supplier rs ON dr.res_supid = rs.sup_id
+      LEFT JOIN tb_relay_res rr ON dr.res_id = rr.id
+      LEFT JOIN tb_sip_basic sb ON dr.relay_num = sb.relay_num AND sb.`status` = '00'
+      WHERE 1 = 1
+      <if test="params.resSupid != null and params.resSupid != ''">
+        AND dr.res_supid = #{params.resSupid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.resId != null and params.resId != ''">
+        AND dr.res_id = #{params.resId,jdbcType=INTEGER}
+      </if>
+      <if test="params.relayNum != null and params.relayNum != ''">
+        AND dr.relay_num = #{params.relayNum,jdbcType=VARCHAR}
+      </if>
+      <if test="datemin != null">
+        AND dr.statday &gt;= #{datemin,jdbcType=DATE}
+      </if>
+      <if test="datemax != null">
+        AND dr.statday &lt;= #{datemax,jdbcType=DATE}
+      </if>
+      <if test="params.reportType == 1">
+        GROUP BY dr.statday, dr.res_supid, dr.res_id, dr.relay_num
+      </if>
+      <if test="params.reportType == 2" >
+        GROUP BY DATE_FORMAT(dr.statday,'%Y-%m'), dr.res_supid, dr.res_id, dr.relay_num
+      </if>
+
+    ) tt
+  </select>
+
+  <!-- 按天统计 -->
+  <select id="pageRecord" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+      SELECT
+        <if test="params.reportType == 1">
+            dr.statday statday,
+        </if>
+        <if test="params.reportType == 2">
+            DATE_FORMAT(dr.statday,'%Y-%m') statday,
+        </if>
+          rs.sup_name supName, rr.res_name resName, rr.id resId, dr.relay_num relayNum, sb.relay_name relayName,
+          sum(dr.call_cnt) callCnt, sum(dr.succ_cnt)/sum(dr.call_cnt) succRate, sum(dr.answer_cnt)/sum(dr.succ_cnt) answerRate,
+          sum(dr.thsc_sum) thscSum, sum(dr.thsc_sum)/sum(dr.succ_cnt) thscAvg, sum(dr.jfsc_sum) jfscSum, sum(dr.cost_fee) costFee
+      FROM stat_relay_res_day_record dr
+      LEFT JOIN tb_relay_supplier rs ON dr.res_supid = rs.sup_id
+      LEFT JOIN tb_relay_res rr ON dr.res_id = rr.id
+      LEFT JOIN tb_sip_basic sb ON dr.relay_num = sb.relay_num AND sb.`status` = '00'
+      WHERE 1 = 1
+      <if test="params.resSupid != null and params.resSupid != ''">
+        AND dr.res_supid = #{params.resSupid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.resId != null and params.resId != ''">
+        AND dr.res_id = #{params.resId,jdbcType=INTEGER}
+      </if>
+      <if test="params.relayNum != null and params.relayNum != ''">
+        AND dr.relay_num = #{params.relayNum,jdbcType=VARCHAR}
+      </if>
+      <if test="datemin != null">
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(dr.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+      </if>
+
+      <if test="datemax != null">
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(dr.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+      </if>
+
+      <if test="monthmin != null">
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(dr.statday,'%Y-%m') &gt;= DATE_FORMAT( #{monthmin,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+
+      <if test="monthmax != null">
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(dr.statday,'%Y-%m') &lt;= DATE_FORMAT( #{monthmax,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+
+      <if test="params.reportType == 1">
+        GROUP BY dr.statday, dr.res_supid, dr.res_id, dr.relay_num
+      </if>
+      <if test="params.reportType == 2" >
+        GROUP BY DATE_FORMAT(dr.statday,'%Y-%m'), dr.res_supid, dr.res_id, dr.relay_num
+      </if>
+
+      ORDER BY dr.statday DESC, dr.res_supid, dr.res_id, dr.relay_num
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+</mapper>

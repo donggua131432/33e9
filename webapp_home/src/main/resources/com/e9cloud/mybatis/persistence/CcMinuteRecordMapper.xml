@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatCcMinuteRecord_Mapper" >
+
+  <!-- 按分钟统计 智能云调度 话务监控 的话务情况 -->
+  <select id="countCcScanByMin" resultType="map" parameterType="map">
+    SELECT
+      SUM(if(sr.abline='I',sr.callcnt,0)) callcntI,
+      SUM(if(sr.abline='O',sr.callcnt,0)) callcntO,
+
+      SUM(if(sr.abline='I',sr.succcnt,0))/SUM(if(sr.abline='I',sr.callcnt,0)) succcntI,
+      SUM(if(sr.abline='O',sr.succcnt,0))/SUM(if(sr.abline='O',sr.callcnt,0)) succcntO,
+
+      DATE_FORMAT(sr.statmin,'%H:%i') d
+    FROM stat_cc_minute_record sr
+    WHERE sr.statmin &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statmin &lt; #{endDay,jdbcType=TIMESTAMP}
+    <if test="appid!=null and ''!=appid">
+      AND sr.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="subid!=null and ''!=subid and '-1'!=subid">
+      AND sr.subid = #{subid,jdbcType=VARCHAR}
+    </if>
+    <if test="sid != null and sid != '-1' and sid != ''">
+      AND sr.feeid = (SELECT feeid FROM tb_user_admin WHERE sid = #{sid,jdbcType=VARCHAR})
+    </if>
+    GROUP BY d
+  </select>
+
+</mapper>

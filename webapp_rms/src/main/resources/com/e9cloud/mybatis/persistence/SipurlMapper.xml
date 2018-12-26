@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Sipurl_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.Sipurl" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="sipurl" property="sipurl" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, sipurl, num, addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_cb_sipurl
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 校验号码的唯一性 -->
+  <select id="countNum" resultType="long" parameterType="com.e9cloud.mybatis.domain.Sipurl" >
+    select
+      count(1)
+    from tb_cb_sipurl
+    where num = #{num,jdbcType=VARCHAR}
+    <if test="id != null and id != ''">
+      AND id != #{id,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="pageSipurl" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_cb_sipurl
+    where 1 = 1
+    <if test="params.sipurl != null and params.sipurl != ''" >
+      AND  #{params.sipurl,jdbcType=VARCHAR} like  concat('%', if (sipurl like '%[%]%' ,concat(SUBSTRING_INDEX(sipurl, '[', 1),'%' , SUBSTRING_INDEX(sipurl, ']', -1)),sipurl),'%') and sipurl is not null and sipurl !=''
+    </if>
+    <if test="params.num != null and params.num != ''" >
+      AND num LIKE "%"#{params.num}"%"
+    </if>
+    order by addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_cb_sipurl
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.Sipurl" >
+    insert into tb_cb_sipurl
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sipurl != null" >
+        sipurl,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="sipurl != null" >
+        #{sipurl,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.Sipurl" >
+    update tb_cb_sipurl
+    <set >
+      <if test="sipurl != null" >
+        sipurl = #{sipurl,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

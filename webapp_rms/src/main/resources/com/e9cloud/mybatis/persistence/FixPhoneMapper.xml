@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="FixPhone_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.FixPhone" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, cityid, number, status
+  </sql>
+
+  <!-- 选择一定数量的固话 号码 （未分配的） -->
+  <select id="selectFixPhonesByAllot" resultMap="BaseResultMap" parameterType="map">
+    SELECT
+    sf.*
+    FROM tb_sp_fixphone sf
+    WHERE sf.`status` = '03'
+    <if test="cityid != null and cityid != ''" >
+      AND sf.cityid = #{cityid,jdbcType=VARCHAR}
+    </if>
+    LIMIT #{fixAmount,jdbcType=INTEGER}
+  </select>
+
+  <!-- 分页选取固话号码列表 -->
+  <select id="pageFixPhoneList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+
+    SELECT
+    DISTINCT
+    sf.id,
+    sf.number,
+    sf.cityid,
+    sf.status,
+    ac.name companyName,
+    ai.sid,
+    ai.appid appId,
+    ai.app_name appName,
+    tp.pname,
+    tc.cname
+    FROM
+    tb_sp_fixphone sf
+    LEFT JOIN tb_telno_city tc ON sf.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_sp_apply_num san ON sf.id = san.fixphone_id AND san. STATUS != '01'
+    LEFT JOIN tb_app_info ai ON san.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ai.sid = ua.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE
+    number is NOT NULL
+
+    <if test="params.number != null  and params.number !=''" >
+      and number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.cityid != null and params.cityid !=''" >
+      and sf.cityid = #{params.cityid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status !=''" >
+      and sf.status = #{params.status,jdbcType=CHAR}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId !=''" >
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    order by number desc
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+  <!-- 下载导出取固话号码列表 -->
+  <select id="downloadFixPhoneList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    DISTINCT
+    sf.id,
+    sf.number,
+    sf.cityid,
+    sf.status,
+    ac.name companyName,
+    ai.sid,
+    ai.appid appId,
+    ai.app_name appName,
+    tp.pname,
+    tc.cname
+    FROM
+    tb_sp_fixphone sf
+    LEFT JOIN tb_telno_city tc ON sf.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_sp_apply_num san ON sf.id = san.fixphone_id AND san. STATUS != '01'
+    LEFT JOIN tb_app_info ai ON san.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ai.sid = ua.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE
+     number is NOT NULL
+
+
+    <if test="params.number != null  and params.number !=''" >
+      and number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.cityid != null and params.cityid !=''" >
+      and sf.cityid = #{params.cityid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status !=''" >
+      and sf.status = #{params.status,jdbcType=CHAR}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId !=''" >
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    order by number desc
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+  <select id="getFixPhoneById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sp_fixphone
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getFixPhoneByNum" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sp_fixphone
+    where 1=1
+    <if test="_parameter!=null and _parameter!=''">
+      and number = #{_parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_sp_fixphone
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <delete id="deleteFixPhoneByIds" parameterType="java.lang.String" >
+  delete from tb_sp_fixphone
+  where id IN
+  <foreach collection="array" item="id" open="(" close=")" separator=",">
+    #{id}
+  </foreach>
+  </delete>
+
+  <insert id="insertFixPhone" parameterType="com.e9cloud.mybatis.domain.FixPhone" >
+    insert into tb_sp_fixphone
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+        id,
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      replace(uuid(),'-',''),
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.FixPhone" >
+    update tb_sp_fixphone
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

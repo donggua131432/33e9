@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SipBasic_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipBasic" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="relay_name" property="relayName" jdbcType="VARCHAR" />
+    <result column="relay_type" property="relayType" jdbcType="CHAR" />
+    <result column="ipport1" property="ipport1" jdbcType="VARCHAR" />
+    <result column="ipport2" property="ipport2" jdbcType="VARCHAR" />
+    <result column="ipport3" property="ipport3" jdbcType="VARCHAR" />
+    <result column="ipport4" property="ipport4" jdbcType="VARCHAR" />
+    <result column="areacode" property="areacode" jdbcType="VARCHAR" />
+    <result column="sip_business" property="sipBusiness" jdbcType="BIGINT" />
+    <result column="sip_url" property="sipUrl" jdbcType="VARCHAR" />
+    <result column="sip_outno_pr" property="sipOutnoPr" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="freeze_time" property="freezeTime" jdbcType="TIMESTAMP" />
+    <result column="is_force" property="isForce" jdbcType="CHAR" />
+    <result column="use_type" property="useType" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="limit_status" property="limitStatus" jdbcType="VARCHAR"/>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, relay_num, relay_name, relay_type, ipport1, ipport2, ipport3, ipport4, areacode, sip_business,
+    sip_url, sip_outno_pr, status, max_concurrent, create_time , is_force , use_type, bus_type, limit_status
+  </sql>
+
+  <select id="selectAllRelay" resultMap="BaseResultMap" parameterType="string">
+    SELECT
+     <include refid="Base_Column_List"/>
+    FROM tb_sip_basic
+    WHERE `status` = '00'
+    AND use_type = #{useType,jdbcType=VARCHAR}
+  </select>
+</mapper>

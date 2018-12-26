@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VN_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.rest.obt.VnObj" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="vnid" property="vnid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="caller" property="caller" jdbcType="VARCHAR" />
+    <result column="called" property="called" jdbcType="VARCHAR" />
+    <result column="vn" property="vn" jdbcType="VARCHAR" />
+    <result column="vnType" property="vnType" jdbcType="VARCHAR" />
+    <result column="validTime" property="validtime" jdbcType="INTEGER" />
+    <result column="needRecord" property="needrecord" jdbcType="INTEGER" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, vnid, appid, sid, caller, called, vn, vnType, validTime, needRecord, createTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_vn_vnm
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_vn_vnm
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.rest.obt.VnObj" >
+    insert into tb_vn_vnm (id, vnid, appid, 
+      sid, caller, called, 
+      vn, validTime, needRecord, 
+      createTime)
+    values (#{id,jdbcType=INTEGER}, #{vnid,jdbcType=VARCHAR}, #{appid,jdbcType=VARCHAR}, 
+      #{sid,jdbcType=VARCHAR}, #{caller,jdbcType=VARCHAR}, #{called,jdbcType=VARCHAR}, 
+      #{vn,jdbcType=VARCHAR}, #{validtime,jdbcType=INTEGER}, #{needrecord,jdbcType=INTEGER}, 
+      #{createtime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.rest.obt.VnObj" >
+    insert into tb_vn_vnm
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="vnid != null" >
+        vnid,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="caller != null" >
+        caller,
+      </if>
+      <if test="called != null" >
+        called,
+      </if>
+      <if test="vn != null" >
+        vn,
+      </if>
+      <if test="vnType != null" >
+        vnType,
+      </if>
+      <if test="validtime != null" >
+        validTime,
+      </if>
+      <if test="needrecord != null" >
+        needRecord,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="vnid != null" >
+        #{vnid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="caller != null" >
+        #{caller,jdbcType=VARCHAR},
+      </if>
+      <if test="called != null" >
+        #{called,jdbcType=VARCHAR},
+      </if>
+      <if test="vn != null" >
+        #{vn,jdbcType=VARCHAR},
+      </if>
+      <if test="vnType != null" >
+        #{vnType,jdbcType=VARCHAR},
+      </if>
+      <if test="validtime != null" >
+        #{validtime,jdbcType=INTEGER},
+      </if>
+      <if test="needrecord != null" >
+        #{needrecord,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.rest.obt.VnObj" >
+    update tb_vn_vnm
+    <set >
+      <if test="vnid != null" >
+        vnid = #{vnid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="caller != null" >
+        caller = #{caller,jdbcType=VARCHAR},
+      </if>
+      <if test="called != null" >
+        called = #{called,jdbcType=VARCHAR},
+      </if>
+      <if test="vn != null" >
+        vn = #{vn,jdbcType=VARCHAR},
+      </if>
+      <if test="vnType != null" >
+        vnType = #{vnType,jdbcType=VARCHAR},
+      </if>
+      <if test="validtime != null" >
+        validTime = #{validtime,jdbcType=INTEGER},
+      </if>
+      <if test="needrecord != null" >
+        needRecord = #{needrecord,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.rest.obt.VnObj" >
+    update tb_vn_vnm
+    set vnid = #{vnid,jdbcType=VARCHAR},
+      appid = #{appid,jdbcType=VARCHAR},
+      sid = #{sid,jdbcType=VARCHAR},
+      caller = #{caller,jdbcType=VARCHAR},
+      called = #{called,jdbcType=VARCHAR},
+      vn = #{vn,jdbcType=VARCHAR},
+      vnType = #{vnType,jdbcType=VARCHAR},
+      validTime = #{validtime,jdbcType=INTEGER},
+      needRecord = #{needrecord,jdbcType=INTEGER},
+      createTime = #{createtime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="findVnByObj" resultType="com.e9cloud.rest.obt.VnObj" parameterType="com.e9cloud.rest.obt.VnObj" >
+     select  <include refid="Base_Column_List" /> from tb_vn_vnm where 1=1
+    <if test="vn!=null and ''!=vn">
+      and vn =  #{vn,jdbcType=VARCHAR}
+    </if>
+    <if test="vnType!=null and ''!=vnType">
+      and vnType =  #{vnType,jdbcType=VARCHAR}
+    </if>
+    <if test="caller!=null and ''!=caller">
+      and  caller = #{caller,jdbcType=VARCHAR}
+    </if>
+    <if test="called!=null and ''!=called">
+      and called = #{called,jdbcType=VARCHAR}
+    </if>
+    <if test="sid!=null and ''!=sid">
+     and sid = #{sid,jdbcType=VARCHAR}
+    </if>
+      and now() &lt; (createTime + INTERVAL validTime SECOND)
+  </select>
+
+</mapper>

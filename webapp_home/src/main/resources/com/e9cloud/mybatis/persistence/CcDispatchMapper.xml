@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CcDispatch_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CcDispatch" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="dispatch_name" property="dispatchName" jdbcType="VARCHAR" />
+    <result column="dispatch_id" property="dispatchId" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="area_id" property="areaId" jdbcType="VARCHAR" />
+    <result column="time_start" property="timeStart" jdbcType="SMALLINT" />
+    <result column="time_end" property="timeEnd" jdbcType="SMALLINT" />
+    <result column="weekday" property="weekday" jdbcType="TINYINT" />
+    <result column="valid_date" property="validDate" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, dispatch_name, dispatch_id, sid, area_id, time_start, time_end, weekday, valid_date, remark, ctime, status
+  </sql>
+
+  <select id="selectByDispatchId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_cc_dispatch
+    where dispatch_id = #{dispatchId,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="selectDispatchPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select tc.id,tc.dispatch_name,tc.dispatch_id,tc.sid,tc.area_id,tc.time_start,tc.time_end,
+    tc.weekday,tc.valid_date,tc.remark,tc.ctime,tc.status,m.ccname
+    from tb_cc_dispatch tc
+    LEFT JOIN (
+    SELECT a.dispatch_id,group_concat(concat(c.ccname,'-',b.pri) ORDER BY b.pri separator ',') AS ccname
+    from tb_cc_dispatch a LEFT JOIN tb_cc_dispatch_info b ON a.dispatch_id = b.dispatch_id
+    LEFT JOIN tb_cc_info c ON b.subid = c.subid
+    GROUP BY dispatch_id
+    )m ON tc.dispatch_id = m.dispatch_id
+    where 1 = 1 AND status = '00'
+    <if test="params.sid!=null and ''!=params.sid">
+      and sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.areaId!=null and ''!=params.areaId">
+      and area_id = #{params.areaId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.validDate!=null and ''!=params.validDate">
+      and valid_date &gt;= str_to_date(#{params.validDate,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.validDate1!=null and ''!=params.validDate1">
+      and valid_date &lt;= str_to_date(#{params.validDate1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    ORDER  BY ctime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <delete id="deleteCcDispatchByDispatchId" parameterType="java.lang.String">
+    update tb_cc_dispatch
+    <set>
+      status = '01'
+    </set>
+    where dispatch_id = #{dispatchId,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertDispatch" parameterType="com.e9cloud.mybatis.domain.CcDispatch" >
+    insert into tb_cc_dispatch
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="dispatchName != null" >
+        dispatch_name,
+      </if>
+      <if test="dispatchId != null" >
+        dispatch_id,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="areaId != null" >
+        area_id,
+      </if>
+      <if test="timeStart != null" >
+        time_start,
+      </if>
+      <if test="timeEnd != null" >
+        time_end,
+      </if>
+      <if test="weekday != null" >
+        weekday,
+      </if>
+      <if test="validDate != null" >
+        valid_date,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+        ctime
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="dispatchName != null" >
+        #{dispatchName,jdbcType=VARCHAR},
+      </if>
+      <if test="dispatchId != null" >
+        #{dispatchId,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="areaId != null" >
+        #{areaId,jdbcType=VARCHAR},
+      </if>
+      <if test="timeStart != null" >
+        #{timeStart,jdbcType=SMALLINT},
+      </if>
+      <if test="timeEnd != null" >
+        #{timeEnd,jdbcType=SMALLINT},
+      </if>
+      <if test="weekday != null" >
+        #{weekday,jdbcType=TINYINT},
+      </if>
+      <if test="validDate != null" >
+        #{validDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      NOW()
+    </trim>
+  </insert>
+
+  <update id="updateDispatch" parameterType="com.e9cloud.mybatis.domain.CcDispatch" >
+    update tb_cc_dispatch
+    <set >
+      <if test="dispatchName != null" >
+      dispatch_name = #{dispatchName,jdbcType=VARCHAR},
+      </if>
+      <if test="areaId != null" >
+        area_id = #{areaId,jdbcType=VARCHAR},
+      </if>
+      <if test="timeStart != null" >
+        time_start = #{timeStart,jdbcType=SMALLINT},
+      </if>
+      <if test="timeEnd != null" >
+        time_end = #{timeEnd,jdbcType=SMALLINT},
+      </if>
+      <if test="weekday != null" >
+        weekday = #{weekday,jdbcType=TINYINT},
+      </if>
+      <if test="validDate != null" >
+        valid_date = #{validDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where dispatch_id = #{dispatchId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="countDispatchBySidAndDispatchName" resultType="long" parameterType="com.e9cloud.mybatis.domain.CcDispatch" >
+    select
+    count(1)
+    from tb_cc_dispatch
+    where 1=1 AND status = '00'
+    <if test="dispatchId != null" >
+      AND dispatch_id != #{dispatchId,jdbcType=INTEGER}
+    </if>
+    AND dispatch_name = #{dispatchName,jdbcType=VARCHAR}
+    AND sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getDispatchByAreaId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_dispatch
+    where status='00'
+    AND area_id = #{areaId,jdbcType=VARCHAR}
+  </select>
+</mapper>

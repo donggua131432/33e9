@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatCcDayRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatCcDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="CHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, appid, subid, feeid, abline, operator, pname, cname, callcnt, succcnt, answercnt,
+    thscsum, jfscsum, fee
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from stat_cc_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="procMonth" resultType="map" parameterType="map">
+    select cc.ccname , a.abline , a.operator, FORMAT(a.succcnt,0) succcnt, fee, thscsum, jfscsum from
+    (SELECT
+    sr.subid,
+    sr.abline,
+    sr.operator,
+    sum(sr.thscsum) thscsum,
+    sum(sr.jfscsum) jfscsum,
+    sum(sr.succcnt) succcnt,
+    sum(sr.fee) fee
+    FROM
+    stat_cc_day_record sr
+    WHERE 1 = 1
+    <if test="cc != null and cc != ''">
+      AND sr.subid = #{cc,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid != null and feeid != ''">
+      AND sr.feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="ym != null and ym != ''">
+      AND DATE_FORMAT(sr.statday,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+    </if>
+    group by sr.operator,sr.abline) a, tb_cc_info cc where  a.subid = cc.subid
+
+  </select>
+
+  <select id="downloadProcMonth" resultType="map" parameterType="map">
+    select cc.ccname , a.abline , a.operator, FORMAT(a.succcnt,0) succcnt,fee, thscsum, jfscsum from
+    (SELECT
+    sr.subid,
+    sr.abline,
+    sr.operator,
+    sum(sr.thscsum) thscsum,
+    sum(sr.jfscsum) jfscsum,
+    sum(sr.succcnt) succcnt,
+    sum(sr.fee) fee
+    FROM
+    stat_cc_day_record sr
+    WHERE 1 = 1
+    <if test="cc != null and cc != ''">
+      AND sr.subid = #{cc,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid != null and feeid != ''">
+      AND sr.feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="ym != null and ym != ''">
+      AND DATE_FORMAT(sr.statday,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+    </if>
+    group by sr.operator,sr.abline) a, tb_cc_info cc where  a.subid = cc.subid and cc.`status` = '00'
+
+  </select>
+
+  <select id="getMonthRecordByDay" resultType="map" parameterType="map">
+    SELECT FORMAT(sum(sr.fee)/10000,3) fee,DATE_FORMAT(sr.statday,'%d') d FROM stat_cc_day_record sr, tb_cc_info cc
+    WHERE 1 = 1 AND cc.subid = sr.subid and cc.`status` = '00'
+    AND DATE_FORMAT(sr.statday,'%Y年%c月') = #{ym,jdbcType=VARCHAR} AND sr.feeid = #{feeid,jdbcType=VARCHAR}
+    group by  d
+  </select>
+
+
+  <select id="getMonthRecordByCallCenter" resultType="map" parameterType="map">
+  select a.feeid,cc.ccname as callCenter, FORMAT(a.fee,3) fee  ,a.fee fee2 from (
+      SELECT sr.appid,sr.feeid,sr.subid, sum(sr.fee)/10000 fee FROM stat_cc_day_record sr
+      WHERE 1 = 1  AND DATE_FORMAT(sr.statday,'%Y年%c月') = #{ym,jdbcType=VARCHAR}
+      group by sr.subid
+      ) a, tb_cc_info cc where  a.subid = cc.subid AND a.feeid = #{feeid,jdbcType=VARCHAR} AND cc.`status` = '00' order by fee2 desc  LIMIT 10
+  </select>
+
+  <select id="getMonthRecordTotal" resultType="string" parameterType="map">
+    SELECT FORMAT(sum(sr.fee)/10000,3) fee FROM stat_cc_day_record sr, tb_cc_info cc
+    WHERE 1 = 1 AND cc.subid = sr.subid and cc.`status` = '00'
+    AND DATE_FORMAT(sr.statday,'%Y年%c月') = #{ym,jdbcType=VARCHAR} AND sr.feeid = #{feeid,jdbcType=VARCHAR}
+  </select>
+
+
+  <!-- ====================================================话务统计========================================================= -->
+  <!-- 智能云调度日统计 -->
+  <select id="selectCcDayRecordPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    statday, appid, subid, feeid, abline, operator, pname, cname, sum(callcnt) as callcnt, sum(succcnt) as succcnt, sum(answercnt) as answercnt,
+    sum(thscsum) as thscsum, sum(jfscsum) as jfscsum, sum(fee) as fee
+    from stat_cc_day_record
+    where 1 = 1
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.statday!=null and ''!=params.statday">
+      and statday &gt;= str_to_date(#{params.statday,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.statday1!=null and ''!=params.statday1">
+      and statday &lt;= str_to_date(#{params.statday1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.abline!=null and ''!=params.abline">
+      and abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.operator!=null and ''!=params.operator">
+      and operator = #{params.operator,jdbcType=VARCHAR}
+    </if>
+    GROUP BY date_format(statday,'%Y-%m-%d'),pname,subid,operator,abline ORDER BY statday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+  <!-- 智能云调度月统计 -->
+  <select id="selectCcMonthRecordPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select statday, appid, subid, feeid, abline, operator, pname,
+    sum(succcnt) as succcnt, sum(thscsum) as thscsum, sum(jfscsum) as jfscsum
+    from stat_cc_day_record
+    where 1 = 1
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.abline!=null and ''!=params.abline">
+      and abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+    <if test="params.operator!=null and ''!=params.operator">
+      and operator = #{params.operator,jdbcType=VARCHAR}
+    </if>
+    <if test="params.statday!=null and ''!=params.statday">
+      and date_format(statday,'%Y-%m') = date_format(CONCAT(#{params.statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m')
+    </if>
+    GROUP BY subid,abline,operator,date_format(statday,'%Y-%m'),pname ORDER BY statday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+  <!-- 智能云调度呼入地区分布统计统计 -->
+  <select id="selectCcCallInRecordList" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.StatCcDayRecord">
+    select statday, appid, subid, feeid, abline, operator, sum(callcnt) as callcnt,
+    case when (LOCATE('省',pname) >0 or LOCATE('市',pname) >0 ) then left(pname,char_length(pname)-1) else pname end pname
+    from stat_cc_day_record
+    where 1 = 1
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    <!--if test="abline!=null and ''!=abline">
+      and abline = #{abline,jdbcType=VARCHAR}
+    </if-->
+    <if test="subid!=null and ''!=subid">
+      and subid = #{subid,jdbcType=VARCHAR}
+    </if>
+    <if test="statday!=null">
+      and statday &gt;= str_to_date(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="statday1!=null">
+      and statday &lt;= str_to_date(#{statday1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <!--GROUP BY pname,abline ORDER BY callcnt ASC-->
+
+    <choose>
+      <when test="abline!=null and ''!=abline">
+        and abline = #{abline,jdbcType=VARCHAR}
+        GROUP BY pname,abline ORDER BY callcnt DESC
+      </when>
+      <otherwise>
+        GROUP BY pname ORDER BY callcnt DESC
+      </otherwise>
+    </choose>
+  </select>
+</mapper>

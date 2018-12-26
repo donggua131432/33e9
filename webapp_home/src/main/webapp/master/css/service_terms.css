@@ -1,0 +1,42 @@
+
+/****************公共样式样式*********************/
+.communication_simple{color:#548BEF;}
+
+/****************内容样式*********************/
+.service_terms_box{margin:100px 0 10px 0;background:#D9DADE;text-align:left;}
+.terms_title_box{margin-left:60px;margin-right:60px;padding:20px 0 20px 0;text-align: center;}
+.service_terms_main{margin:15px 60px 0 60px;border-top:1px solid #3F4857;}
+.linePro>p,.lineCase>p,.line2>p{margin-left:30px;}
+.terms_title{font-size:24px;color:#111111;}
+.general_rules_box{font-size: 16px;}
+.lg_font{display:inline-block;margin:20px 0;font-size: 20px;color:#111111;}
+.md_font{display:inline-block;margin:18px 0;font-size: 18px;color:#111111;}
+.underline{font-size:15px;font-weight:600;color:#333333;}
+.general_rules_box>p{margin-bottom:10px;}
+.leave_page{text-align: center;}
+.close_btn{margin:20px 0 20px 0;width:200px;height:40px;border:none;border-radius:4px;cursor:pointer;background:#548BEF;font-size: 24px;color:#ffffff;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

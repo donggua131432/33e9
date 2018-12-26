@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatSpHourRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatSpHourRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stathour" property="stathour" jdbcType="TIMESTAMP" />
+    <result column="rcdtype" property="rcdtype" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="sipa" property="sipa" jdbcType="BIT" />
+    <result column="sipb" property="sipb" jdbcType="BIT" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="lyscsum" property="lyscsum" jdbcType="INTEGER" />
+    <result column="jflyscsum" property="jflyscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, stathour, rcdtype, abline, sipa, sipb, sid, feeid, appid, subid, callcnt, succcnt, 
+    answercnt, thscsum, jfscsum, lyscsum, jflyscsum, fee, recordingfee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_sp_hour_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 按小时统计 云话机 话务走势 的话务情况 -->
+  <select id="countSpScanByHour" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.thscsum,0)) thscsumRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.thscsum,0)) thscsumRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.thscsum,0)) thscsumSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.thscsum,0)) thscsumSipB,
+	  SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.thscsum,0)) thscsumRestO,
+	  SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.thscsum,0)) thscsumSipO,
+	  SUM(if(rcdtype='sippin',sr.thscsum,0)) thscsumC,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.succcnt,0)) thscAvgRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.succcnt,0)) thscAvgRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.succcnt,0)) thscAvgSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.succcnt,0)) thscAvgSipB,
+      SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.thscsum,0))/SUM(if(rcdtype='sippout' and sipa!=sipb,sr.succcnt,0)) thscAvgRestO,
+      SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.thscsum,0))/SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.succcnt,0)) thscAvgSipO,
+	  SUM(if(rcdtype='sippin',sr.thscsum,0))/SUM(if(rcdtype='sippin',sr.succcnt,0)) thscAvgC,
+
+      SUM(sr.jfscsum) jfscsum,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.callcnt,0)) succcntRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.callcnt,0)) succcntRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.callcnt,0)) succcntSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.callcnt,0)) succcntSipB,
+      SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.succcnt,0))/SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.callcnt,0)) succcntRestO,
+      SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.succcnt,0))/SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.callcnt,0)) succcntSipO,
+	  SUM(if(rcdtype='sippin',sr.succcnt,0))/SUM(if(rcdtype='sippin',sr.callcnt,0)) succcntC,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.callcnt,0)) answercntRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.callcnt,0)) answercntRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.callcnt,0)) answercntSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.callcnt,0)) answercntSipB,
+      SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.answercnt,0))/SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.callcnt,0)) answercntRestO,
+      SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.answercnt,0))/SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.callcnt,0)) answercntSipO,
+	  SUM(if(rcdtype='sippin',sr.answercnt,0))/SUM(if(rcdtype='sippin',sr.callcnt,0)) answercntC,
+
+      DATE_FORMAT(sr.stathour,'%H') h,
+      DATE_FORMAT(sr.stathour,'%Y-%m-%d %H') d
+    FROM stat_sp_hour_record sr
+    WHERE sr.stathour &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.stathour &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+</mapper>

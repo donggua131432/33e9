@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SPIPMapper_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SPIPMapper" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="inner_ip" property="innerIp" jdbcType="VARCHAR" />
+    <result column="outer_ip" property="outerIp" jdbcType="VARCHAR" />
+    <result column="env_name" property="envName" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, inner_ip, outer_ip, env_name
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_sp_ip_mapper
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByOuterIpAndEnv" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.SPIPMapper" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sp_ip_mapper
+    where outer_ip = #{outerIp, jdbcType=VARCHAR}
+    AND env_name = #{envName, jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectRegAddInfo" resultType="map" parameterType="string" >
+
+     SELECT an.id, an.appid, sm.sip_phone sipphone, sm.inner_ip innerIp, sm.outer_ip outerIp, sm.pwd FROM tb_sp_apply_num an
+    INNER JOIN
+    (
+      SELECT ss.*, im.outer_ip,im.inner_ip FROM tb_sp_sipphone ss
+      INNER JOIN tb_sp_ip_mapper im ON ss.ip_port = im.outer_ip
+      WHERE im.env_name = #{envName, jdbcType=VARCHAR}
+    ) sm ON an.sipphone_id = sm.id
+
+    WHERE an.`status` = '00'
+    AND an.register = '00'
+
+  </select>
+
+  <select id="selectRegDelInfo" resultType="map" parameterType="string" >
+    SELECT an.id, an.appid, sm.sip_phone sipphone, sm.inner_ip innerIp, sm.outer_ip outerIp, sm.pwd FROM tb_sp_apply_num an
+    INNER JOIN
+    (
+      SELECT ss.*, im.outer_ip,im.inner_ip FROM tb_sp_sipphone ss
+      INNER JOIN tb_sp_ip_mapper im ON ss.ip_port = im.outer_ip
+      WHERE im.env_name = #{envName, jdbcType=VARCHAR}
+    ) sm ON an.sipphone_id = sm.id
+
+    WHERE an.`status` != '00'
+    AND an.register = '01'
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_sp_ip_mapper
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SPIPMapper" >
+    insert into tb_sp_ip_mapper
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="innerIp != null" >
+        inner_ip,
+      </if>
+      <if test="outerIp != null" >
+        outer_ip,
+      </if>
+      <if test="envName != null" >
+        env_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="innerIp != null" >
+        #{innerIp,jdbcType=VARCHAR},
+      </if>
+      <if test="outerIp != null" >
+        #{outerIp,jdbcType=VARCHAR},
+      </if>
+      <if test="envName != null" >
+        #{envName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateShowNumRegStatus" parameterType="map" >
+    UPDATE tb_sp_apply_num
+    SET register = #{register,jdbcType=VARCHAR}
+    WHERE id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SPIPMapper" >
+    update tb_sp_ip_mapper
+    <set >
+      <if test="innerIp != null" >
+        inner_ip = #{innerIp,jdbcType=VARCHAR},
+      </if>
+      <if test="outerIp != null" >
+        outer_ip = #{outerIp,jdbcType=VARCHAR},
+      </if>
+      <if test="envName != null" >
+        env_name = #{envName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.SPIPMapper" >
+    update tb_sp_ip_mapper
+    set inner_ip = #{innerIp,jdbcType=VARCHAR},
+      outer_ip = #{outerIp,jdbcType=VARCHAR},
+      env_name = #{envName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

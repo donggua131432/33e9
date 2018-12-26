@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CcArea_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CcArea" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="area_id" property="areaId" jdbcType="VARCHAR" />
+    <result column="aname" property="aname" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, area_id, aname, sid,remark,ctime
+  </sql>
+
+  <select id="selectCcAreaBySid" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_cc_area
+    where sid = #{sid,jdbcType=INTEGER} AND status='00'
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_cc_area
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.CcArea" >
+    insert into tb_cc_area
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="areaId != null" >
+        area_id,
+      </if>
+      <if test="aname != null" >
+        aname,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="areaId != null" >
+        #{areaId,jdbcType=VARCHAR},
+      </if>
+      <if test="aname != null" >
+        #{aname,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.CcArea" >
+    update tb_cc_area
+    <set >
+      <if test="areaId != null" >
+        area_id = #{areaId,jdbcType=VARCHAR},
+      </if>
+      <if test="aname != null" >
+        aname = #{aname,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!-- 分页查询区域定义列表 -->
+  <select id="pageCcArea" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ca.id, ca.area_id areaId, ca.aname,ca.sid,ca.remark, ac.`name` companyName
+    FROM tb_cc_area ca, tb_user_admin ua, tb_user_admin_authen_company ac
+    WHERE ca.sid = ua.sid AND ua.uid = ac.uid
+    AND 1 = 1 AND ca.status = '00'
+    <if test="params.sid!=null and ''!=params.sid">
+      and ca.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.aname!=null and ''!=params.aname">
+      and ca.aname LIKE "%"#{params.aname,jdbcType=VARCHAR}"%"
+    </if>
+    order by ca.ctime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="countAreaBySidAndAreaId" resultType="long" parameterType="com.e9cloud.mybatis.domain.CcArea" >
+    select
+    count(1)
+    from tb_cc_area
+    where
+    aname = #{aname,jdbcType=VARCHAR}
+    AND sid = #{sid,jdbcType=VARCHAR} AND status='00'
+    <if test="areaId != null and '' != areaId">
+      AND area_id != #{areaId,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 根据areaId 查询 区域 信息 -->
+  <select id="selectByAreaId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_area
+    where area_id = #{areaId,jdbcType=VARCHAR}
+  </select>
+
+  <update id="updateByAreaId" parameterType="com.e9cloud.mybatis.domain.CcArea" >
+    update tb_cc_area
+    <set >
+      <if test="aname != null" >
+        aname = #{aname,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where area_id = #{areaId,jdbcType=VARCHAR}
+  </update>
+
+  <update id="deleteCcArea" parameterType="java.lang.String" >
+    update tb_cc_area
+    <set >
+      status='01'
+    </set>
+    where area_id = #{areaId,jdbcType=INTEGER}
+  </update>
+</mapper>

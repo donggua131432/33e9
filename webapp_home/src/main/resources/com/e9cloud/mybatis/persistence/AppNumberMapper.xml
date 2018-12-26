@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppNumber_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppNumber" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="number_type" property="numberType" jdbcType="VARCHAR" />
+    <result column="number_status" property="numberStatus" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="reviewtime" property="reviewtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, appid, number, number_type, number_status, remark, addtime, reviewtime
+  </sql>
+  <select id="findAppNumberList" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.AppNumber" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_app_number
+    where 1=1
+    <if test="id!=null and ''!=id">
+      and id = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="numberStatus!=null and ''!=numberStatus">
+      and number_status = #{numberStatus,jdbcType=VARCHAR}
+    </if>
+    order by reviewtime desc
+  </select>
+
+  <update id="deleteAppNumbers" parameterType="java.lang.String" >
+    update tb_app_number set number_status='03' where id in
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </update>
+
+  <update id="clearAppNumberByAppId" parameterType="java.lang.String" >
+    update tb_app_number set number_status='03' where number_status='01' and appid=#{appid, jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insertAppNumbers" parameterType="java.util.List" >
+    insert into tb_app_number (appid, number, number_type, number_status, addtime) values
+    <foreach collection="list" item="item" index="index" separator="," >
+      (#{item.appid},#{item.number},#{item.numberType},'00',now())
+    </foreach>
+  </insert>
+
+  <update id="updateAppNumberById" parameterType="com.e9cloud.mybatis.domain.AppNumber" >
+    update tb_app_number
+    <set >
+      <if test="numberStatus != null" >
+        number_status = #{numberStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      reviewtime = now()
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="pageNumber" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_number
+    where 1=1
+    <if test="params.appid!=null and ''!=params.appid">
+      AND appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.number!=null and ''!=params.number">
+      AND number LIKE "%" #{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.number_status!=null and ''!=params.number_status">
+      AND number_status = #{params.number_status,jdbcType=VARCHAR}
+    </if>
+    ORDER BY FIELD(number_status,'02','01','00','03'),reviewtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="countNumByNumber" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.AppNumber" >
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM (
+    select id, appid, number, number_type, number_status, remark, addtime, reviewtime
+    from tb_app_number
+    where
+    appid = #{appid,jdbcType=VARCHAR}
+    AND number = #{number,jdbcType=VARCHAR}
+    )a
+    WHERE a.number_status='00' OR a.number_status='01' OR a.number_status='02'
+  </select>
+
+  <insert id="insertAppNumber" parameterType="com.e9cloud.mybatis.domain.AppNumber" >
+    insert into tb_app_number
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="numberType != null" >
+        number_type,
+      </if>
+      <if test="numberStatus != null" >
+        number_status,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+        addtime,
+      <if test="reviewtime != null" >
+        reviewtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="numberType != null" >
+        #{numberType,jdbcType=INTEGER},
+      </if>
+      <if test="numberStatus != null" >
+        #{numberStatus,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=INTEGER},
+      </if>
+      now(),
+      <if test="reviewtime != null" >
+        #{reviewtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <select id="findNumByAppidAndNumber" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.AppNumber" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_number
+    where
+    appid = #{appid,jdbcType=VARCHAR}
+    AND number = #{number,jdbcType=VARCHAR}
+  </select>
+
+  <update id="deleteAppNumber" parameterType="java.lang.Long" >
+    update tb_app_number
+    <set>
+      number_status = '03',
+      reviewtime = now()
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="getNumberInfo" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_number
+    where
+    id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <update id="reCommitAppNumber" parameterType="com.e9cloud.mybatis.domain.AppNumber" >
+    update tb_app_number
+    SET number_status = '00',number = #{number,jdbcType=VARCHAR},remark=#{remark,jdbcType=VARCHAR},addtime=#{addtime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="downloadAppNumReport" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_number
+    WHERE appid = #{params.appid}
+    <if test="params.number!=null and ''!=params.number" >
+      AND number LIKE "%" #{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.numberStatus != null and ''!=params.numberStatus" >
+      AND number_status = #{params.numberStatus,jdbcType=VARCHAR}
+    </if>
+    order by reviewtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+</mapper>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="User_Mapper">
+  <!-- 后台用户 -->
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.User" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="department_id" property="departmentId" jdbcType="VARCHAR"/>
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="salt" property="salt" jdbcType="VARCHAR" />
+    <result column="nick" property="nick" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="sys_type" property="sysType" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="roleName" property="roleName" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, username, password, salt, nick, sex, phone, email, status, create_time, department_id, sys_type
+  </sql>
+
+  <select id="selectByLoginName" resultMap="BaseResultMap" parameterType="string">
+    select
+    <include refid="Base_Column_List" />
+    from rms_user_account
+    where sys_type='D' AND username = #{username,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByLoginList" resultType="User" >
+    select
+    <include refid="Base_Column_List" />
+    from rms_user_account
+  </select>
+
+  <select id="getUserInfo" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.User" >
+    select
+    <include refid="Base_Column_List" />
+    from rms_user_account
+    where 1=1
+    <if test="id!=null and ''!=id">
+      and id = #{id,jdbcType=INTEGER}
+    </if>
+    <if test="username!=null and ''!=username">
+      and username = #{username,jdbcType=INTEGER}
+    </if>
+    <if test="phone!=null and ''!=phone">
+      and phone = #{phone,jdbcType=VARCHAR}
+    </if>
+    <if test="password!=null and ''!=password">
+      and password = #{password,jdbcType=VARCHAR}
+    </if>
+    <if test="salt!=null and ''!=salt">
+      and salt = #{salt,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="getUserRoleInfo" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select ua.id,ua.username,ua.password,ua.salt,ua.nick,ua.sex,ua.phone,ua.email,ua.status,ua.create_time,ua.department_id,ua.sys_type,group_concat(sr.`name`) as roleName
+    from rms_user_account ua,rms_sys_user_role ur,rms_sys_role sr
+    where ua.id=ur.user_id AND ur.role_id=sr.id AND ua.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from rms_user_account
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.User" >
+    update rms_user_account
+    <set >
+      <if test="departmentId != null" >
+        department_id = #{departmentId,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null" >
+        salt = #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="nick != null" >
+        nick = #{nick,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="pageUser" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    ua.id id, ua.username, ua.nick, ua.sex, ua.email,ua.sys_type sysType, ua.status, ua.create_time createTime,
+    sd.name departmentName
+    from rms_user_account ua, rms_sys_department sd
+    where ua.department_id = sd.id and ua.sys_type='D'
+    <if test="params.nick != null and params.nick != ''">
+      AND (ua.nick LIKE #{params.nick,jdbcType=VARCHAR}
+      or
+      ua.username LIKE #{params.nick,jdbcType=VARCHAR}
+      )
+    </if>
+
+    <if test="params.name != null and params.name != ''">
+      AND sd.name LIKE  "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 校验用户是否存在 -->
+  <select id="checkUserInfo" resultType="long" parameterType="com.e9cloud.mybatis.domain.User" >
+    select
+    count(1)
+    from rms_user_account
+    where 1=1 AND sys_type='D'
+    <if test="id!=null and ''!=id">
+      and id != #{id,jdbcType=INTEGER}
+    </if>
+    <if test="username!=null and ''!=username">
+      and username = #{username,jdbcType=INTEGER}
+    </if>
+    <if test="phone!=null and ''!=phone">
+      and phone = #{phone,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 插入用户和角色关联表数据 -->
+  <insert id="insertUserRole"  parameterType="com.e9cloud.mybatis.domain.UserRole">
+    INSERT INTO rms_sys_user_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 根据用户Id查找用户角色关系数据 -->
+  <select id="selectUserRoleByUserId" resultMap="UserRole_Mapper.BaseResultMap" parameterType="java.lang.Integer">
+    SELECT id , user_id, role_id
+    FROM rms_sys_user_role
+    WHERE user_id = #{userId}
+  </select>
+  <!-- 删除用户和角色关联表数据 -->
+  <delete id="deleteUserRole" parameterType="java.lang.String">
+    DELETE FROM rms_sys_user_role WHERE user_id = #{userId}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.User" >
+    insert into rms_user_account
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="salt != null" >
+        salt,
+      </if>
+      <if test="nick != null" >
+        nick,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="email != null" >
+        email,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="departmentId != null" >
+        department_id,
+      </if>
+      <if test="sysType != null" >
+        sys_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null" >
+        #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="nick != null" >
+        #{nick,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="departmentId != null" >
+        #{departmentId,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sysType != null" >
+        #{sysType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

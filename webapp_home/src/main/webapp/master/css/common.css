@@ -1,0 +1,109 @@
+/*****************通用样式*******************/
+html,body{min-width:1210px;}
+*{margin:0;padding:0;}
+body{position:relative;font-family: "Microsoft Yahei";font-size:14px;overflow:auto;}
+html,.API_container,.container,.header,.footer{width:100%;}
+.head_box,.main_box,.foot_box{width:1210px;margin:0 auto;}
+.CHeight{border-bottom:1px solid #39414E;}
+.f_left{float:left;}
+.f_right{float:right}
+.clear{clear:both;}
+.communication_simple{letter-spacing:10px;color:#548BEF;}
+a{text-decoration:none;outline:none;-moz-outline:none;}
+ul,ol,dl,li,dt,dd{list-style: none;}
+h1,h2,h3,h4,h5,h6{color:#ffffff;}
+/***********************qq服务样式*************************/
+.communication_simple{letter-spacing:10px;color:#548BEF;}
+.services_box{position:fixed;top:45%;right:0;z-index: 100;}
+.Nine_platform,.Service_tel{position:relative;display:inline-block;cursor: pointer;}
+.Service_tel{right:-35px;}
+.Online_box{margin:0 0 20px 35px;}
+/*.service_box{}*/
+.Nine_platform_main,.Service_tel_main{position:relative;display:inline-block;height:60px;vertical-align:middle;border-top-left-radius:4px;border-bottom-left-radius:4px;background:#fff;color:#384151;}
+.Nine_platform_main{position:absolute;right:-118px;width:118px;text-align: center;}
+.Service_tel_main{position:absolute;right:-153px;width:153px;}
+.nine_top{display:inline-block;margin-top:10px;}
+.tel1{display:inline-block;margin-top:10px;margin-left:15px;}
+.tel2{margin-left:15px;letter-spacing: 2px;}
+
+/*****************页头样式******************/
+.header{position:fixed;background:#1F242A;z-index: 120;}
+.head_box{height:87px;line-height: 87px;text-align: center;}
+.img_box{margin:0 8em 0 0; width:250px;height:55px;}
+.logo {display: inline-block;width: 248px;height: 60px;margin-top:22px;background:url("../img/logo21.png") 0 0 no-repeat;}
+.PRODUCT_right{margin-right:15px;}
+.SOLVE_right{margin-right:20px;}
+.API_DTD{margin-right:8px;}
+.PRICE{margin-right:8px;}
+/*.TEST_DOWNLOAD{width:80px !important;}*/
+.nav_title{display:inline-block;height:87px;margin-top:0;text-align:center;font-size:18px;color:#fff;padding-right:50px;}
+.nav_title:hover{text-decoration: none;color:#054DDB;}
+.register,.login{display:inline-block;width:96px;height:29px;line-height:29px;text-align: center;border-radius: 3px;font-size:16px;color:#FFF; border:1px solid #fff;}
+.register:hover,.login:hover{ text-decoration:none;padding:0 1px;border:none;color:#fff; background:#548BEF;}
+.register{ margin-left:30px;}
+.login{ margin-left:12px;}
+.control_center,.back{display:inline-block;margin-top:12px; height:27px; line-height: 27px;font-size: 18px; text-align: center; border-radius: 3px;}
+.control_center:hover,.back:hover{text-decoration:none;}
+.control_center:visited,.back:visited{text-decoration:none;color:#ffffff;}
+.control_center{margin-left:23px;width:130px;background:#548BEF;}
+.back{width:83px;}
+.container:before{content: "";display:table;margin-top:60px;}
+/****************页尾样式***************/
+.footer{background:#39414E;width:100%;height:300px;border-top:1px solid #39414E;}
+.foot1{ margin-top:2.5em;text-align: center;}
+.ul_left{margin-left:1em;}
+.list_right{width:175px;height:160px;margin-right: 1px;}
+.linePro{border-right:1px solid #29313E;text-align: left;}
+.lineCase{border-left:1px solid #49515E;border-right:1px solid #29313E;text-align: left;}
+.line1{border-left:1px solid #49515E;border-right:1px solid #29313E;}
+.line2{border-left:1px solid #49515E;border-right:1px solid #29313E;text-align: left;}
+.line3{border-left:1px solid #49515E;border-right:1px solid #29313E;}
+.line4{border-left:1px solid #49515E;}
+.list_right>p,.SWidth1>p,.SWidth2>p{margin-bottom:10px;}
+.foot1 h4{margin-bottom:15px;font-size:18px;letter-spacing:3px;color:#ffffff;font-weight: normal;}
+.HLeft{margin-left:10px;}
+.HRight{margin-left:30px;}
+.linePro>p{margin-left:10px;}
+.lineCase>p,.line2>p{margin-left:30px;}
+.SWidth1{margin-left:25px;width:118px;text-align: left;}
+.SWidth2{margin-left:15px;width:105px;text-align: left;}
+.list_right a{color:#A3A5AA;letter-spacing: 1px;}
+.foot1 a:hover{ color:#fff;text-decoration: underline;}
+.ewm{margin-top:18px;}
+.list{margin-top:40px;}
+.list img{border:none;}
+.foot2{padding-top:3em !important;}
+.foot2>p{text-align:center;color:#A3A5AA;}
+.foot2 a{color:#A3A5AA;line-height:25px;}
+.foot2 a:hover{color:#fff;text-decoration:underline;}
+.active{color:#5688E6 !important;}
+
+.RightNo{margin-right:0 !important;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

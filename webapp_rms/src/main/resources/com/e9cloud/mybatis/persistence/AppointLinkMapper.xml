@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppointLink_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppointLink" >
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <id column="xh_telno" property="xhTelno" jdbcType="VARCHAR"/>
+    <id column="dest_telno" property="destTelno" jdbcType="VARCHAR"/>
+    <id column="type" property="type" jdbcType="INTEGER"/>
+    <id column="rn" property="rn" jdbcType="VARCHAR"/>
+    <id column="remake" property="remake" jdbcType="VARCHAR"/>
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, xh_telno as xhTelno, dest_telno as destTelno, type, rn, remake
+  </sql>
+
+  <select id="pageAppointLinkList" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_appoint_link
+    where 1=1
+    <if test="params.xhTelno != null and params.xhTelno != ''">
+      and xh_telno LIKE "%"#{params.xhTelno,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.destTelno != null and params.destTelno != ''">
+      and dest_telno LIKE "%"#{params.destTelno,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.rn != null and params.rn != ''">
+      and rn LIKE "%"#{params.rn,jdbcType=VARCHAR}"%"
+    </if>
+    order by create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <insert id="saveAppointLink" parameterType="com.e9cloud.mybatis.domain.AppointLink" >
+    insert into tb_appoint_link
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="xhTelno != null" >
+        xh_telno,
+      </if>
+      <if test="destTelno != null" >
+        dest_telno,
+      </if>
+      type,
+      <if test="rn != null" >
+        rn,
+      </if>
+        remake,
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="xhTelno != null" >
+        #{xhTelno,jdbcType=VARCHAR},
+      </if>
+      <if test="destTelno != null" >
+        #{destTelno,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="type == null" >
+        NULL,
+      </if>
+      <if test="rn != null" >
+        #{rn,jdbcType=VARCHAR},
+      </if>
+      <if test="remake != null" >
+        #{remake,jdbcType=VARCHAR},
+      </if>
+      <if test="remake == null" >
+        NULL,
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <select id="queryAppointLinkInfoById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_appoint_link
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="queryAppointLinkInfo" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.AppointLink" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_appoint_link
+    where 1=1
+    <if test="xhTelno != null">
+      and xh_telno = #{xhTelno,jdbcType=VARCHAR}
+    </if>
+    <if test="destTelno != null">
+      and dest_telno = #{destTelno,jdbcType=VARCHAR}
+    </if>
+    <if test="rn != null and rn != ''">
+      and rn = #{rn,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <update id="updateAppointLinkInfo" parameterType="com.e9cloud.mybatis.domain.AppointLink" >
+    update tb_appoint_link
+    <set >
+      <if test="xhTelno != null" >
+        xh_telno = #{xhTelno,jdbcType=VARCHAR},
+      </if>
+      <if test="destTelno != null" >
+        dest_telno = #{destTelno,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="rn != null" >
+        rn = #{rn,jdbcType=VARCHAR},
+      </if>
+      <if test="remake != null" >
+        remake = #{remake,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <delete id="delAppointLinkInfo" parameterType="com.e9cloud.mybatis.domain.AppointLink" >
+    delete from tb_appoint_link
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+</mapper>

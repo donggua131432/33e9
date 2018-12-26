@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatCcHourRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatCcHourRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stathour" property="stathour" jdbcType="TIMESTAMP" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="CHAR" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="cname" property="cname" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, stathour, feeid, appid, subid, abline, operator, pname, cname, callcnt, succcnt,
+    answercnt, thscsum, jfscsum, fee
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_cc_hour_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="getDayRecordByHour" resultType="map" parameterType="map">
+    SELECT FORMAT(sum(sr.fee)/10000,3) fee,DATE_FORMAT(sr.stathour,'%H') d FROM stat_cc_hour_record sr, tb_cc_info cc
+    WHERE 1 = 1 AND cc.subid = sr.subid and cc.`status` = '00'
+    AND DATE_FORMAT(sr.stathour,'%Y年%c月%d日') = #{ym,jdbcType=VARCHAR} AND sr.feeid = #{feeid,jdbcType=VARCHAR}
+    group by  d
+  </select>
+
+  <select id="getDayRecordByCallCenter" resultType="map" parameterType="map">
+
+    select a.feeid,cc.ccname as callCenter, FORMAT(a.fee,3) fee ,a.fee fee2 from (
+    SELECT sr.appid,sr.feeid,sr.subid, sum(sr.fee)/10000 fee FROM stat_cc_hour_record sr
+    WHERE 1 = 1  AND DATE_FORMAT(sr.stathour,'%Y年%c月%d日') = #{ym,jdbcType=VARCHAR}
+    group by sr.subid
+    ) a, tb_cc_info cc where  a.subid = cc.subid AND a.feeid = #{feeid,jdbcType=VARCHAR} AND cc.`status` = '00' order by fee2 desc  LIMIT 10
+  </select>
+
+  <select id="getDayRecordTotal" resultType="string" parameterType="map">
+    SELECT FORMAT(sum(sr.fee)/10000,3) fee FROM stat_cc_hour_record sr, tb_cc_info cc
+    WHERE 1 = 1 AND cc.subid = sr.subid and cc.`status` = '00'
+    AND DATE_FORMAT(sr.stathour,'%Y年%c月%d日') = #{ym,jdbcType=VARCHAR} AND sr.feeid = #{feeid,jdbcType=VARCHAR}
+  </select>
+
+  <!-- ====================================================话务统计========================================================= -->
+  <select id="selectCcHourRecordPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+    stathour, appid, subid, feeid, abline, operator, pname, cname, sum(callcnt) as callcnt, sum(succcnt) as succcnt, sum(answercnt) as answercnt,
+    sum(thscsum) as thscsum, sum(jfscsum) as jfscsum, sum(fee) as fee
+    from stat_cc_hour_record
+    where 1 = 1
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.stathour!=null and ''!=params.stathour">
+      and stathour &gt;= str_to_date(#{params.stathour,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.stathour1!=null and ''!=params.stathour1">
+      and stathour &lt;= str_to_date(#{params.stathour1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.abline!=null and ''!=params.abline">
+      and abline = #{params.abline,jdbcType=VARCHAR}
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.operator!=null and ''!=params.operator">
+      and operator = #{params.operator,jdbcType=VARCHAR}
+    </if>
+    GROUP BY stathour,pname,subid,operator,abline ORDER  BY stathour DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+</mapper>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SipDayRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, statday, appid, subid, feeid, abline, callcnt, succcnt, answercnt, thscsum, jfscsum, 
+    fee
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_sip_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectSipDayRecordPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select <include refid="Base_Column_List" />
+    from stat_sip_day_record
+    where 1 = 1
+    <if test="params.statday!=null and ''!=params.statday">
+      and statday &gt;= str_to_date(#{params.statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.statday1!=null and ''!=params.statday1">
+      and statday &lt;= str_to_date(#{params.statday1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    ORDER  BY statday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <select id="selectSipDayRecordList" resultMap="BaseResultMap" parameterType="Page" >
+    select <include refid="Base_Column_List" />
+    from stat_sip_day_record
+    where 1 = 1
+    <if test="params.statday!=null and ''!=params.statday">
+      and statday &gt;= str_to_date(#{params.statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.statday1!=null and ''!=params.statday1">
+      and statday &lt;= str_to_date(#{params.statday1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    ORDER  BY statday DESC
+  </select>
+
+  <!-- sip消费报表（日报） -->
+  <select id="selectSipDayReportPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select feeid, appid, subid, date_format(statday,'%Y-%m-%d') as statday, sum(fee) as fee
+    from stat_sip_day_record
+    where 1 = 1
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.statday!=null and ''!=params.statday">
+      and statday &gt;= str_to_date(#{params.statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="params.statday1!=null and ''!=params.statday1">
+      and statday &lt;= str_to_date(#{params.statday1,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    GROUP BY subid,date_format(statday,'%Y-%m-%d') ORDER BY statday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- sip消费报表（月报） -->
+  <select id="selectSipMonthReportPage" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select feeid, appid, subid, date_format(statday,'%Y-%m') as statday, sum(fee) as fee
+    from stat_sip_day_record
+    where 1 = 1
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.subid!=null and ''!=params.subid">
+      and subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.statday!=null and ''!=params.statday">
+      and date_format(statday,'%Y-%m') = date_format(CONCAT(#{params.statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m')
+    </if>
+    GROUP BY subid,date_format(statday,'%Y-%m') ORDER BY statday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- sip本月消费总金额 -->
+  <select id="selectSipCurrentMonthSumFee" resultType="map" parameterType="java.util.Map" >
+    SELECT feeid, date_format(statday, '%Y-%m') as statday, sum(fee) as fee
+    FROM stat_sip_day_record
+    where feeid = #{feeid,jdbcType=VARCHAR} and date_format(statday,'%Y-%m') = date_format(CONCAT(#{statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m')
+  </select>
+
+  <!-- 昨日消费总金额 -->
+  <select id="selectSipYesterdaySumFee" resultType="map" parameterType="java.util.Map" >
+    SELECT feeid,date_format(statday, '%Y-%m-%d') as statday, sum(fee) as fee
+    FROM stat_sip_day_record
+    where feeid = #{feeid,jdbcType=VARCHAR} and date_format(statday,'%Y-%m-%d') = date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+  </select>
+
+
+  <!-- 本月消费总金额 wzj 由日统计表改为从视图中出-->
+  <select id="selectCurrentMonthSumFee" resultType="map" parameterType="java.util.Map" >
+    SELECT
+      feeid,date_format(statday, '%Y-%m') as statday,SUM(fee+recordingfee) as fee
+    FROM vi_stat_day_platform
+    WHERE feeid = #{feeid,jdbcType=VARCHAR}
+    AND date_format(statday,'%Y-%m') = date_format(CONCAT(#{statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m')
+    <!--SELECT a.feeid,a.statday,sum(a.fee) as fee FROM(
+    (SELECT feeid,date_format(statday, '%Y-%m') as statday,fee FROM stat_sip_day_record where date_format(statday,'%Y-%m') = date_format(CONCAT(#{statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m'))
+    UNION all
+    (SELECT feeid,date_format(stafday, '%Y-%m') as statday,(fee+recordingfee) as fee FROM stat_rest_day_record where date_format(stafday,'%Y-%m') = date_format(CONCAT(#{statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m'))
+    UNION all
+    (SELECT feeid,date_format(statday, '%Y-%m') as statday,(fee+recordingfee) as fee FROM stat_mask_day_record where date_format(statday,'%Y-%m') = date_format(CONCAT(#{statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m'))
+    UNION all
+    (SELECT feeid,date_format(statday, '%Y-%m') as statday,fee FROM stat_cc_day_record where date_format(statday,'%Y-%m') = date_format(CONCAT(#{statday,jdbcType=TIMESTAMP},'-01'),'%Y-%m'))
+    ) as a WHERE  a.feeid = #{feeid,jdbcType=VARCHAR};-->
+  </select>
+
+  <!-- 昨日消费总金额 wzj 由日统计表改为从视图中出-->
+  <select id="selectYesterdaySumFee" resultType="map" parameterType="java.util.Map" >
+    SELECT
+	feeid,date_format(statday, '%Y-%m-%d') as statday,SUM(fee+recordingfee) as fee
+    FROM vi_stat_day_platform
+    WHERE feeid = #{feeid,jdbcType=VARCHAR}
+    AND date_format(statday,'%Y-%m-%d') = date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    <!--SELECT a.feeid,a.statday,sum(a.fee) as fee FROM(
+    (SELECT feeid,date_format(statday, '%Y-%m-%d') as statday, fee FROM stat_sip_day_record where date_format(statday,'%Y-%m-%d') = date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d'))
+    UNION all
+    (SELECT feeid,date_format(stafday, '%Y-%m-%d') as statday,(fee+recordingfee) as fee FROM stat_rest_day_record where date_format(stafday,'%Y-%m-%d') = date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d'))
+    UNION all
+    (SELECT feeid,date_format(statday, '%Y-%m-%d') as statday,(fee+recordingfee) as fee FROM stat_mask_day_record where date_format(statday,'%Y-%m-%d') = date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d'))
+    UNION all
+    (SELECT feeid,date_format(statday, '%Y-%m-%d') as statday, fee FROM stat_cc_day_record where date_format(statday,'%Y-%m-%d') = date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d'))
+    ) as a WHERE  a.feeid = #{feeid,jdbcType=VARCHAR};-->
+  </select>
+</mapper>

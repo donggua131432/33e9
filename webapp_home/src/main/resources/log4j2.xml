@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="MyApp" packages="">
+    <Properties>
+        <Property name="appName">webapp_home</Property>
+        <Property name="logHome">${sys:logHome}</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d] [%-5level] [%l] -  %msg%xEx%n"/>
+        </Console>
+        <Syslog name="RFC5424" format="RFC5424" host="10.0.7.167" port="514"
+                protocol="UDP" appName="${appName}" mdcId="mdc" includeMDC="true"
+                facility="LOCAL0" enterpriseNumber="18060" newLine="true"
+                messageId="Audit" id="App">
+        </Syslog>
+        <!--这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFile" fileName="${logHome}/${appName}/${appName}.log"
+                     filePattern="${logHome}/${appName}/${date:yyyy-MM}/${appName}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%l]  - %msg%xEx%n"/>
+            <SizeBasedTriggeringPolicy size="20MB"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <Logger name="LOG" encoding="UTF-8">
+            <AppenderRef ref="RFC5424"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+    </Loggers>
+</Configuration>

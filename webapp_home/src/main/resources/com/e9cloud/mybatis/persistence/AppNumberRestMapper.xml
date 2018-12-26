@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppNumberRest_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppNumberRest" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="number_id" property="numberId" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, number_id, appid, number, addtime
+  </sql>
+  <select id="selectAppNumberRest" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.AppNumberRest">
+    select 
+    <include refid="Base_Column_List" />
+    from tb_app_number_rest
+    where 1=1
+    <if test="id!=null">
+      and id = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="numberId!=null">
+      and number_id = #{numberId,jdbcType=BIGINT}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="number!=null and ''!=number">
+      and number = #{number,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <delete id="clearAppNumberRestByAppId" parameterType="java.lang.String" >
+    delete from tb_app_number_rest where appid=#{appid, jdbcType=VARCHAR}
+  </delete>
+
+
+  <delete id="deleteNumberRestByNumberIds" parameterType="java.lang.String" >
+    delete from tb_app_number_rest where number_id in(
+      select id from tb_app_number where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+          #{id}
+        </foreach>
+    )
+  </delete>
+
+  <insert id="insertAppNumberRest" parameterType="java.util.List" >
+    insert into tb_app_number_rest (number_id, appid, number, addtime) values
+    <foreach collection="list" item="item" index="index" separator="," >
+      (#{item.numberId}, #{item.appid}, #{item.number}, now())
+    </foreach>
+  </insert>
+
+
+  <select id="selectAppNumberRestByNumbers" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_number_rest
+    where appid = #{appid,jdbcType=VARCHAR} and number in
+    <foreach collection="numbers" item="number" open="(" close=")" separator=",">
+      #{number}
+    </foreach>
+    order by number asc
+  </select>
+  <delete id="deleteAppNumberRest" parameterType="java.lang.Long" >
+    delete from tb_app_number_rest
+    where number_id = #{id,jdbcType=INTEGER}
+  </delete>
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppNumberRest_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppNumberRest" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="number_id" property="numberId" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, number_id, appid, number, addtime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_number_rest
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_app_number_rest
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.AppNumberRest" >
+    insert into tb_app_number_rest (number_id, appid,
+      number, addtime)
+    values (#{numberId,jdbcType=BIGINT}, #{appid,jdbcType=VARCHAR},
+      #{number,jdbcType=VARCHAR}, #{addtime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="listInsert" parameterType="java.util.List" >
+    insert into tb_app_number_rest(number_id, appid, number, addtime) VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.numberId,jdbcType=VARCHAR},#{item.appid,jdbcType=VARCHAR},#{item.number,jdbcType=VARCHAR},#{item.addtime,jdbcType=TIMESTAMP})
+    </foreach>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.AppNumberRest" >
+    update tb_app_number_rest
+    <set >
+      <if test="numberId != null" >
+        number_id = #{numberId,jdbcType=BIGINT},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.AppNumberRest" >
+    update tb_app_number_rest
+    set number_id = #{numberId,jdbcType=BIGINT},
+      appid = #{appid,jdbcType=VARCHAR},
+      number = #{number,jdbcType=VARCHAR},
+      addtime = #{addtime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+</mapper>

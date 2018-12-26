@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- 分页专用 -->
+<mapper namespace="com.e9cloud">
+	<sql id="pre">
+		<if test="doDownload==false">
+			<if test = "doAount==true">
+				SELECT COUNT(*) as counts FROM (
+			</if>
+			 <if test ="doAount==false">
+				SELECT _a.* FROM (
+			</if>
+		</if>
+	</sql>
+	<sql id="suf">
+		<if test="doDownload==false">
+			<if test ="doAount==true">
+				) _a
+			</if>
+			<if test ="doAount==false">
+			  ) _a  limit #{start,jdbcType=INTEGER},#{pageSize,jdbcType=INTEGER}
+			</if>
+		</if>
+	</sql>
+</mapper>

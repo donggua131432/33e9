@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VnWhite_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.rest.obt.VnWhite" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="VARCHAR" />
+    <result column="ntype" property="ntype" jdbcType="BIT" />
+    <result column="validTime" property="validtime" jdbcType="INTEGER" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sid, num, ntype, validTime, createTime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_vn_white
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_vn_white
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.rest.obt.VnWhite" >
+    insert into tb_vn_white (id, sid, num, 
+      ntype, validTime, createTime
+      )
+    values (#{id,jdbcType=INTEGER}, #{sid,jdbcType=VARCHAR}, #{num,jdbcType=VARCHAR}, 
+      #{ntype,jdbcType=BIT}, #{validtime,jdbcType=INTEGER}, #{createtime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.rest.obt.VnWhite" >
+    insert into tb_vn_white
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="ntype != null" >
+        ntype,
+      </if>
+      <if test="validtime != null" >
+        validTime,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=VARCHAR},
+      </if>
+      <if test="ntype != null" >
+        #{ntype,jdbcType=BIT},
+      </if>
+      <if test="validtime != null" >
+        #{validtime,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.rest.obt.VnWhite" >
+    update tb_vn_white
+    <set >
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=VARCHAR},
+      </if>
+      <if test="ntype != null" >
+        ntype = #{ntype,jdbcType=BIT},
+      </if>
+      <if test="validtime != null" >
+        validTime = #{validtime,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.rest.obt.VnWhite" >
+    update tb_vn_white
+    set sid = #{sid,jdbcType=VARCHAR},
+      num = #{num,jdbcType=VARCHAR},
+      ntype = #{ntype,jdbcType=BIT},
+      validTime = #{validtime,jdbcType=INTEGER},
+      createTime = #{createtime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatMaskDayRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatMaskDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, appid, subid, feeid, abline, callcnt, succcnt, thscsum, jfscsum, fee, 
+    recordingfee
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_mask_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <!-- 获取每天的消费总额 -->
+  <select id="selectMaskDayConsumeTotal" resultType="DECIMAL" parameterType="java.util.HashMap" >
+    select sum(fee+recordingfee) as day_fee
+    from stat_mask_day_record
+    where 1=1
+    <if test="statday!=null">
+      and date_format(statday,'%Y-%m-%d')=date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    group by date_format(statday, '%Y-%m-%d');
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from stat_mask_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.StatMaskDayRecord" >
+    insert into stat_mask_day_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="statday != null" >
+        statday,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="abline != null" >
+        abline,
+      </if>
+      <if test="callcnt != null" >
+        callcnt,
+      </if>
+      <if test="succcnt != null" >
+        succcnt,
+      </if>
+      <if test="thscsum != null" >
+        thscsum,
+      </if>
+      <if test="jfscsum != null" >
+        jfscsum,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="recordingfee != null" >
+        recordingfee,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="statday != null" >
+        #{statday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="abline != null" >
+        #{abline,jdbcType=CHAR},
+      </if>
+      <if test="callcnt != null" >
+        #{callcnt,jdbcType=INTEGER},
+      </if>
+      <if test="succcnt != null" >
+        #{succcnt,jdbcType=INTEGER},
+      </if>
+      <if test="thscsum != null" >
+        #{thscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jfscsum != null" >
+        #{jfscsum,jdbcType=INTEGER},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingfee != null" >
+        #{recordingfee,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.StatMaskDayRecord" >
+    update stat_mask_day_record
+    <set >
+      <if test="statday != null" >
+        statday = #{statday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="subid != null" >
+        subid = #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="abline != null" >
+        abline = #{abline,jdbcType=CHAR},
+      </if>
+      <if test="callcnt != null" >
+        callcnt = #{callcnt,jdbcType=INTEGER},
+      </if>
+      <if test="succcnt != null" >
+        succcnt = #{succcnt,jdbcType=INTEGER},
+      </if>
+      <if test="thscsum != null" >
+        thscsum = #{thscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jfscsum != null" >
+        jfscsum = #{jfscsum,jdbcType=INTEGER},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingfee != null" >
+        recordingfee = #{recordingfee,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

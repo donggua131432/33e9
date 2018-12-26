@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CcDispatchInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CcDispatchInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="dispatch_id" property="dispatchId" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="pri" property="pri" jdbcType="TINYINT" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, dispatch_id, subid, pri
+  </sql>
+
+  <select id="selectCcDispatchInfoList" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_cc_dispatch_info
+    where dispatch_id = #{dispatchId,jdbcType=INTEGER}
+    order by pri ASC
+  </select>
+
+  <delete id="deleteCcDispatchInfoByDispatchId" parameterType="java.lang.String" >
+    delete from tb_cc_dispatch_info
+    where dispatch_id = #{dispatchId,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertCcDispatchInfoList" parameterType="java.util.List" >
+    insert into tb_cc_dispatch_info (dispatch_id, subid, pri) values
+    <foreach collection="list" item="item" index="index" separator="," >
+      (#{item.dispatchId}, #{item.subid}, #{item.pri})
+    </foreach>
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.CcDispatchInfo" >
+    insert into tb_cc_dispatch_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="dispatchId != null" >
+        dispatch_id,
+      </if>
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="pri != null" >
+        pri,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="dispatchId != null" >
+        #{dispatchId,jdbcType=VARCHAR},
+      </if>
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="pri != null" >
+        #{pri,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.CcDispatchInfo" >
+    update tb_cc_dispatch_info
+    <set >
+      <if test="dispatchId != null" >
+        dispatch_id = #{dispatchId,jdbcType=VARCHAR},
+      </if>
+      <if test="subid != null" >
+        subid = #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="pri != null" >
+        pri = #{pri,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

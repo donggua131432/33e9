@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="EccExtention_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.EccExtention" >
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="eccid" property="eccid" jdbcType="VARCHAR" />
+    <result column="sub_num" property="subNum" jdbcType="VARCHAR" />
+    <result column="num_type" property="numType" jdbcType="VARCHAR" />
+    <result column="sipphone_id" property="sipphoneId" jdbcType="VARCHAR" />
+    <result column="fixphone_id" property="fixphoneId" jdbcType="VARCHAR" />
+    <result column="shownum_id" property="shownumId" jdbcType="VARCHAR" />
+    <result column="long_distance_flag" property="longDistanceFlag" jdbcType="VARCHAR" />
+    <result column="call_switch_flag" property="callSwitchFlag" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="BaseResultMapWithNum" type="com.e9cloud.mybatis.domain.EccExtention" extends="BaseResultMap">
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="shownum" property="shownum" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, eccid, sub_num, num_type, sipphone_id, fixphone_id, shownum_id, long_distance_flag, 
+    call_switch_flag, status, addtime, updatetime
+  </sql>
+
+  <!--  -->
+  <select id="selectExtentionByPK" resultMap="BaseResultMapWithNum" parameterType="string">
+    SELECT
+      ee.*, IF(ee.num_type = '01', es.sip_phone, ef.number) phone, eh.number shownum
+    from tb_ecc_extention ee
+	LEFT JOIN tb_ecc_sipphone es ON ee.sipphone_id = es.id
+    LEFT JOIN tb_ecc_fixphone ef ON ee.fixphone_id = ef.id
+    LEFT JOIN tb_ecc_shownum  eh ON ee.shownum_id = eh.id
+    where ee.id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="countExtentionByEccId" resultType="long" parameterType="string">
+      SELECT COUNT(*) FROM tb_ecc_extention
+      WHERE eccid = #{eccid,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 根据appid分页查询分机号 -->
+  <select id="pageExtention" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      ee.id, ee.appid, ee.eccid, ee.sub_num subNum, ee.num_type numType, ee.sipphone_id sipphoneid, ee.fixphone_id fixphoneid,
+      ee.long_distance_flag longDistanceFlag, ee.call_switch_flag callSwitchFlag, ee.`status`, ee.addtime, ee.updatetime,
+      es.sip_phone sipphone, es.pwd, es.ip_port ipPort, es.sip_realm sipRealm, ef.number fixphone,
+      IF(ee.num_type = '01' AND (ee.shownum_id is NULL OR ee.shownum_id = ''), eb.number, eh.number) showNum,
+      tp.pname, tc.cname
+    FROM (select * from tb_ecc_extention where appid = #{params.appid,jdbcType=VARCHAR}) ee
+    LEFT JOIN tb_ecc_sipphone es ON ee.sipphone_id = es.id
+    LEFT JOIN tb_ecc_fixphone ef ON ee.fixphone_id = ef.id
+    LEFT JOIN tb_ecc_shownum  eh ON ee.shownum_id = eh.id
+    LEFT JOIN tb_telno_city  	tc ON tc.ccode = IF(ee.num_type = '01', es.cityid, ef.cityid)
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    inner JOIN (select number from tb_ecc_switchboard where appid = #{params.appid,jdbcType=VARCHAR}) eb
+
+    WHERE ee.appid = #{params.appid,jdbcType=VARCHAR}
+    <if test="params.subNum != null and params.subNum != ''">
+      AND ee.sub_num LIKE "%"#{params.subNum,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.phone != null and params.phone != ''">
+      AND (
+        es.sip_phone LIKE "%"#{params.phone,jdbcType=VARCHAR}"%"
+        OR ef.number LIKE "%"#{params.phone,jdbcType=VARCHAR}"%"
+      )
+    </if>
+    <if test="params.showNum != null and params.showNum != ''">
+      AND IF(ee.num_type = '01' AND (ee.shownum_id is NULL OR ee.shownum_id = ''), eb.number, eh.number) LIKE "%"#{params.showNum,jdbcType=VARCHAR}"%"
+
+    </if>
+    <if test="params.numType != null and params.numType != ''">
+      AND ee.num_type = #{params.numType,jdbcType=VARCHAR}
+    </if>
+    <if test="params.callSwitchFlag != null and params.callSwitchFlag != ''">
+      AND ee.call_switch_flag = #{params.callSwitchFlag,jdbcType=VARCHAR}
+    </if>
+    <if test="params.longDistanceFlag != null and params.longDistanceFlag != ''">
+      AND ee.long_distance_flag = #{params.longDistanceFlag,jdbcType=VARCHAR}
+    </if>
+    <if test="params.pcode != null and params.pcode != ''">
+      AND tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode != ''">
+      AND tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="countSubNumByMap" resultType="long" parameterType="map">
+    SELECT count(1) FROM tb_ecc_extention ee
+    WHERE eccid = #{eccid,jdbcType=VARCHAR}
+    AND sub_num = #{subNum,jdbcType=VARCHAR}
+    <if test="extid != null and extid != ''">
+      AND id != #{extid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+
+  <select id="getExtentionNumList" resultType="map" parameterType="String">
+    SELECT
+    ee.id, ee.appid, ee.eccid, ee.sub_num subNum, ee.num_type numType, ee.sipphone_id sipphoneid, ee.fixphone_id fixphoneid,
+    ee.long_distance_flag longDistanceFlag, ee.call_switch_flag callSwitchFlag, ee.`status`, ee.addtime, ee.updatetime,
+    es.sip_phone sipphone, es.pwd, es.ip_port ipPort, es.sip_realm sipRealm, ef.number fixphone,
+    IF(ee.num_type = '01' AND (ee.shownum_id is NULL OR ee.shownum_id = ''), eb.number, eh.number) showNum,
+    tp.pname, tc.cname
+    FROM (select * from tb_ecc_extention where appid = #{appid,jdbcType=VARCHAR}) ee
+    LEFT JOIN tb_ecc_sipphone es ON ee.sipphone_id = es.id
+    LEFT JOIN tb_ecc_fixphone ef ON ee.fixphone_id = ef.id
+    LEFT JOIN tb_ecc_shownum  eh ON ee.shownum_id = eh.id
+    LEFT JOIN tb_telno_city  	tc ON tc.ccode = IF(ee.num_type = '01', es.cityid, ef.cityid)
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    inner JOIN (select number from tb_ecc_switchboard where appid = #{appid,jdbcType=VARCHAR}) eb
+    WHERE ee.appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_ecc_extention
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <!-- 开启禁用长途、开启禁用号码 -->
+  <update id="updateSubNumStatus" parameterType="com.e9cloud.mybatis.domain.EccExtention">
+    update tb_ecc_extention
+    <set>
+      <if test="longDistanceFlag != null" >
+        long_distance_flag = #{longDistanceFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="callSwitchFlag != null" >
+        call_switch_flag = #{callSwitchFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+     WHERE id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.EccExtention" >
+    update tb_ecc_extention
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="eccid != null" >
+        eccid = #{eccid,jdbcType=VARCHAR},
+      </if>
+      <if test="subNum != null" >
+        sub_num = #{subNum,jdbcType=VARCHAR},
+      </if>
+      <if test="numType != null" >
+        num_type = #{numType,jdbcType=VARCHAR},
+      </if>
+      <if test="sipphoneId != null" >
+        sipphone_id = #{sipphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="fixphoneId != null" >
+        fixphone_id = #{fixphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="shownumId != null" >
+        shownum_id = #{shownumId,jdbcType=VARCHAR},
+      </if>
+      <if test="longDistanceFlag != null" >
+        long_distance_flag = #{longDistanceFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="callSwitchFlag != null" >
+        call_switch_flag = #{callSwitchFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.EccExtention" >
+    insert into tb_ecc_extention (id, appid, eccid, 
+      sub_num, num_type, sipphone_id, 
+      fixphone_id, shownum_id, long_distance_flag, 
+      call_switch_flag, status, addtime, 
+      updatetime)
+    values (#{id,jdbcType=VARCHAR}, #{appid,jdbcType=VARCHAR}, #{eccid,jdbcType=VARCHAR}, 
+      #{subNum,jdbcType=VARCHAR}, #{numType,jdbcType=VARCHAR}, #{sipphoneId,jdbcType=VARCHAR}, 
+      #{fixphoneId,jdbcType=VARCHAR}, #{shownumId,jdbcType=VARCHAR}, #{longDistanceFlag,jdbcType=VARCHAR}, 
+      #{callSwitchFlag,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{addtime,jdbcType=TIMESTAMP}, 
+      #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.EccExtention" >
+    insert into tb_ecc_extention
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="eccid != null" >
+        eccid,
+      </if>
+      <if test="subNum != null" >
+        sub_num,
+      </if>
+      <if test="numType != null" >
+        num_type,
+      </if>
+      <if test="sipphoneId != null" >
+        sipphone_id,
+      </if>
+      <if test="fixphoneId != null" >
+        fixphone_id,
+      </if>
+      <if test="shownumId != null" >
+        shownum_id,
+      </if>
+      <if test="longDistanceFlag != null" >
+        long_distance_flag,
+      </if>
+      <if test="callSwitchFlag != null" >
+        call_switch_flag,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="eccid != null" >
+        #{eccid,jdbcType=VARCHAR},
+      </if>
+      <if test="subNum != null" >
+        #{subNum,jdbcType=VARCHAR},
+      </if>
+      <if test="numType != null" >
+        #{numType,jdbcType=VARCHAR},
+      </if>
+      <if test="sipphoneId != null" >
+        #{sipphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="fixphoneId != null" >
+        #{fixphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="shownumId != null" >
+        #{shownumId,jdbcType=VARCHAR},
+      </if>
+      <if test="longDistanceFlag != null" >
+        #{longDistanceFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="callSwitchFlag != null" >
+        #{callSwitchFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+</mapper>

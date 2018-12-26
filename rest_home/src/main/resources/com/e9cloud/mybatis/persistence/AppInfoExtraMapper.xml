@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppInfoExtra_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppInfoExtra" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="recording_type" property="recordingType" jdbcType="INTEGER" />
+    <result column="fee_url" property="feeUrl" jdbcType="VARCHAR" />
+    <result column="voice_code" property="voiceCode" jdbcType="VARCHAR" />
+    <result column="value_added" property="valueAdded" jdbcType="INTEGER" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, recording_type, fee_url, voice_code, value_added
+  </sql>
+
+  <select id="selectAppInfoExtraByAppId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_app_info_extra
+    where appid = #{appid,jdbcType=INTEGER}
+  </select>
+
+</mapper>

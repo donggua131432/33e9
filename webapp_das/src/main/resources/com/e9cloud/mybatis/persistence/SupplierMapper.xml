@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Supplier_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.Supplier" >
+    <id column="sup_id" property="supId" jdbcType="VARCHAR" />
+    <result column="sup_name" property="supName" jdbcType="VARCHAR" />
+    <result column="contacts" property="contacts" jdbcType="VARCHAR" />
+    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="pay_type" property="payType" jdbcType="CHAR" />
+    <result column="has_bond" property="hasBond" jdbcType="CHAR" />
+    <result column="bank_acc_name" property="bankAccName" jdbcType="VARCHAR" />
+    <result column="bank_acd_recipient" property="bankAcdRecipient" jdbcType="VARCHAR" />
+    <result column="bank_acc_num" property="bankAccNum" jdbcType="VARCHAR" />
+    <result column="atime" property="atime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    sup_id, sup_name, contacts, mobile ,address, pay_type, has_bond, bank_acc_name, bank_acd_recipient,
+    bank_acc_num, atime
+  </sql>
+
+  <select id="selectAllSupplier" resultMap="BaseResultMap">
+    SELECT
+     <include refid="Base_Column_List"/>
+    FROM tb_relay_supplier
+  </select>
+
+</mapper>

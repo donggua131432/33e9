@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserExternInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.UserExternInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="qq" property="qq" jdbcType="VARCHAR" />
+    <result column="weixin" property="weixin" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="atten_type1" property="attenType1" jdbcType="INTEGER" />
+    <result column="atten_way1" property="attenWay1" jdbcType="VARCHAR" />
+    <result column="atten_type2" property="attenType2" jdbcType="INTEGER" />
+    <result column="atten_way2" property="attenWay2" jdbcType="VARCHAR" />
+    <result column="atten_type3" property="attenType3" jdbcType="INTEGER" />
+    <result column="atten_way3" property="attenWay3" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, uid, qq, weixin, address, atten_type1, atten_way1, atten_type2, atten_way2, atten_type3, 
+    atten_way3, create_date, update_date
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_user_admin_externinfo
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_user_admin_externinfo
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.UserExternInfo" >
+    insert into tb_user_admin_externinfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="qq != null" >
+        qq,
+      </if>
+      <if test="weixin != null" >
+        weixin,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="attenType1 != null" >
+        atten_type1,
+      </if>
+      <if test="attenWay1 != null" >
+        atten_way1,
+      </if>
+      <if test="attenType2 != null" >
+        atten_type2,
+      </if>
+      <if test="attenWay2 != null" >
+        atten_way2,
+      </if>
+      <if test="attenType3 != null" >
+        atten_type3,
+      </if>
+      <if test="attenWay3 != null" >
+        atten_way3,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="uid != null" >
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="qq != null" >
+        #{qq,jdbcType=VARCHAR},
+      </if>
+      <if test="weixin != null" >
+        #{weixin,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="attenType1 != null" >
+        #{attenType1,jdbcType=INTEGER},
+      </if>
+      <if test="attenWay1 != null" >
+        #{attenWay1,jdbcType=VARCHAR},
+      </if>
+      <if test="attenType2 != null" >
+        #{attenType2,jdbcType=INTEGER},
+      </if>
+      <if test="attenWay2 != null" >
+        #{attenWay2,jdbcType=VARCHAR},
+      </if>
+      <if test="attenType3 != null" >
+        #{attenType3,jdbcType=INTEGER},
+      </if>
+      <if test="attenWay3 != null" >
+        #{attenWay3,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.UserExternInfo" >
+    update tb_user_admin_externinfo
+    <set >
+      <if test="uid != null" >
+        uid = #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="qq != null" >
+        qq = #{qq,jdbcType=VARCHAR},
+      </if>
+      <if test="weixin != null" >
+        weixin = #{weixin,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="attenType1 != null" >
+        atten_type1 = #{attenType1,jdbcType=INTEGER},
+      </if>
+      <if test="attenWay1 != null" >
+        atten_way1 = #{attenWay1,jdbcType=VARCHAR},
+      </if>
+      <if test="attenType2 != null" >
+        atten_type2 = #{attenType2,jdbcType=INTEGER},
+      </if>
+      <if test="attenWay2 != null" >
+        atten_way2 = #{attenWay2,jdbcType=VARCHAR},
+      </if>
+      <if test="attenType3 != null" >
+        atten_type3 = #{attenType3,jdbcType=INTEGER},
+      </if>
+      <if test="attenWay3 != null" >
+        atten_way3 = #{attenWay3,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="isExistUserExtern" resultType="int" parameterType="java.lang.String" >
+      select count(1) from tb_user_admin_externinfo where uid =  #{uid,jdbcType=VARCHAR}
+  </select>
+</mapper>

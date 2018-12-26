@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserAdminHistory_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.UserAdminHistory" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="cday" property="cday" jdbcType="VARCHAR" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+    <result column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="call_no" property="callNo" jdbcType="VARCHAR" />
+    <result column="token" property="token" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+    <result column="utype" property="utype" jdbcType="CHAR" />
+    <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+    <result column="salt" property="salt" jdbcType="VARCHAR" />
+    <result column="nick" property="nick" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="CHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="login_date" property="loginDate" jdbcType="TIMESTAMP" />
+    <result column="login_count" property="loginCount" jdbcType="INTEGER" />
+    <result column="auth_status" property="authStatus" jdbcType="CHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, cday, ctime, uid, sid, feeid, fee, call_no, token, email, mobile, utype, pwd, 
+    salt, nick, name, bus_type, status, create_date, update_date, login_date, login_count, 
+    auth_status
+  </sql>
+
+  <select id="selectBalanceHistoryListPage" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select u.sid, u.cday, u.ctime, u.fee, c.name
+    from tb_user_admin_history u left join tb_user_admin_authen_company c
+    on u.uid = c.uid
+    where 1=1
+    <if test="datemin != null">
+      And ctime &gt;= #{datemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="datemax != null">
+      And ctime &lt; #{datemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      And u.sid like "%"#{params.sid,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.customer_name != null and params.customer_name != ''">
+      And c.name like "%"#{params.customer_name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.price_min != null and params.price_min != '' and params.price_max != null and params.price_max != ''">
+      And u.fee BETWEEN #{params.price_min,jdbcType=INTEGER} AND #{params.price_max,jdbcType=INTEGER}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by u.${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="selectBalanceHistoryLisDownload" resultMap="BaseResultMap" parameterType="Page">
+    select u.sid, u.cday, u.ctime, u.fee, c.name
+    from tb_user_admin_history u left join tb_user_admin_authen_company c
+    on u.uid = c.uid
+    where 1=1
+    <if test="datemin != null">
+      And ctime &gt;= #{datemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="datemax != null">
+      And ctime &lt; #{datemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      And u.sid like "%"#{params.sid,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.customer_name != null and params.customer_name != ''">
+      And c.name like "%"#{params.customer_name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.price_min != null and params.price_min != '' and params.price_max != null and params.price_max != ''">
+      And u.fee BETWEEN #{params.price_min,jdbcType=INTEGER} AND #{params.price_max,jdbcType=INTEGER}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by u.${sidx} ${sord}
+    </if>
+  </select>
+
+</mapper>

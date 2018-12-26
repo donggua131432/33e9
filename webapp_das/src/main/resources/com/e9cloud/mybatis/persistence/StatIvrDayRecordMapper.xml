@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="StatIvrDayRecord_Mapper">
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatIvrDayRecord">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="statday" jdbcType="DATE" property="statday" />
+    <result column="rcdtype" jdbcType="VARCHAR" property="rcdtype" />
+    <result column="abline" jdbcType="CHAR" property="abline" />
+    <result column="sid" jdbcType="VARCHAR" property="sid" />
+    <result column="feeid" jdbcType="VARCHAR" property="feeid" />
+    <result column="appid" jdbcType="VARCHAR" property="appid" />
+    <result column="callcnt" jdbcType="INTEGER" property="callcnt" />
+    <result column="succcnt" jdbcType="INTEGER" property="succcnt" />
+    <result column="answercnt" jdbcType="INTEGER" property="answercnt" />
+    <result column="thscsum" jdbcType="INTEGER" property="thscsum" />
+    <result column="jfscsum" jdbcType="INTEGER" property="jfscsum" />
+    <result column="lyscsum" jdbcType="INTEGER" property="lyscsum" />
+    <result column="jflyscsum" jdbcType="INTEGER" property="jflyscsum" />
+    <result column="fee" jdbcType="DECIMAL" property="fee" />
+    <result column="recordingfee" jdbcType="DECIMAL" property="recordingfee" />
+    <result column="ctime" jdbcType="TIMESTAMP" property="ctime" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, statday, rcdtype, abline, sid, feeid, appid, callcnt, succcnt,
+    answercnt, thscsum, jfscsum, lyscsum, jflyscsum, fee, recordingfee, ctime
+  </sql>
+
+  <select id="selectEcc" resultType="map" parameterType="java.util.HashMap">
+    select CASE WHEN rcdtype='CallInSip' THEN '呼入总机SIP'
+    WHEN rcdtype='CallInNonSip' THEN '呼入总机非SIP'
+    WHEN rcdtype='CallInDirect' THEN '呼入直呼'
+    WHEN rcdtype='CallOutLocal' THEN '呼出市话'
+    WHEN rcdtype='CallOutNonLocal'THEN '呼出长途' END AS rcdtype,
+    sum(thscsum)as thscsum, sum(jfscsum)as jfscsum,
+    case when sum(answercnt)=0 then '0' else ROUND(sum(thscsum)/sum(answercnt),0) end as pjsc,
+    sum(lyscsum)as lyscsum,sum(jflyscsum)as jflyscsum,
+    CONCAT(CAST((sum(succcnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(answercnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    from stat_ivr_day_record
+    WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    group by rcdtype
+    ORDER BY rcdtype
+  </select>
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageIvrRecordList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      r.statday,ua.sid,ac.name as companyName, r.rcdtype,
+      r.abLine,r.appid,sum(r.callcnt) callcnt, sum(r.succcnt) succCnt,
+      CONCAT(CAST((sum(r.succcnt) / sum(r.callcnt) ) * 100 AS DECIMAL (5, 2)),'%') AS callRate,
+      CONCAT(CAST((sum(r.answercnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)),'%') AS callAnswerRate,
+      sum(r.lyscsum) lyscsum,
+      sum(r.jflyscsum) jflyscsum,
+      sum(r.thscsum) thscsum,
+      sum(r.jfscsum) jfscsum,
+      case when sum(r.answercnt) = 0 then '0' else ROUND(sum(r.thscsum)/sum(r.answercnt),0) end as pjsc,sum(r.fee) fee,
+      sum(r.recordingfee) recordingfee,
+      CASE WHEN sum(r.succcnt) = 0 THEN '0' ELSE ROUND(sum(r.thscsum) / sum(r.succcnt),0) END AS pjthsc,
+      (select sum(callcnt) from stat_ivr_day_record where feeid = r.feeid and statday = r.statday) as allCallCnt
+
+    FROM stat_ivr_day_record r,tb_user_admin ua,tb_user_admin_authen_company ac
+    WHERE r.feeid = ua.feeid AND ua.uid = ac.uid and r.abline='B'
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.rcdtype != null and params.rcdtype != ''">
+      and r.rcdtype =#{params.rcdtype,jdbcType=VARCHAR}
+    </if>
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.feeid,r.rcdtype
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.rcdtype
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.rcdtype
+    </if>
+      ORDER BY r.statday DESC,allCallCnt DESC,r.feeid,FIELD(r.rcdtype,'CallInSip','CallInNonSip','CallInDirect','CallOutLocal','CallOutNonLocal')
+    <include refid="com.e9cloud.suf"/>
+  </select>
+  <!--
+    m.statday,m.sid,m.companyName,m.rcdtype,m.abline,m.callcnt,m.callRate,m.callAnswerRate,m.thscsum,m.jfscsum,
+    m.pjsc,m.lyscsum,m.jflyscsum,m.fee,m.recordingfee
+    导出选取话务报表列表 -->
+  <select id="downloadIvrRecord" resultType="map" parameterType="Page">
+    SELECT
+      r.statday,ua.sid,ac.name as companyName, r.rcdtype,
+      r.abLine,r.appid,sum(r.callcnt) callcnt, sum(r.succcnt) succCnt,
+      CONCAT(CAST((sum(r.succcnt) / sum(r.callcnt) ) * 100 AS DECIMAL (5, 2)),'%') AS callRate,
+      CONCAT(CAST((sum(r.answercnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)),'%') AS callAnswerRate,
+      sum(r.lyscsum) lyscsum,
+      sum(r.jflyscsum) jflyscsum,
+      sum(r.thscsum) thscsum,
+      sum(r.jfscsum) jfscsum,
+      case when sum(r.answercnt) = 0 then '0' else ROUND(sum(r.thscsum)/sum(r.answercnt),0) end as pjsc,sum(r.fee) fee,
+      sum(r.recordingfee) recordingfee,
+      CASE WHEN sum(r.succcnt) = 0 THEN '0' ELSE ROUND(sum(r.thscsum) / sum(r.succcnt),0) END AS pjthsc,
+      (select sum(callcnt) from stat_ivr_day_record where feeid = r.feeid and statday = r.statday) as allCallCnt
+
+    FROM stat_ivr_day_record r,tb_user_admin ua,tb_user_admin_authen_company ac
+    WHERE r.feeid = ua.feeid AND ua.uid = ac.uid and r.abline='B'
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.rcdtype != null and params.rcdtype != ''">
+      and r.rcdtype =#{params.rcdtype,jdbcType=VARCHAR}
+    </if>
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.feeid,r.rcdtype
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.rcdtype
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.rcdtype
+    </if>
+    ORDER BY r.statday DESC,allCallCnt DESC,r.feeid,FIELD(r.rcdtype,'CallInSip','CallInNonSip','CallInDirect','CallOutLocal','CallOutNonLocal')
+  </select>
+
+  <!-- 按天统计 Ecc 云总机 话务走势 的话务情况 -->
+  <select id="countEccScanByDay" resultType="map" parameterType="map">
+    SELECT
+    SUM(sr.thscsum) thscsum,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.thscsum,0)) thscsumS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.thscsum,0)) thscsumNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.thscsum,0)) thscsumD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.thscsum,0)) thscsumL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.thscsum,0)) thscsumNL,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.thscsum,0))/SUM(if(sr.rcdtype='CallInSip',sr.succcnt,0)) thscAvgS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.thscsum,0))/SUM(if(sr.rcdtype='CallInNonSip',sr.succcnt,0)) thscAvgNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.thscsum,0))/SUM(if(sr.rcdtype='CallInDirect',sr.succcnt,0)) thscAvgD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.thscsum,0))/SUM(if(sr.rcdtype='CallOutLocal',sr.succcnt,0)) thscAvgL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.thscsum,0))/SUM(if(sr.rcdtype='CallOutNonLocal',sr.succcnt,0)) thscAvgNL,
+
+    SUM(sr.jfscsum) jfscsum,
+
+    SUM(sr.callcnt) callcnt,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.succcnt,0))/SUM(if(sr.rcdtype='CallInSip',sr.callcnt,0)) succcntS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.succcnt,0))/SUM(if(sr.rcdtype='CallInNonSip',sr.callcnt,0)) succcntNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.succcnt,0))/SUM(if(sr.rcdtype='CallInDirect',sr.callcnt,0)) succcntD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.succcnt,0))/SUM(if(sr.rcdtype='CallOutLocal',sr.callcnt,0)) succcntL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.succcnt,0))/SUM(if(sr.rcdtype='CallOutNonLocal',sr.callcnt,0)) succcntNL,
+
+    SUM(if(sr.rcdtype='CallInSip',sr.answercnt,0))/SUM(if(sr.rcdtype='CallInSip',sr.callcnt,0)) answercntS,
+    SUM(if(sr.rcdtype='CallInNonSip',sr.answercnt,0))/SUM(if(sr.rcdtype='CallInNonSip',sr.callcnt,0)) answercntNS,
+    SUM(if(sr.rcdtype='CallInDirect',sr.answercnt,0))/SUM(if(sr.rcdtype='CallInDirect',sr.callcnt,0)) answercntD,
+    SUM(if(sr.rcdtype='CallOutLocal',sr.answercnt,0))/SUM(if(sr.rcdtype='CallOutLocal',sr.callcnt,0)) answercntL,
+    SUM(if(sr.rcdtype='CallOutNonLocal',sr.answercnt,0))/SUM(if(sr.rcdtype='CallOutNonLocal',sr.callcnt,0)) answercntNL,
+
+    DATE_FORMAT(sr.statday,'%Y-%m-%d') d
+    FROM stat_ivr_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    AND sr.abline = 'B'
+    GROUP BY d
+  </select>
+
+</mapper>

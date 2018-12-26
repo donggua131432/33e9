@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SipAppNumPool_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipAppNumPool" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, number, max_concurrent, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_sip_app_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 根据号码查询sip信息 -->
+  <select id="selectSipNumberByNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List"/>
+    from tb_sip_app_numpool
+    where number = #{number,jdbcType=VARCHAR}
+  </select>
+
+
+  <!-- 分页获取Sip全局号码信息 -->
+  <select id="selectSipNumberList" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List"/>
+    from tb_sip_app_numpool
+    where appid = #{params.appid,jdbcType=VARCHAR}
+    and #{params.managerType,jdbcType=VARCHAR} = #{params.managerType,jdbcType=VARCHAR}
+    <if test="params.number!=null and ''!=params.number">
+      and number LIKE "%" #{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    order by create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 获取Sip全局号码信息-导出 -->
+  <select id="selectSipNumberListDownload" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List"/>
+    from tb_sip_app_numpool
+    where appid = #{params.appid,jdbcType=VARCHAR}
+    order by create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- 判断是否已删除号码 -->
+  <select id="checkSipNumUnique" resultType="long" parameterType="com.e9cloud.mybatis.domain.SipAppNumPool" >
+    select
+    count(1)
+    from tb_sip_app_numpool
+    where
+    <![CDATA[ 1<>1 ]]>
+    <if test="id!=null and ''!=id">
+      OR id = #{id,jdbcType=INTEGER}
+    </if>
+
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_sip_app_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.SipAppNumPool" >
+    insert into tb_sip_app_numpool (id, appid, number, 
+      max_concurrent, create_time)
+    values (#{id,jdbcType=INTEGER}, #{appid,jdbcType=VARCHAR}, #{number,jdbcType=VARCHAR}, 
+      #{maxConcurrent,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insetSIPNumberPool" parameterType="com.e9cloud.mybatis.domain.SipAppNumPool" >
+    insert into tb_sip_app_numpool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SipAppNumPool" >
+    update tb_sip_app_numpool
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.SipAppNumPool" >
+    update tb_sip_app_numpool
+    set appid = #{appid,jdbcType=VARCHAR},
+      number = #{number,jdbcType=VARCHAR},
+      max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <delete id="deleteStatusBylink" parameterType="java.lang.String" >
+    delete FROM tb_sip_app_numpool where id IN
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+
+  <!-- sip全局、子账号 号码池 -->
+  <select id="getSipNumList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT b.appid appid,b.number number,b.type type,b.subName subName,b.create_time createTime,b.sid accountId,ac.name companyName
+      FROM tb_user_admin AS ua ,tb_user_admin_authen_company ac,
+        (SELECT a.appid,a.number,a.type,a.subName,a.create_time,ai.sid FROM
+          (SELECT sr.appid,srn.number,N'1' AS type,sr.sub_name subName,srn.create_time
+            FROM tb_sip_relayinfo sr LEFT JOIN tb_sip_relay_numpool srn ON sr.subid=srn.subid
+            WHERE sr.`status`='00' AND srn.number IS NOT NULL
+           UNION ALL
+           SELECT san.appid,san.number,N'0' AS type,N'' AS subName,san.create_time
+            FROM tb_sip_app_numpool san) a,tb_app_info ai WHERE a.appid=ai.appid) b
+    where ua.sid = b.sid and ua.uid = ac.uid AND 1=1
+    <if test="params.accountId != null and params.accountId != ''">
+      and b.sid = #{params.accountId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.subName != null and params.subName != ''">
+      and b.subName LIKE "%"#{params.subName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.type != null and params.type != ''">
+      and b.type = #{params.type,jdbcType=VARCHAR}
+    </if>
+    <if test="params.number != null and params.number != ''">
+      and b.number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    ORDER BY b.create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <resultMap id="SipNumResultMap" type="com.e9cloud.mybatis.domain.SipNumPool" >
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <!-- 根据number获取sip全局、子账号 号码池 -->
+  <select id="getSipNumPoolByNumber" resultMap="SipNumResultMap" parameterType="Map">
+    SELECT a.appid,a.number,a.type,a.subid,a.create_time FROM
+    (SELECT sr.appid,srn.number,N'1' AS type,srn.create_time,srn.subid
+    FROM tb_sip_relayinfo sr LEFT JOIN tb_sip_relay_numpool srn ON sr.subid=srn.subid
+    WHERE sr.`status`='00' AND srn.number IS NOT NULL
+    UNION ALL
+    SELECT san.appid,san.number,N'0' AS type,san.create_time,N'' AS subid
+    FROM tb_sip_app_numpool san) a
+    WHERE 1=1
+    <if test="number != null">
+      AND a.number = #{number,jdbcType=VARCHAR}
+    </if>
+    <if test="type != null">
+      AND a.type = #{type,jdbcType=VARCHAR}
+    </if>
+    <if test="appid != null">
+      AND a.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+  </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SysAvar_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SysAvar" >
+    <id column="var" property="var" jdbcType="VARCHAR" />
+    <result column="varname" property="varname" jdbcType="VARCHAR" />
+    <result column="valtype" property="valtype" jdbcType="CHAR" />
+    <result column="ivalue" property="ivalue" jdbcType="INTEGER" />
+    <result column="cvalue" property="cvalue" jdbcType="VARCHAR" />
+    <result column="fvalue" property="fvalue" jdbcType="REAL" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    var, varname, valtype, ivalue, cvalue, fvalue, remark
+  </sql>
+
+  <select id="selectSysAvarByVar" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_sys_avar
+    where var = #{var,jdbcType=VARCHAR}
+  </select>
+
+</mapper>

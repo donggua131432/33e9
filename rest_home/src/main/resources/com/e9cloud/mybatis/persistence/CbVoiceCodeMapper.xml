@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CbVoiceCode_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.CbVoiceCode" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="bus_code" property="busCode" jdbcType="VARCHAR" />
+    <result column="voice_code" property="voiceCode" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, bus_code, voice_code, addtime, updatetime
+  </sql>
+  <select id="selectVoiceCodeByBusCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_cb_voice_code
+    where bus_code = #{busCode,jdbcType=INTEGER}
+  </select>
+</mapper>

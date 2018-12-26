@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatMaskHourRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatMaskHourRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stathour" property="stathour" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="jflyscsum" property="jflyscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="rcd_time" property="rcdTime" jdbcType="INTEGER" />
+    <result column="rcd_cnt" property="rcdCnt" jdbcType="INTEGER" />
+    <result column="rcd_bill_cnt" property="rcdBillCnt" jdbcType="INTEGER" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, stathour, appid, subid, feeid, abline, callcnt, succcnt, answercnt, thscsum, 
+    jfscsum, jflyscsum, fee, recordingfee, rcd_time, rcd_cnt, rcd_bill_cnt, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_mask_hour_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 按小时统计 专号通 话务走势 的话务情况 -->
+  <select id="countMaskScanByHour" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(if(sr.abline='A',sr.thscsum,0)) thscsumA,
+      SUM(if(sr.abline='B',sr.thscsum,0)) thscsumB,
+	  SUM(if(sr.abline='C',sr.thscsum,0)) thscsumC,
+
+      SUM(if(sr.abline='A',sr.thscsum,0))/SUM(if(sr.abline='A',sr.succcnt,0)) thscAvgA,
+      SUM(if(sr.abline='B',sr.thscsum,0))/SUM(if(sr.abline='B',sr.succcnt,0)) thscAvgB,
+	  SUM(if(sr.abline='C',sr.thscsum,0))/SUM(if(sr.abline='C',sr.succcnt,0)) thscAvgC,
+
+      SUM(sr.jfscsum) jfscsum,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(if(sr.abline='A',sr.succcnt,0))/SUM(if(sr.abline='A',sr.callcnt,0)) succcntA,
+      SUM(if(sr.abline='B',sr.succcnt,0))/SUM(if(sr.abline='B',sr.callcnt,0)) succcntB,
+	  SUM(if(sr.abline='C',sr.succcnt,0))/SUM(if(sr.abline='C',sr.callcnt,0)) succcntC,
+
+      SUM(if(sr.abline='A',sr.answercnt,0))/SUM(if(sr.abline='A',sr.callcnt,0)) answercntA,
+      SUM(if(sr.abline='B',sr.answercnt,0))/SUM(if(sr.abline='B',sr.callcnt,0)) answercntB,
+	  SUM(if(sr.abline='C',sr.answercnt,0))/SUM(if(sr.abline='C',sr.callcnt,0)) answercntC,
+
+      DATE_FORMAT(sr.stathour,'%H') h,
+      DATE_FORMAT(sr.stathour,'%Y-%m-%d %H') d
+    FROM stat_mask_hour_record sr
+    WHERE sr.stathour &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.stathour &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+</mapper>

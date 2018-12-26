@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MaskRate_Mapper">
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.MaskRate">
+    <id column="feeid" jdbcType="VARCHAR" property="feeid" />
+    <result column="start_date" jdbcType="DATE" property="startDate" />
+    <result column="end_date" jdbcType="DATE" property="endDate" />
+    <result column="forever" jdbcType="BIT" property="forever" />
+    <result column="fee_mode" jdbcType="VARCHAR" property="feeMode" />
+    <result column="maskA" jdbcType="DECIMAL" property="maska" />
+    <result column="maskA_discount" jdbcType="INTEGER" property="maskaDiscount" />
+    <result column="maskB" jdbcType="DECIMAL" property="maskb" />
+    <result column="maskB_discount" jdbcType="INTEGER" property="maskbDiscount" />
+    <result column="recording" jdbcType="DECIMAL" property="recording" />
+    <result column="recording_discount" jdbcType="INTEGER" property="recordingDiscount" />
+    <result column="callback" jdbcType="DECIMAL" property="callback" />
+    <result column="callback_discount" jdbcType="INTEGER" property="callbackDiscount" />
+    <result column="recording_callback" jdbcType="DECIMAL" property="recordingCallback" />
+    <result column="recording_callback_discount" jdbcType="INTEGER" property="recordingCallbackDiscount" />
+    <result column="rent" jdbcType="DECIMAL" property="rent" />
+    <result column="addtime" jdbcType="TIMESTAMP" property="addtime" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    feeid, start_date, end_date, forever, fee_mode, maskA, maskA_discount, maskB, maskB_discount, 
+    recording, recording_discount, callback, callback_discount, recording_callback, recording_callback_discount, 
+    rent, addtime
+  </sql>
+
+  <select id="selectMaskRateByFeeId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from rms_mask_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from rms_mask_rate
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertMaskRate" parameterType="com.e9cloud.mybatis.domain.MaskRate">
+    insert into rms_mask_rate
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="feeid != null">
+        feeid,
+      </if>
+      <if test="startDate != null">
+        start_date,
+      </if>
+      <if test="endDate != null">
+        end_date,
+      </if>
+      <if test="forever != null">
+        forever,
+      </if>
+      <if test="feeMode != null">
+        fee_mode,
+      </if>
+      <if test="maska != null">
+        maskA,
+      </if>
+      <if test="maskaDiscount != null">
+        maskA_discount,
+      </if>
+      <if test="maskb != null">
+        maskB,
+      </if>
+      <if test="maskbDiscount != null">
+        maskB_discount,
+      </if>
+      <if test="recording != null">
+        recording,
+      </if>
+      <if test="recordingDiscount != null">
+        recording_discount,
+      </if>
+      <if test="callback != null">
+        callback,
+      </if>
+      <if test="callbackDiscount != null">
+        callback_discount,
+      </if>
+      <if test="recordingCallback != null">
+        recording_callback,
+      </if>
+      <if test="recordingCallbackDiscount != null">
+        recording_callback_discount,
+      </if>
+      <if test="rent != null">
+        rent,
+      </if>
+      addtime,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="feeid != null">
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null">
+        #{forever,jdbcType=BIT},
+      </if>
+      <if test="feeMode != null">
+        #{feeMode,jdbcType=VARCHAR},
+      </if>
+      <if test="maska != null">
+        #{maska,jdbcType=DECIMAL},
+      </if>
+      <if test="maskaDiscount != null">
+        #{maskaDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="maskb != null">
+        #{maskb,jdbcType=DECIMAL},
+      </if>
+      <if test="maskbDiscount != null">
+        #{maskbDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="recording != null">
+        #{recording,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingDiscount != null">
+        #{recordingDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="callback != null">
+        #{callback,jdbcType=DECIMAL},
+      </if>
+      <if test="callbackDiscount != null">
+        #{callbackDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="recordingCallback != null">
+        #{recordingCallback,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingCallbackDiscount != null">
+        #{recordingCallbackDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="rent != null">
+        #{rent,jdbcType=DECIMAL},
+      </if>
+      NOW(),
+    </trim>
+  </insert>
+
+  <update id="updateMaskRate" parameterType="com.e9cloud.mybatis.domain.MaskRate">
+    update rms_mask_rate
+    <set>
+      <!--<if test="startDate != null">
+        start_date = #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null">
+        end_date = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null">
+        forever = #{forever,jdbcType=BIT},
+      </if>-->
+
+      <if test="forever != null" >
+        start_date = #{startDate,jdbcType=DATE},
+        end_date = #{endDate,jdbcType=DATE},
+        forever = #{forever,jdbcType=BIT},
+      </if>
+      <if test="feeMode != null">
+        fee_mode = #{feeMode,jdbcType=VARCHAR},
+      </if>
+      <if test="maska != null">
+        maskA = #{maska,jdbcType=DECIMAL},
+      </if>
+      <if test="maskaDiscount != null">
+        maskA_discount = #{maskaDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="maskb != null">
+        maskB = #{maskb,jdbcType=DECIMAL},
+      </if>
+      <if test="maskbDiscount != null">
+        maskB_discount = #{maskbDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="recording != null">
+        recording = #{recording,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingDiscount != null">
+        recording_discount = #{recordingDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="callback != null">
+        callback = #{callback,jdbcType=DECIMAL},
+      </if>
+      <if test="callbackDiscount != null">
+        callback_discount = #{callbackDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="recordingCallback != null">
+        recording_callback = #{recordingCallback,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingCallbackDiscount != null">
+        recording_callback_discount = #{recordingCallbackDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="rent != null">
+        rent = #{rent,jdbcType=DECIMAL},
+      </if>
+      <if test="addtime != null">
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where feeid = #{feeid,jdbcType=VARCHAR}
+  </update>
+
+
+  <!-- ==================== 费率信息联表查询rms_mask_rate,tb_user_admin_authen_company,tb_user_admin  start ==================== -->
+  <resultMap id="MaskRateUnionResult" type="com.e9cloud.mybatis.domain.MaskRate" extends="BaseResultMap">
+    <association property="userAdmin" column="feeid" javaType="com.e9cloud.mybatis.domain.UserAdmin">
+      <id column="uid" property="uid" jdbcType="VARCHAR" />
+      <result column="sid" property="sid" jdbcType="VARCHAR" />
+      <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    </association>
+    <association property="authenCompany" column="uid" javaType="com.e9cloud.mybatis.domain.AuthenCompany">
+      <id column="id" property="id" jdbcType="INTEGER" />
+      <result column="uid" property="uid" jdbcType="VARCHAR" />
+      <result column="name" property="name" jdbcType="VARCHAR" />
+      <result column="address" property="address" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+
+  <select id="selectMaskRateUnionInfo" resultMap="MaskRateUnionResult" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    select a.*,b.name,c.uid,c.sid from rms_mask_rate as a, tb_user_admin_authen_company as b, tb_user_admin as c where a.feeid = c.feeid and c.uid = b.uid
+    <if test="uid!=null and ''!=uid">
+      and c.uid = #{uid,jdbcType=VARCHAR}
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and c.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and c.feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+
+  <!-- ==================== 费率信息分页联表查询rms_call_rate,tb_user_admin_authen_company,tb_user_admin  start ==================== -->
+  <select id="selectPageMaskRateUnion" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select a.*,b.name,c.uid,c.sid
+    from rms_mask_rate as a, tb_user_admin_authen_company as b, tb_user_admin as c
+    where a.feeid = c.feeid and c.uid = b.uid
+    <if test="params.uid!=null and ''!=params.uid">
+      and c.uid = #{params.uid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and c.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.feeid!=null and ''!=params.feeid">
+      and c.feeid = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name!=null and ''!=params.name">
+      and b.name LIKE "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.endDate!=null and ''!=params.endDate">
+      and a.end_date &gt;= str_to_date(#{params.endDate,jdbcType=DATE},'%Y-%m-%d')
+    </if>
+    <if test="params.endDate1!=null and ''!=params.endDate1">
+      and a.end_date &lt;= str_to_date(#{params.endDate1,jdbcType=DATE},'%Y-%m-%d')
+    </if>
+
+    <if test="params.addtime!=null and ''!=params.addtime">
+      and a.addtime &gt;= str_to_date(#{params.addtime,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    <if test="params.addtime1!=null and ''!=params.addtime1">
+      and a.addtime &lt;= str_to_date(#{params.addtime1,jdbcType=TIMESTAMP},'%Y-%m-%d %H:%i:%s')
+    </if>
+    order by a.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+
+</mapper>

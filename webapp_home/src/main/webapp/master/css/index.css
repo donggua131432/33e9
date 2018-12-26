@@ -1,0 +1,133 @@
+
+*{ margin:0; padding:0;}
+body {
+    /*padding-top:87px;*/
+    font-family: "Microsoft Yahei";
+    overflow:auto;
+}
+article,aside,dialog,footer,header,section,footer,nav,figure,menu{display:block;}
+.f_left{float:left;}
+.f_right{float:right}
+.clear{clear:both;}
+a{outline:none;-moz-outline:none;}
+
+/********************页头样式**********************/
+.PRODUCT_right{margin-right:15px;}
+.SOLVE_right{margin-right:20px;}
+.API_DTD{margin-right:8px;}
+.PRICE{margin-right:8px;}
+.nav_title{display:inline-block;padding-right:50px;height:87px;line-height:87px;margin-top:0;text-align:center;font-size:18px;color:#fff;}
+.nav_title:hover{color:#054DDB;text-decoration: none;}
+.register,.login{display:inline-block;width:98px;height:31px;line-height:29px;text-align: center;border-radius: 3px;font-size:16px;color:#FFF; border:1px solid #fff;}
+.register:hover,.login:hover{ text-decoration:none;padding:0 1px;border:none;color:#fff; background:#548BEF;}
+.register{ margin-left:30px;}
+.login{ margin-left:12px;}
+.control_center,.back{display:inline-block;margin-top:12px; height:27px; line-height: 27px;font-size: 18px; text-align: center; border-radius: 3px;}
+.control_center:hover,.back:hover{text-decoration:none;}
+.control_center:visited,.back:visited{text-decoration:none;color:#ffffff;}
+.control_center{margin-left:23px;width:130px;background:#548BEF;}
+.back{width:83px;}
+.logo { display: inline-block;margin:22px 0 0 1px;width: 248px; background:url("../img/logo21.png") 0 0 no-repeat;}
+.head_main{background:#3F4857; position:relative; overflow: hidden;padding-top:40px;}
+.head_main:before{content:"";}
+
+/*****************侧边QQ服务样式**********************/
+
+.services_box{position:fixed;top:45%;right:0;z-index: 100;}
+.Nine_platform,.Service_tel{position:relative;display:inline-block;cursor: pointer;}
+.Service_tel{right:-35px;}
+.Online_box{margin:0 0 20px 35px;}
+/*.service_box{}*/
+.Nine_platform_main,.Service_tel_main{position:relative;display:inline-block;height:60px;vertical-align:middle;border-top-left-radius:4px;border-bottom-left-radius:4px;background:#fff;color:#384151;}
+.Nine_platform_main{position:absolute;right:-118px;width:118px;text-align: center;}
+.Service_tel_main{position:absolute;right:-153px;width:153px;}
+.nine_top{display:inline-block;margin-top:10px;}
+.tel1{display:inline-block;margin-top:10px;margin-left:15px;}
+.tel2{margin-left:15px;letter-spacing: 2px;}
+
+/*******************首页内容样式********************/
+.head_box{ margin-top:40px; text-align:center;}
+.logo_big img{display:inline-block;}
+/*.logo_font{margin-top:20px;}*/
+.logo_font>img{margin:0 auto;}
+.k_begin{margin-top:35px;}
+.k_begin>img{margin:0 auto;cursor: pointer;}
+.arrows{position: relative;}
+.arrows_box{margin:90px auto 0 ;width:80px;height:80px;cursor:pointer;}
+.arrows_box>img{margin:0 auto;}
+.sec_main1,.sec_main2{ width:100%;height:700px;}
+.sec_main1 h1{ margin-bottom:30px;padding-top:15px;font-weight: normal;font-size:40px;letter-spacing:4px;}
+.btm{ margin-bottom:45px;}
+.sec_main2 h1{margin-bottom:30px; padding-top:30px;font-weight: normal;font-size:40px;letter-spacing:4px;}
+.main2 p,.main3 p{letter-spacing:1px;}
+p{ margin-top:20px;font-size:18px;color:#B7B9BB;}
+h1{color:#fff;}
+a{ color:#fff;}
+a.hov{
+    display: block;
+    width:180px;
+    height:45px;
+    line-height:40px;
+    border:1px solid #fff;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 3px;
+    /*font-weight: bold;*/
+    color:#fff;
+    margin-top:5px;
+}
+a.hov:hover{border:none;text-decoration: none; background:#548bef;padding-top:1px;}
+.main2{margin-top:140px;}
+.main3{margin-top:120px;}
+.main3 .mar_top{ margin-top:20px;}
+.bottom{ margin-bottom:110px;}
+.sec_main1{background: #3C4556;}
+.sec_main2{ background:#394251;}
+.banner{width:100%;height:725px; background:#42495B;}
+.ban_1,.ban_2{ text-align: center;}
+.ban_1 h1{ margin-top:60px;margin-bottom:55px;font-size:40px;letter-spacing:3px;}
+.ban_2{ margin-bottom:66px;}
+.ban_2 span{border-top:1px solid #4E5666; padding-top:20px; letter-spacing:8px;font-size:20px; color:#AEB1B4;}
+.ban_3 a{ display:block; margin-bottom:30px;}
+.change{ box-shadow: 0 0 2px 2px #548BEF;}
+
+/*****************页尾样式********************/
+.footer{ width:100%;height:300px;background:#39414E;border:1px solid #42495B;}
+.foot_box{margin:0 auto;width:1210px;}
+.foot1{ margin-top:2.5em;text-align: center;}
+.ul_left{margin-left:1em;}
+.list_right{width:175px;height:160px;margin-right: 1px;}
+.linePro{border-right:1px solid #29313E;text-align: left;}
+.lineCase{border-left:1px solid #49515E;border-right:1px solid #29313E;text-align: left;}
+.line1{border-left:1px solid #49515E;border-right:1px solid #29313E;}
+.line2{border-left:1px solid #49515E;border-right:1px solid #29313E;text-align: left;}
+.line3{border-left:1px solid #49515E;border-right:1px solid #29313E;}
+.line4{border-left:1px solid #49515E;}
+.list_right>p,.SWidth1>p,.SWidth2>p{margin-bottom:-12px;}
+.foot1 h4{margin-bottom:5px !important;font-size:18px;letter-spacing:3px;color:#ffffff;font-weight: normal;}
+.ALeft{margin-top: 15px;}
+.HLeft{margin-left:10px;}
+.HRight{margin-left:30px;}
+.SWidth1{margin-left:25px;width:118px;text-align: left;}
+.SWidth2{margin-left:15px;width:105px;text-align: left;}
+.linePro>p{margin-left:10px;}
+.lineCase>p,.line2>p{margin-left:30px;}
+.list_right a{color:#A3A5AA;letter-spacing: 1px;font-weight: normal;font-size: 14px !important;}
+.foot1 a:hover{ color:#fff;text-decoration: underline;}
+.ewm{margin-top:1.8em;}
+.list{margin-top:40px;}
+.list img{border:none;}
+.foot2{padding-top:2em;}
+.foot2>p{text-align:center;font-size:14px;color:#A3A5AA;;font-weight: normal;}
+.foot2 a{color:#A3A5AA;}
+.foot2 a:hover{color:#fff;}
+.active{color:#5688E6 !important;}
+
+/*专通号*/
+.DeigMian{width:1175px;height:auto;overflow:hidden;margin:0 auto;padding-top:80px;}
+.DeigMian .DeiImg{width:626px;height:538px;}
+.DeTit{color:#fff;font-size:60px;padding:60px 0px 15px 0px;}
+.TextTop{padding-top:20px !important;}
+.Left20{padding-right:20px;}
+.Dbtn-bottom{margin-bottom:80px;}

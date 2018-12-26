@@ -1,0 +1,66 @@
+body,html{min-width:1200px;overflow:hidden;}
+*{margin:0;padding:0;}
+body{ position: relative;font-family: "Microsoft Yahei" ;color:#FFFFFF;font-size:14px;}
+a{text-decoration:none;color:#79A1EB;}
+a:link{color:#79A1EB;}
+input{font-family: "Microsoft Yahei" ;}
+/*.operatingBg{width:100%;background-image:url("../images/operatingBg.png");background-repeat:no-repeat;background-position:bottom;background-size:cover;}*/
+.operatingBg{width:100%;height:1080px;background:url("../images/operatingBg.png") center center no-repeat;}
+.operationalBg{width:100%;height:1080px;background:url("../images/operationalBg.png") center center no-repeat;}
+.dataCenterBg{width:100%;height:1080px;background:url("../images/dataCenter.png") center center no-repeat;}
+.souFangBg{width:100%;height:1080px;background:url("../images/souFangBg.png") center center no-repeat;text-align: center;}
+.souFangLogo{width:100%;height:71px;background:#CC0101;}
+.souFangLogo>img{margin:16px 0 0 50px;}
+.operatingBg:before,.operationalBg:before,.dataCenterBg:before,.souFangBg:before{content:"";display: table;line-height: 0;}
+.headLogo{margin:30px 0 0 30px;}
+.operationFont{margin:50px auto;text-align: center;}
+.commonHeadFont{margin:80px auto;text-align: center;}
+.souFangFont{margin:150px auto 50px;text-align: center;}
+.operationFont>p{font-size: 36px;letter-spacing: 3px;text-shadow:1px 1px 1px #C5ECF7;}
+.commonHeadFont>p{font-size: 46px;letter-spacing: 3px;text-shadow:1px 1px 1px #C5ECF7;}
+.souFangFont>p{font-size: 52px;letter-spacing: 3px;text-shadow:1px 1px 1px #D9C0C6;color:#D40101;}
+.operatingTop{margin-top:50px;}
+.operaTop{margin-top:10px;}
+.platformTop{margin-top:20px;}
+.inputStyle{padding-left:8px;width:300px;height:35px;border-radius:5px;font-size: 16px;letter-spacing: 1px;color:#666666;}
+.operatingBorder{border:1px solid #1B5ED7;}
+.operationalBorder{border:1px solid #42D8AA;}
+.dataCenterBorder{border:1px solid #51A9E2;}
+.souFangBorder{border:1px solid #FEAB49;}
+.RAccount{width:14px;height:14px;vertical-align: middle;margin-right:5px;}
+.souFangRAccount{outline: none;-moz-outline:none;margin-right:5px;}
+.blackFont{color:#333333 !important;}
+.whiteFont{color:#FFFFFF !important;}
+.operating_txt,.operational_txt,.dataCenter_txt{display: inline-block;width:14px;height: 14px;vertical-align: -2px;}
+.operating_txt{background:url("../images/operatingQuestion.png") 0 0 no-repeat;}
+.operational_txt{background:url("../images/operationalQuestion.png") 0 0 no-repeat;}
+.dataCenter_txt{background:url("../images/dataCenterQuestion.png") 0 0 no-repeat;}
+.passwordStyle{margin-left:140px;}
+.operatingBtn,.operationalBtn,.dataCenterBtn,.souFangBtn,.aiwuBtn,.zyBtn{margin-top:20px;padding-left:15px;border:none;border-radius:5px;width:310px;height:35px;font-family:"Microsoft Yahei" ;font-size:18px;letter-spacing:15px;color:#ECF1FD;cursor:pointer;}
+.operatingBtn{background:#1B67F1;}
+.operatingBtn:hover{background:#053BA0;}
+.operationalBtn{background:#0DCE95;}
+.operationalBtn:hover{background:#0D8662;}
+.dataCenterBtn{background:#3179F2;}
+.dataCenterBtn:hover{background:#0A43A5;}
+.souFangBtn{background:#E61010;}
+.souFangBtn:hover{background:#A00303;}
+.errorPropBox{position:relative;left:-34px;margin:auto;margin-top:25px;width:240px;height:35px;line-height:35px;border-radius:5px;background:#FEFFFF;}
+.triangleTip{position:absolute;top:-10px;left:15px;width:0;height:0;border-bottom: 10px solid white;border-left: 8px solid transparent;border-right: 8px solid transparent;}
+.triangleGery{border-bottom: 10px solid #DDDDDD !important;}
+.error{letter-spacing:1px;color:#EA5153 !important;}
+
+/*玖云运营管理平台*/
+.jiuCloudBg{background:url("../images/CloudDateBg.png") no-repeat top center;}
+.jiuCloud h2{font-size:60px;letter-spacing:4px;color:#fff;padding-top:50px;font-weight: normal;margin:50px auto;text-align: center;}
+.jiuCloud_line{border:1px solid #00dff1;}
+.jiuCloundIco{background:url("../images/CloudDateIco.png") no-repeat;width:12px;height:12px;display:inline-block;}
+.inputW350{width:350px !important;height:40px !important;}
+.inputW360{width:360px !important;height:40px !important;}
+.jiuCloudBtn{font-family:"Microsoft Yahei";width:360px;background:#01dff4;color:#000032;margin-top:20px;border:none;border-radius:5px;font-size:18px;letter-spacing:15px;cursor:pointer; outline: none;}
+.jiuCloudBtn:hover{background:#02ccdf;}
+.Left60{left:-60px !important;}
+.PasswordMj{margin-left:200px;}
+.jiuCloudBg2{background:url("../images/cloudOperationsBg.png") no-repeat top center;}
+
+.error{letter-spacing:1px;color:#EA5153 !important;}

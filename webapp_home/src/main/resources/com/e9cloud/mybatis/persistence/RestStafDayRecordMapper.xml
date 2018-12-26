@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RestStafDayRecord_Mapper" >
+  <!-- 消费统计 -->
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RestStafDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stafday" property="stafDay" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abLine" jdbcType="CHAR" />
+    <result column="callcnt" property="callCnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succCnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscSum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscSum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingFee" jdbcType="DECIMAL" />
+    <result column="sum_fee" property="sumFee" jdbcType="DECIMAL" />
+    <result column="sum_recordingfee" property="sumRecordingfee" jdbcType="DECIMAL" />
+    <result column="total_fee" property="totalFee" jdbcType="DECIMAL" />
+    <result column="day_fee" property="dayFee" jdbcType="DECIMAL" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, stafday, appid, subid, feeid, abline, callcnt, succcnt, thscsum, jfscsum, fee, recordingfee
+  </sql>
+  <select id="selectRestStafDayRecordByObj" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.RestStafDayRecord" >
+    select
+    <include refid="Base_Column_List" />
+    from stat_rest_day_record
+    where 1=1
+    <if test="id!=null and ''!=id">
+      and id = #{id,jdbcType=INTEGER}
+    </if>
+    <if test="stafDay!=null and ''!=stafDay">
+      and stafday = #{stafDay,jdbcType=TIMESTAMP}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- ==================== 近期消费走势（月消费走势）stat_rest_day_record  start ==================== -->
+  <select id="selectConsumeTrendView" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.RestStafDayRecord" >
+    select stafday,sum(fee) as sum_fee, sum(recordingfee) as sum_recordingfee, sum(fee+recordingfee) as total_fee
+    from stat_rest_day_record
+    where 1=1
+    <if test="stafDay!=null">
+      and date_format(stafday,'%Y-%m')=date_format(#{stafDay,jdbcType=TIMESTAMP},'%Y-%m')
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    group by stafday;
+  </select>
+
+  <!-- ==================== 应用消费概况联表查询 stat_rest_day_record,tb_app_info  start ==================== -->
+  <!--  <resultMap id="ConsumeSurveyResult" type="com.e9cloud.mybatis.domain.RestStafDayRecord" extends="BaseResultMap">
+      <association property="appInfo" column="appid" javaType="com.e9cloud.mybatis.domain.AppInfo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="appid" property="appid" jdbcType="VARCHAR"/>
+        <result column="sid" property="sid" jdbcType="VARCHAR"/>
+        <result column="app_name" property="appName" jdbcType="VARCHAR"/>
+      </association>
+    </resultMap>-->
+
+  <select id="selectConsumeSurveyView" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.RestStafDayRecord" >
+    select a.appid,b.sid,b.app_name,sum(a.fee + a.recordingfee) as total_fee
+    from stat_rest_day_record as a, tb_app_info as b
+    where a.appid = b.appid
+    <if test="feeid!=null and ''!=feeid">
+      and a.feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="stafDay!=null">
+      and date_format(stafday,'%Y-%m') = date_format(#{stafDay,jdbcType=TIMESTAMP},'%Y-%m')
+    </if>
+    group by b.appid order by total_fee desc
+  </select>
+
+  <!-- 获取每个月的消费总额 -->
+  <select id="selectMonthConsumeTotal" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.RestStafDayRecord" >
+    select stafday,sum(fee) as sum_fee, sum(recordingfee) as sum_recordingfee, sum(fee+recordingfee) as total_fee
+    from stat_rest_day_record
+    where 1=1
+    <if test="stafDay!=null">
+      and date_format(stafday,'%Y-%m')=date_format(#{stafDay,jdbcType=TIMESTAMP},'%Y-%m')
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    group by date_format(stafday, '%Y-%m');
+  </select>
+
+
+  <!-- 获取每天的消费总额 -->
+  <select id="selectRestDayConsumeTotal" resultType="DECIMAL" parameterType="java.util.HashMap" >
+    select /*stafday, */sum(fee+recordingfee) as day_fee
+    from stat_rest_day_record
+    where 1=1
+    <if test="statday!=null">
+      and date_format(stafday,'%Y-%m-%d')=date_format(#{statday,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    group by date_format(stafday, '%Y-%m-%d');
+  </select>
+
+  <!-- 数据日报 -->
+  <select id="getDataAnalysisCount" resultType="Integer" parameterType="java.util.HashMap" >
+    select count(1) from (select stafday,appid
+    from stat_rest_day_record
+    where 1=1
+    <if test="stafDay != null">
+      and stafday &gt;= #{stafDay,jdbcType=TIMESTAMP}
+    </if>
+    <if test="stafDay1 != null">
+      and stafday &lt;= #{stafDay1,jdbcType=TIMESTAMP}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(feeid)">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appid)">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(abLine)">
+      and abline = #{abLine,jdbcType=CHAR}
+    </if>
+    GROUP BY appid,stafday) a
+  </select>
+
+
+  <select id="getDataAnalysisList" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select id,stafday,appid,subid,feeid,abline,
+    sum(callcnt) as callcnt,
+    sum(succcnt) as succcnt,
+    sum(thscsum) as thscsum,
+    sum(jfscsum) as jfscsum,
+    sum(fee) as fee,
+    sum(recordingfee) as recordingfee
+    from stat_rest_day_record
+    where 1=1
+    <if test="stafDay!=null">
+      and stafday &gt;= #{stafDay,jdbcType=TIMESTAMP}
+    </if>
+    <if test="stafDay1!=null">
+      and stafday &lt;= #{stafDay1,jdbcType=TIMESTAMP}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(feeid)">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appid)">
+      and appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(abLine)">
+      and abline = #{abLine,jdbcType=CHAR}
+    </if>
+    GROUP BY appid,stafday
+    ORDER BY stafday desc
+    limit #{start,jdbcType=DECIMAL},#{pageSize,jdbcType=DECIMAL}
+  </select>
+</mapper>
+
+

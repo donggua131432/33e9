@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="StatSpDayRecord_Mapper">
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatSpDayRecord">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="statday" jdbcType="DATE" property="statday" />
+    <result column="rcdtype" jdbcType="VARCHAR" property="rcdtype" />
+    <result column="abline" jdbcType="CHAR" property="abline" />
+    <result column="sipa" jdbcType="BIT" property="sipa" />
+    <result column="sipb" jdbcType="BIT" property="sipb" />
+    <result column="sid" jdbcType="VARCHAR" property="sid" />
+    <result column="feeid" jdbcType="VARCHAR" property="feeid" />
+    <result column="appid" jdbcType="VARCHAR" property="appid" />
+    <result column="subid" jdbcType="VARCHAR" property="subid" />
+    <result column="callcnt" jdbcType="INTEGER" property="callcnt" />
+    <result column="succcnt" jdbcType="INTEGER" property="succcnt" />
+    <result column="answercnt" jdbcType="INTEGER" property="answercnt" />
+    <result column="thscsum" jdbcType="INTEGER" property="thscsum" />
+    <result column="jfscsum" jdbcType="INTEGER" property="jfscsum" />
+    <result column="lyscsum" jdbcType="INTEGER" property="lyscsum" />
+    <result column="jflyscsum" jdbcType="INTEGER" property="jflyscsum" />
+    <result column="fee" jdbcType="DECIMAL" property="fee" />
+    <result column="recordingfee" jdbcType="DECIMAL" property="recordingfee" />
+    <result column="ctime" jdbcType="TIMESTAMP" property="ctime" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, statday, rcdtype, abline, sipa, sipb, sid, feeid, appid, subid, callcnt, succcnt, 
+    answercnt, thscsum, jfscsum, lyscsum, jflyscsum, fee, recordingfee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from stat_sp_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectSipp" resultType="map" parameterType="java.util.HashMap">
+    select CASE WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=0 AND abline='A' THEN '回拨A路'
+    WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=0 AND abline='B' THEN '回拨B路'
+    WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=1 AND abline='A' THEN 'SIP PHONE间回拨A路'
+    WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=1 AND abline='B' THEN 'SIP PHONE间回拨B路'
+    WHEN rcdtype='sippout' AND if(sipa=1 and sipb = 1,1,0)=0 THEN '直拨'
+    WHEN rcdtype='sippout' AND if(sipa=1 and sipb = 1,1,0)=1 THEN 'SIP PHONE间直拨'
+    WHEN rcdtype='sippin' THEN '回呼' END AS abline,
+    sum(thscsum)as thscsum, sum(jfscsum)as jfscsum,
+    case when sum(answercnt)=0 then '0' else ROUND(sum(thscsum)/sum(answercnt),0) end as pjsc,
+    sum(lyscsum)as lyscsum,sum(jflyscsum)as jflyscsum,
+    CONCAT(CAST((sum(succcnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(answercnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    from stat_sp_day_record
+    WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    group by rcdtype , if(sipa=1 and sipb = 1,1,0),abline
+  </select>
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageSpRecordList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      sp.statday,ua.sid,ac.name as companyName,
+      CASE
+      WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=0 AND abline='A' THEN '1'
+      WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=0 AND abline='B' THEN '2'
+      WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=1 AND abline='A' THEN '3'
+      WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=1 AND abline='B' THEN '4'
+      WHEN rcdtype='sippout' AND if(sipa=1 and sipb = 1,1,0)=0 THEN '5'
+      WHEN rcdtype='sippout' AND if(sipa=1 and sipb = 1,1,0)=1 THEN '6'
+      WHEN rcdtype='sippin' THEN '7'
+      END AS abline,
+      sum(callcnt)as callcnt,sum(thscsum)as thscsum, sum(jfscsum)as jfscsum,
+      case
+      when sum(answercnt)=0 then '0' else ROUND(sum(thscsum)/sum(answercnt),0)
+      end as pjsc,
+      sum(lyscsum)as lyscsum,sum(jflyscsum)as jflyscsum,sum(sp.fee)as fee,sum(recordingfee)as recordingfee,
+      CONCAT(CAST((sum(succcnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+      CONCAT(CAST((sum(answercnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate,
+      (select sum(callcnt) from stat_sp_day_record where feeid = sp.feeid and statday = sp.statday) as allCallCnt
+      from stat_sp_day_record sp,tb_user_admin ua,tb_user_admin_authen_company ac
+      WHERE sp.feeid = ua.feeid AND ua.uid = ac.uid
+
+      <if test="params.companyName != null and params.companyName != ''">
+        and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+      </if>
+      <if test="params.sid != null and params.sid != ''">
+        and ua.sid = #{params.sid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.abline == 1">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=0 AND sp.abline='A')
+      </if>
+      <if test="params.abline == 2">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=0 AND sp.abline='B')
+      </if>
+      <if test="params.abline == 3">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=1 AND sp.abline='A')
+      </if>
+      <if test="params.abline == 4">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=1 AND sp.abline='B')
+      </if>
+      <if test="params.abline == 5">
+        and (sp.rcdtype='sippout' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=0)
+      </if>
+      <if test="params.abline == 6">
+        and (sp.rcdtype='sippout' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=1)
+      </if>
+      <if test="params.abline == 7">
+        and sp.rcdtype='sippin'
+      </if>
+
+      <if test="datemin != null">
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+      <if test="datemax != null">
+
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+      <if test="params.reportType==2">
+        GROUP BY DATE_FORMAT(sp.statday,'%Y-%m'), sp.feeid, sp.rcdtype, if(sp.sipa=1 and sp.sipb = 1,1,0), sp.abline
+      </if>
+      <if test="params.reportType==1">
+        GROUP BY DATE_FORMAT(sp.statday,'%Y-%m-%d'), sp.feeid, sp.rcdtype, if(sp.sipa=1 and sp.sipb = 1,1,0), sp.abline
+      </if>
+      <if test="params.reportType==0 or params.reportType ==null">
+        GROUP BY DATE_FORMAT(sp.statday,'%Y-%m-%d'), sp.feeid, sp.rcdtype, if(sp.sipa=1 and sp.sipb = 1,1,0), sp.abline
+      </if>
+      ORDER BY sp.statday DESC, allCallCnt DESC, sp.feeid, abline ASC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出选取话务报表列表 -->
+  <select id="downloadSpRecord" resultType="map" parameterType="Page">
+    SELECT
+      sp.statday,ua.sid,ac.name as companyName,
+      CASE
+        WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=0 AND abline='A' THEN '1'
+        WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=0 AND abline='B' THEN '2'
+        WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=1 AND abline='A' THEN '3'
+        WHEN rcdtype='sipprest' AND if(sipa=1 and sipb = 1,1,0)=1 AND abline='B' THEN '4'
+        WHEN rcdtype='sippout' AND if(sipa=1 and sipb = 1,1,0)=0 THEN '5'
+        WHEN rcdtype='sippout' AND if(sipa=1 and sipb = 1,1,0)=1 THEN '6'
+        WHEN rcdtype='sippin' THEN '7'
+      END AS abline,
+      sum(callcnt)as callcnt,sum(thscsum)as thscsum, sum(jfscsum)as jfscsum,
+      case
+        when sum(answercnt)=0 then '0' else ROUND(sum(thscsum)/sum(answercnt),0)
+      end as pjsc,
+      sum(lyscsum)as lyscsum,sum(jflyscsum)as jflyscsum,sum(sp.fee)as fee,sum(recordingfee)as recordingfee,
+      CONCAT(CAST((sum(succcnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+      CONCAT(CAST((sum(answercnt)/sum(callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate,
+      (select sum(callcnt) from stat_sp_day_record where feeid = sp.feeid and statday = sp.statday) as allCallCnt
+    from stat_sp_day_record sp,tb_user_admin ua,tb_user_admin_authen_company ac
+      WHERE sp.feeid = ua.feeid AND ua.uid = ac.uid
+
+      <if test="params.companyName != null and params.companyName != ''">
+        and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+      </if>
+      <if test="params.sid != null and params.sid != ''">
+        and ua.sid = #{params.sid,jdbcType=VARCHAR}
+      </if>
+      <if test="params.abline == 1">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=0 AND sp.abline='A')
+      </if>
+      <if test="params.abline == 2">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=0 AND sp.abline='B')
+      </if>
+      <if test="params.abline == 3">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=1 AND sp.abline='A')
+      </if>
+      <if test="params.abline == 4">
+        and (sp.rcdtype='sipprest' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=1 AND sp.abline='B')
+      </if>
+      <if test="params.abline == 5">
+        and (sp.rcdtype='sippout' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=0)
+      </if>
+      <if test="params.abline == 6">
+        and (sp.rcdtype='sippout' AND if(sp.sipa=1 and sp.sipb = 1,1,0)=1)
+      </if>
+      <if test="params.abline == 7">
+        and sp.rcdtype='sippin'
+      </if>
+
+      <if test="datemin != null">
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+      <if test="datemax != null">
+
+        <if test="params.reportType==1 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+        </if>
+
+        <if test="params.reportType==2 and params.reportType!=null">
+          AND DATE_FORMAT(sp.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+        </if>
+      </if>
+      <if test="params.reportType==2">
+        GROUP BY DATE_FORMAT(sp.statday,'%Y-%m'), sp.feeid, sp.rcdtype, if(sp.sipa=1 and sp.sipb = 1,1,0), sp.abline
+      </if>
+      <if test="params.reportType==1">
+        GROUP BY DATE_FORMAT(sp.statday,'%Y-%m-%d'), sp.feeid, sp.rcdtype, if(sp.sipa=1 and sp.sipb = 1,1,0), sp.abline
+      </if>
+      <if test="params.reportType==0 or params.reportType ==null">
+        GROUP BY DATE_FORMAT(sp.statday,'%Y-%m-%d'), sp.feeid, sp.rcdtype, if(sp.sipa=1 and sp.sipb = 1,1,0), sp.abline
+      </if>
+      ORDER BY sp.statday DESC, allCallCnt DESC, sp.feeid, abline ASC
+  </select>
+
+  <!-- 按天统计 云话机 话务走势 的话务情况 -->
+  <select id="countSpScanByDay" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.thscsum,0)) thscsumRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.thscsum,0)) thscsumRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.thscsum,0)) thscsumSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.thscsum,0)) thscsumSipB,
+	  SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.thscsum,0)) thscsumRestO,
+	  SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.thscsum,0)) thscsumSipO,
+	  SUM(if(rcdtype='sippin',sr.thscsum,0)) thscsumC,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.succcnt,0)) thscAvgRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.succcnt,0)) thscAvgRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.succcnt,0)) thscAvgSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.thscsum,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.succcnt,0)) thscAvgSipB,
+      SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.thscsum,0))/SUM(if(rcdtype='sippout' and sipa!=sipb,sr.succcnt,0)) thscAvgRestO,
+      SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.thscsum,0))/SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.succcnt,0)) thscAvgSipO,
+	  SUM(if(rcdtype='sippin',sr.thscsum,0))/SUM(if(rcdtype='sippin',sr.succcnt,0)) thscAvgC,
+
+      SUM(sr.jfscsum) jfscsum,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.callcnt,0)) succcntRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.callcnt,0)) succcntRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.callcnt,0)) succcntSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.succcnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.callcnt,0)) succcntSipB,
+      SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.succcnt,0))/SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.callcnt,0)) succcntRestO,
+      SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.succcnt,0))/SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.callcnt,0)) succcntSipO,
+	  SUM(if(rcdtype='sippin',sr.succcnt,0))/SUM(if(rcdtype='sippin',sr.callcnt,0)) succcntC,
+
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='A',sr.callcnt,0)) answercntRestA,
+      SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa!=sipb and abline='B',sr.callcnt,0)) answercntRestB,
+      SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='A',sr.callcnt,0)) answercntSipA,
+	  SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.answercnt,0))/SUM(if(rcdtype='sipprest' and sipa=1 and sipa=sipb and abline='B',sr.callcnt,0)) answercntSipB,
+      SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.answercnt,0))/SUM(if(rcdtype='sippout'  and sipa!=sipb,sr.callcnt,0)) answercntRestO,
+      SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.answercnt,0))/SUM(if(rcdtype='sippout' and sipa=1 and sipa=sipb,sr.callcnt,0)) answercntSipO,
+	  SUM(if(rcdtype='sippin',sr.answercnt,0))/SUM(if(rcdtype='sippin',sr.callcnt,0)) answercntC,
+
+      DATE_FORMAT(sr.statday,'%Y-%m-%d') d
+    FROM stat_sp_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatVoiceHourRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatVoiceHourRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="stathour" property="stathour" jdbcType="TIMESTAMP" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="validcnt" property="validcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="trysum" property="trysum" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, stathour, feeid, appid, callcnt, validcnt, succcnt, answercnt, trysum, thscsum, 
+    jfscsum, fee, recordingfee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_voice_hour_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 按小时统计 语音通知 话务走势 的话务情况 -->
+  <select id="countVoiceScanByHour" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+      SUM(sr.thscsum)/SUM(sr.succcnt) thscAvg,
+      SUM(sr.jfscsum) jfscsum,
+      SUM(sr.callcnt) callcnt,
+      SUM(sr.succcnt)/SUM(sr.callcnt) succcntRate,
+      SUM(sr.answercnt)/SUM(sr.callcnt) answercntRate,
+
+      DATE_FORMAT(sr.stathour,'%H') h,
+      DATE_FORMAT(sr.stathour,'%Y-%m-%d %H') d
+    FROM stat_voice_hour_record sr
+    WHERE sr.stathour &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.stathour &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Payment_Records" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.PaymentRecords" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="payment_time" property="paymentTime" jdbcType="TIMESTAMP" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="comment" property="comment" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    status, sid, customer_name, money, payment_time, operator, comment
+  </sql>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.PaymentRecords" >
+    insert into tb_payment_records (status, sid, customer_name, money,
+      payment_time,operator, comment)
+    values (#{status,jdbcType=INTEGER}, #{sid,jdbcType=VARCHAR}, #{customerName,jdbcType=VARCHAR},
+      #{money,jdbcType=DECIMAL}, #{paymentTime,jdbcType=TIMESTAMP}, #{operator,jdbcType=VARCHAR},
+      #{comment,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <select id="selectPaymentRecordsPage" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List" />
+    from tb_payment_records
+    WHERE 1 = 1
+    <if test="datemin != null and datemax != null">
+      And payment_time BETWEEN #{datemin,jdbcType=TIMESTAMP} AND #{datemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="datemin == null and datemax != null">
+      And <![CDATA[payment_time < #{datemax,jdbcType=TIMESTAMP}]]>
+    </if>
+    <if test="datemin != null and datemax == null">
+      And <![CDATA[payment_time > #{datemin,jdbcType=TIMESTAMP}]]>
+    </if>
+    <if test="fuzzy != null and fuzzy != ''">
+      And operator like #{fuzzy,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      And sid like "%"#{params.sid,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.customer_name != null and params.customer_name != ''">
+      And customer_name like "%"#{params.customer_name,jdbcType=VARCHAR}"%"
+    </if>
+
+
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="selectPaymentRecordsDownload" resultMap="BaseResultMap" parameterType="Page">
+    select
+    <include refid="Base_Column_List" />
+    from tb_payment_records
+    WHERE 1 = 1
+    <if test="datemin != null and datemax != null">
+      And payment_time BETWEEN #{datemin,jdbcType=TIMESTAMP} AND #{datemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="datemin == null and datemax != null">
+      And <![CDATA[payment_time < #{datemax,jdbcType=TIMESTAMP}]]>
+    </if>
+    <if test="datemin != null and datemax == null">
+      And <![CDATA[payment_time > #{datemin,jdbcType=TIMESTAMP}]]>
+    </if>
+    <if test="fuzzy != null and fuzzy != '%%'">
+      And operator like #{fuzzy,jdbcType=VARCHAR}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+  </select>
+
+</mapper>

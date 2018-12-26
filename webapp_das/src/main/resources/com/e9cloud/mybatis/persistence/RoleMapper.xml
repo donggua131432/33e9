@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Role_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.Role" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="CHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="ordering" property="ordering" jdbcType="TINYINT" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, name, type, description, sys_type,ordering
+  </sql>
+
+  <!-- 分页选取角色信息列表 -->
+  <select id="pageRoleList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    <include refid="Base_Column_List"/>,
+    (SELECT GROUP_CONCAT(sm.`name`) FROM
+    rms_sys_role_action ra, rms_sys_action sa, rms_sys_menu sm
+    WHERE ra.action_id = sa.id
+    AND sa.menu_id = sm.id
+    AND ra.role_id = sr.id) AS menuName
+    FROM
+    rms_sys_role sr
+    WHERE 1=1
+    AND sr.sys_type='D'
+    <if test="params.id != null and params.id != ''">
+      and id = #{params.id,jdbcType=VARCHAR}
+    </if>
+    <if test="params.name != null and params.name != ''">
+      and name LIKE "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.type != null and params.type != ''">
+      and type  = #{params.type,jdbcType=CHAR}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="selectRoleById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    <include refid="Base_Column_List" />
+    from rms_sys_role
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectRoleByName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    SELECT
+    <include refid="Base_Column_List" />
+    from rms_sys_role
+    where sys_type='D' AND name = #{name,jdbcType=VARCHAR}
+  </select>
+
+  <select id="allRoleList" resultMap="BaseResultMap" >
+    SELECT
+    <include refid="Base_Column_List" />
+    from rms_sys_role WHERE sys_type='D'
+  </select>
+
+
+  <delete id="deleteRoleById" parameterType="java.lang.String" >
+    delete from rms_sys_role
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+
+  <insert id="saveRole" parameterType="com.e9cloud.mybatis.domain.Role" >
+    insert into rms_sys_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="ordering != null" >
+        ordering,
+      </if>
+      <if test="sysType != null" >
+        sys_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=CHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="ordering != null" >
+        #{ordering,jdbcType=TINYINT},
+      </if>
+      <if test="sysType != null" >
+        #{sysType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+
+
+  <update id="updateRoleById" parameterType="com.e9cloud.mybatis.domain.Role" >
+    update rms_sys_role
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=CHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="ordering != null" >
+        ordering = #{ordering,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

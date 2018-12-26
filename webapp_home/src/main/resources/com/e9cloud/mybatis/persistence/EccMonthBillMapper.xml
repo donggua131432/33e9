@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="EccMonthBill_Mapper" >
+
+  <!-- 分页选取消费统计月报列表 -->
+  <select id="pageMonthEccBill" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select tmp.appid , tmp.smonth ,app.app_name as appName , sum(tmp.ivrFee) as ivrFee , sum(tmp.directFee) as directFee,sum(tmp.localFee) as localFee,sum(tmp.nonlocalFee) as nonlocalFee
+    , sum(tmp.inRecordingfee) as inRecordingfee,sum(tmp.outRecordingfee) as outRecordingfee
+    ,sum(tmp.sipnumRent) as sipnumRent,sum(tmp.minConsume) as minConsume, FORMAT(sum(tmp.rent_fee),2) as costFee
+    from (
+    select icr.appid, DATE_FORMAT(icr.smonth,'%Y-%m') smonth, sum(icr.callin_ivr_fee) ivrFee, sum(icr.callin_direct_fee) directFee, sum(icr.callout_local_fee) localFee, sum(icr.callout_nonlocal_fee) nonlocalFee, sum(icr.						 callin_recordingfee) inRecordingfee, sum(icr.callout_recordingfee) outRecordingfee
+    , sum(icr.sipnum_rent) sipnumRent, sum(icr.min_consume) minConsume ,0 as rent_fee
+    FROM stat_ivr_consume_record icr
+    WHERE 1=1
+    <if test="params.feeid != null and params.feeid != ''">
+      and icr.feeid  = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.appId != null and params.appId != ''">
+      and icr.appid  = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.time != null and params.time != ''">
+      and DATE_FORMAT(icr.smonth,'%Y年%c月')  = #{params.time,jdbcType=VARCHAR}
+    </if>
+    GROUP BY icr.appid
+    union all
+    select appid , DATE_FORMAT(cost_date,'%Y-%m') smonth,0 ivrFee,0 directFee,0 localFee, 0 nonlocalFee, 0 inRecordingfee, 0 outRecordingfee,0  sipnumRent,0  minConsume , ifnull(sum(cost_fee),0) as rent_fee
+    from rms_ivr_rent_history
+    where 1=1
+    <if test="params.feeid != null and params.feeid != ''">
+      and feeid  = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.appId != null and params.appId != ''">
+      and appid  = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.time != null and params.time != ''">
+      and DATE_FORMAT(cost_date,'%Y年%c月')  = #{params.time,jdbcType=VARCHAR}
+    </if>
+    and rent_type=0
+    group by appid) tmp
+    left join tb_app_info app on tmp.appid = app.appid
+    group by appid ,smonth
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 列表账单导出 -->
+  <select id="downloadEccMonthBill" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select tmp.appid,tmp.smonth,app.app_name as appName , sum(tmp.ivrFee) as ivrFee , sum(tmp.directFee) as directFee,sum(tmp.localFee) as localFee,sum(tmp.nonlocalFee) as nonlocalFee
+    , sum(tmp.inRecordingfee) as inRecordingfee,sum(tmp.outRecordingfee) as outRecordingfee
+    ,sum(tmp.sipnumRent) as sipnumRent,sum(tmp.minConsume) as minConsume, FORMAT(sum(tmp.rent_fee),2) as costFee
+    from (
+    select icr.appid, DATE_FORMAT(icr.smonth,'%Y-%m') smonth, sum(icr.callin_ivr_fee) ivrFee, sum(icr.callin_direct_fee) directFee, sum(icr.callout_local_fee) localFee, sum(icr.callout_nonlocal_fee) nonlocalFee, sum(icr.						 callin_recordingfee) inRecordingfee, sum(icr.callout_recordingfee) outRecordingfee
+    , sum(icr.sipnum_rent) sipnumRent, sum(icr.min_consume) minConsume ,0 as rent_fee
+    FROM stat_ivr_consume_record icr
+    WHERE 1=1
+    <if test="feeid != null and feeid != ''">
+      and icr.feeid  = #{feeid,jdbcType=VARCHAR}
+    </if>
+    <if test="appId != null and appId != ''">
+      and icr.appid  = #{appId,jdbcType=VARCHAR}
+    </if>
+    <if test="time != null and time != ''">
+      and DATE_FORMAT(icr.smonth,'%Y年%c月')  = #{time,jdbcType=VARCHAR}
+    </if>
+    GROUP BY icr.appid
+    union all
+    select appid , DATE_FORMAT(cost_date,'%Y-%m') smonth,0 ivrFee,0 directFee,0 localFee, 0 nonlocalFee, 0 inRecordingfee, 0 outRecordingfee,0  sipnumRent,0  minConsume , ifnull(sum(cost_fee),0) as rent_fee
+    from rms_ivr_rent_history
+    where 1=1
+    <if test="feeid != null and feeid != ''">
+      and feeid  = #{feeid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="appId != null and appId != ''">
+      and appid  = #{appId,jdbcType=VARCHAR}
+    </if>
+    <if test="time != null and time != ''">
+      and DATE_FORMAT(cost_date,'%Y年%c月')  = #{time,jdbcType=VARCHAR}
+    </if>
+    and rent_type=0
+    group by appid) tmp
+    left join tb_app_info app on tmp.appid = app.appid
+    group by appid ,smonth
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出消费统计月报明细 -->
+  <select id="downloadEccMonthBillRecordList" resultType="map" parameterType="Page">
+    SELECT
+    DATE_FORMAT(icr.smonth,'%Y-%m') smonth,
+    icr.subphone,
+    icr.subphone_type,
+    icr.callin_ivr_fee ivrFee,
+    icr.callin_direct_fee directFee,
+    icr.callout_local_fee localFee,
+    icr.callout_nonlocal_fee nonlocalFee,
+    icr.callin_recordingfee inRecordingfee,
+    icr.callout_recordingfee outRecordingfee,
+    icr.sipnum_rent sipnumRent,
+    icr.min_consume minConsume
+    FROM stat_ivr_consume_record icr
+    WHERE 1=1
+
+    <if test="params.feeid != null and params.feeid != ''">
+      and feeid  = #{params.feeid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.appId != null and params.appId != ''">
+      and icr.appid  = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.smonth != null and params.smonth != ''">
+      AND DATE_FORMAT(icr.smonth,'%Y-%m') = #{params.smonth,jdbcType=TIMESTAMP}
+    </if>
+
+    GROUP BY icr.subphone
+    ORDER BY icr.ctime DESC;
+  </select>
+
+</mapper>

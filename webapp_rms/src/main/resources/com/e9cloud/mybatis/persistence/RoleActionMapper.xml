@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RoleAction_Mapper">
+
+  <!-- 角色-权限关联 -->
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RoleAction" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="VARCHAR" />
+    <result column="action_id" property="actionId" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, role_id, action_id
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from rms_sys_role_action
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from rms_sys_role_action
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByRoleId" parameterType="java.lang.String" >
+    delete from rms_sys_role_action
+    where role_id = #{roleId,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.RoleAction" >
+    insert into rms_sys_role_action (id, role_id, action_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{roleId,jdbcType=VARCHAR}, #{actionId,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.RoleAction" >
+    insert into rms_sys_role_action
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="actionId != null" >
+        action_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+      <if test="actionId != null" >
+        #{actionId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>

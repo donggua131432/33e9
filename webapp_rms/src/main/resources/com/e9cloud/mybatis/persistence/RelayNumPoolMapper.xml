@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RelayNumPool_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RelayNumPool" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, relay_num, number, max_concurrent, create_time
+  </sql>
+
+
+  <!-- 分页获取中继强显号码池信息 -->
+  <select id="getRelayNumList" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Base_Column_List"/>
+    from tb_relay_numpool
+    where 1=1
+    <if test="params.id!=null">
+      and id = #{params.id,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.number!=null and ''!=params.number">
+      and number LIKE "%" #{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.relayNum!=null and ''!=params.relayNum">
+      and relay_num = #{params.relayNum,jdbcType=VARCHAR}
+    </if>
+    order by create_time DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 根据号码查询信息 -->
+  <select id="selectRelayNumberByNumber" resultMap="BaseResultMap" parameterType="Map" >
+    select
+    <include refid="Base_Column_List"/>
+    from tb_relay_numpool
+    where number = #{number,jdbcType=VARCHAR}
+    and relay_num = #{relayNum,jdbcType=VARCHAR}
+
+  </select>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_relay_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_relay_numpool
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertRelayNumber" parameterType="com.e9cloud.mybatis.domain.RelayNumPool" >
+    insert into tb_relay_numpool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="relayNum != null" >
+        relay_num,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="relayNum != null" >
+        #{relayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <!-- 判断是否已删除号码 -->
+  <select id="checkRelayNumUnique" resultType="long" parameterType="com.e9cloud.mybatis.domain.RelayNumPool" >
+    select
+    count(1)
+    from tb_relay_numpool
+    where
+    <![CDATA[ 1<>1 ]]>
+    <if test="id!=null and ''!=id">
+      OR id = #{id,jdbcType=INTEGER}
+    </if>
+
+  </select>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.RelayNumPool" >
+    update tb_relay_numpool
+    <set >
+      <if test="relayNum != null" >
+        relay_num = #{relayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

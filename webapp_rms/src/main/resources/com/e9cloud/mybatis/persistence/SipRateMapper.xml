@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SipRate_Mapper">
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipRate">
+    <id column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="start_date" property="startDate" jdbcType="DATE" />
+    <result column="end_date" property="endDate" jdbcType="DATE" />
+    <result column="forever" property="forever" jdbcType="BIT" />
+    <result column="cycle" property="cycle" jdbcType="INTEGER" />
+    <result column="per6" property="per6" jdbcType="DECIMAL" />
+    <result column="per6_discount" property="per6Discount" jdbcType="INTEGER" />
+    <result column="per60" property="per60" jdbcType="DECIMAL" />
+    <result column="per60_discount" property="per60Discount" jdbcType="INTEGER" />
+    <result column="perx" property="perx" jdbcType="DECIMAL" />
+    <result column="recording" property="recording" jdbcType="DECIMAL" />
+    <result column="recording_discount" property="recordingDiscount" jdbcType="INTEGER" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    subid, appid, feeid, start_date, end_date, forever, cycle, per6, per6_discount, per60, 
+    per60_discount, perx, recording, recording_discount, addtime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from rms_sip_rate
+    where subid = #{subid,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from rms_sip_rate
+    where subid = #{subid,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SipRate" >
+    insert into rms_sip_rate
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="subid != null" >
+        subid,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="startDate != null" >
+        start_date,
+      </if>
+      <if test="endDate != null" >
+        end_date,
+      </if>
+      <if test="forever != null" >
+        forever,
+      </if>
+      <if test="cycle != null" >
+        cycle,
+      </if>
+      <if test="per6 != null" >
+        per6,
+      </if>
+      <if test="per6Discount != null" >
+        per6_discount,
+      </if>
+      <if test="per60 != null" >
+        per60,
+      </if>
+      <if test="per60Discount != null" >
+        per60_discount,
+      </if>
+      <if test="perx != null" >
+        perx,
+      </if>
+      <if test="recording != null" >
+        recording,
+      </if>
+      <if test="recordingDiscount != null" >
+        recording_discount,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="subid != null" >
+        #{subid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null" >
+        #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null" >
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null" >
+        #{forever,jdbcType=BIT},
+      </if>
+      <if test="cycle != null" >
+        #{cycle,jdbcType=INTEGER},
+      </if>
+      <if test="per6 != null" >
+        #{per6,jdbcType=DECIMAL},
+      </if>
+      <if test="per6Discount != null" >
+        #{per6Discount,jdbcType=INTEGER},
+      </if>
+      <if test="per60 != null" >
+        #{per60,jdbcType=DECIMAL},
+      </if>
+      <if test="per60Discount != null" >
+        #{per60Discount,jdbcType=INTEGER},
+      </if>
+      <if test="perx != null" >
+        #{perx,jdbcType=DECIMAL},
+      </if>
+      <if test="recording != null" >
+        #{recording,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingDiscount != null" >
+        #{recordingDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SipRate" >
+    update rms_sip_rate
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null" >
+        start_date = #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null" >
+        end_date = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="forever != null" >
+        forever = #{forever,jdbcType=BIT},
+      </if>
+      <if test="cycle != null" >
+        cycle = #{cycle,jdbcType=INTEGER},
+      </if>
+      <if test="per6 != null" >
+        per6 = #{per6,jdbcType=DECIMAL},
+      </if>
+      <if test="per6Discount != null" >
+        per6_discount = #{per6Discount,jdbcType=INTEGER},
+      </if>
+      <if test="per60 != null" >
+        per60 = #{per60,jdbcType=DECIMAL},
+      </if>
+      <if test="per60Discount != null" >
+        per60_discount = #{per60Discount,jdbcType=INTEGER},
+      </if>
+      <if test="perx != null" >
+        perx = #{perx,jdbcType=DECIMAL},
+      </if>
+      <if test="recording != null" >
+        recording = #{recording,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingDiscount != null" >
+        recording_discount = #{recordingDiscount,jdbcType=INTEGER},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where subid = #{subid,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

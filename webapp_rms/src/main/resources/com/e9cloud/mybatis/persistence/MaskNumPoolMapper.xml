@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MaskNumPool_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.MaskNumPool" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, uid, sid, appid, addtime
+  </sql>
+  <!-- 根据条件查询单个号码池信息 -->
+  <select id="selectMaskNumberPoolByObj" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.MaskNumPool" >
+    select a.id, a.uid, b.name, a.sid, a.appid, c.app_name, a.addtime
+    from tb_mask_num_pool a, tb_user_admin_authen_company b, tb_app_info c
+    where a.uid = b.uid  and a.appid = c.appid
+    <if test="id!=null and ''!=id">
+      and a.id = #{id,jdbcType=VARCHAR}
+    </if>
+    <if test="name!=null and ''!=name">
+      and b.name LIKE "%"#{name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and a.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and a.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 分页联合查询号码池信息 -->
+  <select id="selectMaskNumberPoolList" resultType="map" parameterType="com.e9cloud.core.page.Page">
+    <include refid="com.e9cloud.pre"/>
+    select a.id, b.name, a.sid, c.app_name, a.appid
+    from tb_mask_num_pool a, tb_user_admin_authen_company b, tb_app_info c
+    where a.uid = b.uid  and a.appid = c.appid
+    <if test="params.name!=null and ''!=params.name">
+      and b.name LIKE "%"#{params.name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid!=null and ''!=params.sid">
+      and a.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid!=null and ''!=params.appid">
+      and a.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    order by a.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 删除号码池信息 -->
+  <delete id="deleteMaskNumberPool" parameterType="java.lang.String" >
+    delete from tb_mask_num_pool
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+
+  <insert id="insetMaskNumberPool" parameterType="com.e9cloud.mybatis.domain.MaskNumPool" >
+    insert into tb_mask_num_pool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      addtime,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="uid != null" >
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      now(),
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.MaskNumPool" >
+    update tb_mask_num_pool
+    <set >
+      <if test="uid != null" >
+        uid = #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

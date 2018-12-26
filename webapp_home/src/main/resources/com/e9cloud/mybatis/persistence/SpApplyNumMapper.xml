@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SpApplyNum_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SpApplyNum" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="apply_id" property="applyId" jdbcType="VARCHAR" />
+    <result column="sipphone_id" property="sipphoneId" jdbcType="VARCHAR" />
+    <result column="sip_phone" property="sipphone" jdbcType="VARCHAR" />
+    <result column="fixphone_id" property="fixphoneId" jdbcType="VARCHAR" />
+    <result column="number" property="fixphone" jdbcType="VARCHAR" />
+    <result column="show_num" property="auditShowNum" jdbcType="VARCHAR" />
+    <result column="showNum" property="showNum" jdbcType="VARCHAR" />
+    <result column="atime" property="atime" jdbcType="TIMESTAMP" />
+    <result column="audit_status" property="auditStatus" jdbcType="CHAR" />
+    <result column="audit_common" property="auditCommon" jdbcType="VARCHAR" />
+    <result column="audit_time" property="auditTime" jdbcType="TIMESTAMP" />
+    <result column="long_distance_flag" property="longDistanceFlag" jdbcType="VARCHAR" />
+    <result column="call_switch_flag" property="callSwitchFlag" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id,appid,apply_id,sipphone_id,fixphone_id,show_num,atime,audit_status,audit_common,audit_time,long_distance_flag,call_switch_flag
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sp_apply_num
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="getSipPhoneNumList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT a.id,f.shownum_id,b.sip_phone,c.number,a.show_num showNum,IFNULL(f.show_num,a.show_num) show_num,IFNULL(f.audit_status,'01') audit_status,cp.pname,cp.cname,b.pwd,b.sip_realm,b.ip_port,a.atime,a.appid,
+    a.long_distance_flag longDistanceFlag, a.call_switch_flag callSwitchFlag
+    FROM tb_sp_apply_num a LEFT JOIN(
+    select aud.id,aud.shownum_id,aud.show_num,aud.atime,aud.audit_status,aud.audit_common,aud.audit_time
+    from tb_sp_num_audit aud,(select shownum_id,max(atime) atime from tb_sp_num_audit group by shownum_id) b
+    where aud.shownum_id = b.shownum_id and aud.atime = b.atime order by aud.shownum_id
+    )f ON a.id=f.shownum_id
+    LEFT JOIN tb_sp_sipphone b ON a.sipphone_id=b.id
+    LEFT JOIN tb_sp_fixphone c ON a.fixphone_id= c.id
+    LEFT JOIN (
+    SELECT
+    tc.cname, tp.pname, tc.ccode, tp.pcode
+    FROM tb_telno_city tc LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    ) cp ON a.cityid = cp.ccode
+    WHERE a.status='00'
+
+    <if test="params.appid != null and params.appid != ''">
+      and a.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sipphone != null and params.sipphone != ''">
+      and b.sip_phone LIKE "%"#{params.sipphone,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.fixphone != null and params.fixphone != ''">
+      and c.number LIKE "%"#{params.fixphone,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.showNum != null and params.showNum != ''">
+      and a.show_num LIKE "%"#{params.showNum,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.ccode != null and params.ccode != ''">
+      and b.cityid = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.pcode != null and params.pcode != ''">
+      and d.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    ORDER BY f.atime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="getSpApplyNumById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    SELECT a.id,f.shownum_id,b.sip_phone,c.number,a.show_num showNum,IFNULL(f.show_num,a.show_num) show_num,IFNULL(f.audit_status,'01') audit_status,cp.pname,cp.cname,b.pwd,b.sip_realm,b.ip_port,a.atime,a.appid,f.audit_common
+    FROM tb_sp_apply_num a LEFT JOIN (
+    select aud.id,aud.shownum_id,aud.show_num,aud.atime,aud.audit_status,aud.audit_common,aud.audit_time
+    from tb_sp_num_audit aud,(select shownum_id,max(atime) atime from tb_sp_num_audit group by shownum_id) b
+    where aud.shownum_id = b.shownum_id and aud.atime = b.atime order by aud.shownum_id
+    )f ON a.id=f.shownum_id
+    LEFT JOIN tb_sp_sipphone b ON a.sipphone_id=b.id
+    LEFT JOIN tb_sp_fixphone c ON a.fixphone_id= c.id
+    LEFT JOIN (
+    SELECT
+    tc.cname, tp.pname, tc.ccode, tp.pcode
+    FROM tb_telno_city tc LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    ) cp ON a.cityid = cp.ccode
+    WHERE a.status='00'
+    AND a.id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <update id="updateSipPhone" parameterType="com.e9cloud.mybatis.domain.SipPhone" >
+    update tb_sp_sipphone
+    <set >
+      <if test="sipPhone != null" >
+        sip_phone = #{sipPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="impi != null" >
+        impi = #{impi,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null" >
+        pwd = #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="ipPort != null" >
+        ip_port = #{ipPort,jdbcType=VARCHAR},
+      </if>
+      <if test="sipRealm != null" >
+        sip_realm = #{sipRealm,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateFixPhone" parameterType="com.e9cloud.mybatis.domain.FixPhone" >
+    update tb_sp_fixphone
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+  <select id="countSpApplyNumByFixId" resultType="long" parameterType="com.e9cloud.mybatis.domain.SpApplyNum" >
+    select
+    count(1)
+    from tb_sp_apply_num
+    where id != #{id,jdbcType=BIGINT}
+    AND fixphone_id = #{fixphoneId,jdbcType=VARCHAR}
+    AND status = '00'
+  </select>
+
+  <!-- 删除外显号码 -->
+  <update id="updateShowNumStatus" parameterType="long">
+    UPDATE tb_sp_apply_num
+    SET `status` = '01',
+    fixphone_id = NULL,
+    sipphone_id = NULL
+    WHERE id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteSpApplyNum" parameterType="java.lang.Long">
+    UPDATE tb_sp_apply_num SET status='01' WHERE id in
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </delete>
+
+  <update id="deleteSipphone" parameterType="java.util.List" >
+    update tb_sp_sipphone set status='03',updatetime = now() where id IN
+    <foreach collection="list" item="item" open="(" close=")" index="index" separator=",">
+      #{item}
+    </foreach>
+  </update>
+
+  <update id="deletefixphone" parameterType="java.util.List" >
+    update tb_sp_fixphone set status='03' where id IN
+    <foreach collection="list" item="item" open="(" close=")" index="index" separator=",">
+      #{item}
+    </foreach>
+  </update>
+
+  <update id="updateShowNum" parameterType="com.e9cloud.mybatis.domain.SpApplyNum" >
+    update tb_sp_apply_num
+    <set >
+      <if test="showNum != null and showNum!=''" >
+        show_num = #{showNum,jdbcType=VARCHAR},
+      </if>
+      audit_status='00'
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <insert id="saveDelShowNumToTAsk" parameterType="com.e9cloud.mybatis.domain.SipPhoneRegTask" >
+    insert into tb_sp_reg_task
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="showNumId != null" >
+        shownum_id,
+      </if>
+      <if test="sipphoneId != null" >
+        sipphone_id,
+      </if>
+      <if test="fixphoneId != null" >
+        fixphone_id,
+      </if>
+      <if test="taskType != null" >
+        task_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="showNumId != null" >
+        #{showNumId,jdbcType=VARCHAR},
+      </if>
+      <if test="sipphoneId != null" >
+        #{sipphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="fixphoneId != null" >
+        #{fixphoneId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskType != null" >
+        #{taskType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateSipStatus" parameterType="com.e9cloud.mybatis.domain.SpApplyNum" >
+    update tb_sp_apply_num
+    <set>
+      <if test="longDistanceFlag != null" >
+        long_distance_flag = #{longDistanceFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="callSwitchFlag != null" >
+        call_switch_flag = #{callSwitchFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+</mapper>

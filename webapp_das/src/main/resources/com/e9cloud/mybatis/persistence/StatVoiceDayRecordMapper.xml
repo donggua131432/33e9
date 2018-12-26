@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatVoiceDayRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatVoiceDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="DATE" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="validcnt" property="validcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="trysum" property="trysum" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, feeid, appid, callcnt, validcnt, succcnt, answercnt, trysum, thscsum, 
+    jfscsum, fee, recordingfee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_voice_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectVoice" resultType="map" parameterType="java.util.HashMap">
+    select '单路' as abline, sum(thscsum)as thscsum,sum(jfscsum)as jfscsum,
+    case when sum(vo.answercnt)=0 then '0' else ROUND(sum(vo.thscsum)/sum(vo.answercnt),0) end as pjsc,
+    case when sum(vo.validcnt)=0 then '0' else FORMAT(sum(vo.trysum)/sum(vo.validcnt),2) end as pjcs,
+    CONCAT(CAST((sum(vo.succcnt)/sum(vo.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(vo.answercnt)/sum(vo.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    from stat_voice_day_record vo
+    WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(vo.statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(vo.statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+  </select>
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageVoiceRecordList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT vr.statday,ua.sid,ac.name as companyName,vr.callcnt,
+    CONCAT(CAST((sum(vr.succcnt)/sum(vr.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(vr.answercnt)/sum(vr.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate,
+    sum(thscsum)as thscsum,sum(jfscsum)as jfscsum,
+    case when sum(vr.answercnt)=0 then '0' else ROUND(sum(vr.thscsum)/sum(vr.answercnt),0) end as pjsc,
+    case when sum(vr.validcnt)=0 then '0' else FORMAT(sum(vr.trysum)/sum(vr.validcnt),2) end as pjcs,
+    SUM(vr.fee) fee
+    FROM stat_voice_day_record vr,tb_user_admin_authen_company ac,tb_user_admin ua
+    WHERE vr.feeid = ua.feeid AND ua.uid = ac.uid
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(vr.statday,'%Y-%m'), vr.feeid
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(vr.statday,'%Y-%m-%d'), vr.feeid
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(vr.statday,'%Y-%m-%d'), vr.feeid
+    </if>
+    ORDER BY vr.statday DESC, vr.callcnt DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出选取话务报表列表 -->
+  <select id="downloadVoiceRecord" resultType="map" parameterType="Page">
+    SELECT vr.statday,ua.sid,ac.name as companyName,vr.callcnt,
+    CONCAT(CAST((sum(vr.succcnt)/sum(vr.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(vr.answercnt)/sum(vr.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate,
+    sum(thscsum)as thscsum,sum(jfscsum)as jfscsum,
+    case when sum(vr.answercnt)=0 then '0' else ROUND(sum(vr.thscsum)/sum(vr.answercnt),0) end as pjsc,
+    case when sum(vr.validcnt)=0 then '0' else FORMAT(sum(vr.trysum)/sum(vr.validcnt),2) end as pjcs,
+    SUM(vr.fee) fee
+    FROM stat_voice_day_record vr,tb_user_admin_authen_company ac,tb_user_admin ua
+    WHERE vr.feeid = ua.feeid AND ua.uid = ac.uid
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(vr.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(vr.statday,'%Y-%m'), vr.feeid
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(vr.statday,'%Y-%m-%d'), vr.feeid
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(vr.statday,'%Y-%m-%d'), vr.feeid
+    </if>
+    ORDER BY vr.statday DESC, vr.callcnt DESC
+  </select>
+
+  <!-- 按天统计 语音通知 话务走势 的话务情况 -->
+  <select id="countVoiceScanByDay" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+      SUM(sr.thscsum)/SUM(sr.succcnt) thscAvg,
+      SUM(sr.jfscsum) jfscsum,
+      SUM(sr.callcnt) callcnt,
+      SUM(sr.succcnt)/SUM(sr.callcnt) succcntRate,
+      SUM(sr.answercnt)/SUM(sr.callcnt) answercntRate,
+
+      DATE_FORMAT(sr.statday,'%Y-%m-%d') d
+    FROM stat_voice_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+</mapper>

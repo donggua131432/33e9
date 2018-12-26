@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+
+    <description>JSTL for e9cloud</description>
+    <display-name>e9cloud core</display-name>
+    <tlib-version>0.1</tlib-version>
+    <short-name>e9</short-name>
+    <uri>http://www.e9cloud.com/e9tag</uri>
+
+    <!-- 输出内容 -->
+    <tag>
+        <description>
+            print context
+        </description>
+        <name>printCRNContext</name>
+        <tag-class>com.e9cloud.core.tag.E9cloudTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <description>the id is for template and dataModel</description>
+            <name>primaryKey</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+</taglib>

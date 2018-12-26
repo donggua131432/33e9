@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StatSipDayRecord_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.StatSipDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="DATE" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="cycle" property="cycle" jdbcType="TINYINT" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statday, appid, subid, feeid, abline, cycle, callcnt, succcnt, answercnt, thscsum, 
+    jfscsum, fee, recordingfee, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_sip_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectSip" resultType="map" parameterType="java.util.HashMap">
+    SELECT IFNULL(sip.abline,'单路') as abline,SUM(sip.thscsum)as thscsum,SUM(sip.jfscsum)as jfscsum,
+    case when sum(sip.answercnt)=0 then '0' else ROUND(sum(sip.thscsum)/sum(sip.answercnt),0) end as pjsc,
+    CONCAT(CAST((sum(sip.succcnt)/sum(sip.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+    CONCAT(CAST((sum(sip.answercnt)/sum(sip.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+    FROM stat_sip_day_record sip WHERE 1=1
+    <if test="reportType == 1" >
+      AND DATE_FORMAT(sip.statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    </if>
+    <if test="reportType == 2" >
+      AND DATE_FORMAT(sip.statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+    </if>
+  </select>
+  <select id="selectSipNumByDay" resultType="map" parameterType="java.util.HashMap">
+    select count(*)as sipNum
+    FROM tb_sip_relayinfo_history WHERE DATE_FORMAT(cday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+    AND status='00';
+  </select>
+  <select id="selectSipNumByMonth" resultType="map" parameterType="java.util.HashMap">
+    select count(*)as sipNum,cday from tb_sip_relayinfo_history where DATE_FORMAT(cday,'%Y-%m')= #{date,jdbcType=TIMESTAMP} AND status='00' group by cday  order by cday desc limit 1;
+  </select>
+
+  <!-- 按天统计 sip 话务走势 的话务情况 -->
+  <select id="countSipScanByDay" resultType="map" parameterType="map">
+    SELECT
+      SUM(sr.thscsum) thscsum,
+
+      SUM(sr.thscsum)/SUM(sr.succcnt) thscAvg,
+
+      SUM(if(sr.cycle='60',sr.jfscsum,0)) jfscsum60,
+
+      SUM(sr.callcnt) callcnt,
+
+      SUM(sr.succcnt)/SUM(sr.callcnt) succcntRate,
+
+      SUM(sr.answercnt)/SUM(sr.callcnt) answercntRate,
+
+      DATE_FORMAT(sr.statday,'%Y-%m-%d') d
+    FROM stat_sip_day_record sr
+    WHERE sr.statday &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statday &lt; #{endDay,jdbcType=TIMESTAMP}
+    <if test="sid != null and sid != '-1' and sid != ''">
+      AND sr.feeid = (SELECT feeid FROM tb_user_admin WHERE sid = #{sid,jdbcType=VARCHAR})
+    </if>
+    <if test="subid != null and subid != ''">
+      AND sr.subid = #{subid,jdbcType=VARCHAR}
+    </if>
+    GROUP BY d
+  </select>
+
+
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageSipReportList" resultType="map" parameterType="Page">
+
+    <include refid="com.e9cloud.pre"/>
+    SELECT r.statday, 'SIP接口' AS businessName, ua.sid, ac. NAME AS companyName, ap.appid, ar.subid,ar.sub_name,a.relay_num,a.relay_name,
+    sum(r.callcnt) callcnt,
+    CONCAT( CAST(( sum(r.succcnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS callCompletingRate,
+    CONCAT( CAST(( sum(r.answercnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS answerRate,
+    sum(r.thscsum) thscsum, sum(r.jfscsum) jfscsum,
+    CASE WHEN sum(succcnt) = 0 THEN '0' ELSE ROUND( SUM(thscsum) / sum(succcnt), 0 ) END AS pjsc,
+    sum(r.fee) fee,
+    (select sum(callcnt) from stat_sip_day_record where feeid = r.feeid and statday = r.statday) as allCallCnt
+
+    FROM stat_sip_day_record r
+    LEFT JOIN tb_user_admin ua 	              ON r.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    LEFT JOIN tb_app_info ap				  ON r.appid = ap.appid
+    LEFT JOIN tb_sip_relayinfo ar			  ON r.subid = ar.subid
+    LEFT JOIN tb_sip_basic a				  ON a.relay_num = ar.relay_num AND a.`status` = '00'
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.subid != null and params.subid != ''">
+      and ar.subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.subName != null and params.subName != ''">
+      and ar.sub_name LIKE "%" #{params.subName,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.feeid,r.subid
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.subid
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.subid
+    </if>
+    ORDER BY r.statday DESC, allCallCnt DESC, r.feeid, r.callcnt DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出选取话务报表列表 -->
+  <select id="downloadSipReport" resultType="map" parameterType="Page">
+    SELECT r.statday, 'SIP接口' AS businessName, ua.sid, ac. NAME AS companyName, ap.appid, ar.subid,ar.sub_name,
+    sum(r.callcnt) callcnt,
+    CONCAT( CAST(( sum(r.succcnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS callCompletingRate,
+    CONCAT( CAST(( sum(r.answercnt) / sum(r.callcnt)) * 100 AS DECIMAL (5, 2)), '%' ) AS answerRate,
+    sum(r.thscsum) thscsum, sum(r.jfscsum) jfscsum,
+    CASE WHEN sum(succcnt) = 0 THEN '0' ELSE ROUND( SUM(thscsum) / sum(succcnt), 0 ) END AS pjsc,
+    sum(r.fee) fee,
+    (select sum(callcnt) from stat_sip_day_record where feeid = r.feeid and statday = r.statday) as allCallCnt
+
+    FROM stat_sip_day_record r
+    LEFT JOIN tb_user_admin ua 	              ON r.feeid = ua.feeid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    LEFT JOIN tb_app_info ap				  ON r.appid = ap.appid
+    LEFT JOIN tb_sip_relayinfo ar			  ON r.subid = ar.subid
+    LEFT JOIN tb_sip_basic a				  ON a.relay_num = ar.relay_num AND a.`status` = '00'
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.subid != null and params.subid != ''">
+      and ar.subid = #{params.subid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.subName != null and params.subName != ''">
+      and ar.sub_name LIKE "%"#{params.subName,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="datemin != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{datemin,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &gt;= DATE_FORMAT( #{datemin,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+    <if test="datemax != null">
+
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+      <if test="params.reportType==2 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m') &lt;= DATE_FORMAT( #{datemax,jdbcType=TIMESTAMP},'%Y-%m')
+      </if>
+    </if>
+
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.feeid,r.subid
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.subid
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'),r.feeid,r.subid
+    </if>
+    ORDER BY r.statday DESC, allCallCnt DESC, r.feeid, r.callcnt DESC
+  </select>
+
+</mapper>

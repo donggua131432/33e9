@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Overviews_Mapper" >
+
+    <select id="selectOverviews" resultType="map" parameterType="java.util.HashMap">
+        select sum(m.thscsum) thscsum,sum(m.jfscsum) jfscsum,case when sum(m.answercnt)=0 then '0' else   ROUND(sum(m.thscsum)/sum(m.answercnt),0) end as pjsc,
+        CONCAT(CAST((sum(m.succcnt)/sum(m.callcnt))*100 AS DECIMAL(5,2)),'%')as callCompletingRate,
+        CONCAT(CAST((sum(m.answercnt)/sum(m.callcnt))*100 AS DECIMAL(5,2)),'%')as callAnswerRate
+        from (
+        SELECT statday,yw,feeid,feetype,callcnt,succcnt,answercnt,thscsum,jfscsum,fee,recordingfee
+        FROM vi_stat_day_platform  where 1=1
+        <if test="reportType == 1" >
+            AND DATE_FORMAT(statday,'%Y-%m-%d') = #{date,jdbcType=TIMESTAMP}
+        </if>
+        <if test="reportType == 2" >
+            AND DATE_FORMAT(statday,'%Y-%m') = #{date,jdbcType=TIMESTAMP}
+        </if>
+        )m
+
+    </select>
+
+    <select id="CountOverviewsUser" resultType="Integer" parameterType="java.util.HashMap">
+    select count(1) from (
+      select n.uid,sum(n.fee)/#{dateNum,jdbcType=INTEGER} fee from (
+        select m.*,ua.uid from (
+          select stafday as statday,appid,subid,feeid,thscsum,jfscsum,fee from stat_rest_day_record
+          union all
+          select statday,appid,subid,feeid,thscsum,jfscsum,fee from stat_mask_day_record
+          union all
+          select statday,appid,subid,feeid,thscsum,jfscsum,fee from stat_sip_day_record
+          union all
+          select statday,appid,subid,feeid,thscsum,jfscsum,fee from stat_cc_day_record
+        )m inner join tb_user_admin ua on m.feeid=ua.feeid
+      )n
+      where DATE_FORMAT(statday,'%Y-%m-%d') &gt;= #{timemin,jdbcType=TIMESTAMP}
+        and DATE_FORMAT(statday,'%Y-%m-%d') &lt;= #{timemax,jdbcType=TIMESTAMP}
+      group by n.uid having sum(n.fee)/#{dateNum,jdbcType=INTEGER} &gt;= 300
+    )c
+  </select>
+
+    <select id="selectTypePercent" resultType="map" parameterType="java.util.HashMap">
+
+        select IFNULL(sum(fee + recordingfee),0) fee,'专线语音' typeName from stat_rest_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select IFNULL(sum(fee + recordingfee),0) fee,'专号通' typeName from stat_mask_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select IFNULL(sum(fee + recordingfee),0) fee,'SIP' typeName from stat_sip_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select IFNULL(sum(fee),0) fee,'智能云调度' typeName from stat_cc_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select IFNULL(sum(fee+ recordingfee),0) fee,'语音通知' typeName from stat_voice_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select IFNULL(sum(fee+ recordingfee),0) fee,'云话机' typeName from stat_sp_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+
+        union all
+        select IFNULL(sum(fee+ recordingfee),0) fee,'云总机' typeName from stat_ivr_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+
+        union all
+        SELECT IFNULL(sum(fee),0) fee,'语音验证码' typeName FROM stat_voiceverify_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')=#{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+
+
+    </select>
+
+    <select id="selectOverviewsRev" resultType="map" parameterType="java.util.HashMap">
+        select sum(fee+recordingfee)fee,sum(callcnt)callcnt from vi_stat_day_platform
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectOverviewsMon" resultType="map" parameterType="java.util.HashMap">
+        select sum(money)money  from tb_recharge_records
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(recharge_time,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(recharge_time,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectOverviewsCon" resultType="String" parameterType="java.lang.String">
+        SELECT  count(*) from tb_user_admin_authen_company
+    </select>
+
+
+    <select id="selectOverviewsConNew" resultType="String" parameterType="java.util.HashMap">
+        select count(*) from tb_user_admin_authen_company
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(create_date,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(create_date,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectOverviewsConActive" resultType="String" parameterType="java.util.HashMap">
+        select count(distinct feeid) from rms_fee_log
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectOverviewsTop" resultType="map" parameterType="java.util.HashMap">
+        select (@rowno:=@rowno+1) as rowno,r.jfscsum,r.fee,r.sid,r.name,r.typeName from (
+        select t.jfscsum,t.fee,tua.sid,tuc.name,t.typeName from (
+        select n.uid,sum(n.jfscsum) jfscsum,sum(n.fee) fee,CONCAT_WS(',',max(n.typeName1),max(n.typeName2),max(n.typeName3),max(n.typeName4)) typeName from (
+        select m.statday,m.feeid,m.jfscsum,m.fee,m.typeName1,m.typeName2,m.typeName3,m.typeName4,ua.uid from (
+        select stafday as statday,feeid,jfscsum,fee,'专线语音' as typeName1,null as typeName2,null as typeName3,null as typeName4 from stat_rest_day_record
+        where DATE_FORMAT(stafday,'%Y-%m-%d') &gt;= #{timemin,jdbcType=TIMESTAMP}
+        and DATE_FORMAT(stafday,'%Y-%m-%d') &lt;= #{timemax,jdbcType=TIMESTAMP}
+        union all
+        select statday,feeid,jfscsum,fee,null as typeName1,'专号通' as typeName2,null as typeName3,null as typeName4 from stat_mask_day_record
+        where DATE_FORMAT(statday,'%Y-%m-%d') &gt;= #{timemin,jdbcType=TIMESTAMP}
+        and DATE_FORMAT(statday,'%Y-%m-%d') &lt;= #{timemax,jdbcType=TIMESTAMP}
+        union all
+        select statday,feeid,jfscsum,fee,null as typeName1,null as typeName2,'SIP' as typeName3,null as typeName4 from stat_sip_day_record
+        where DATE_FORMAT(statday,'%Y-%m-%d') &gt;= #{timemin,jdbcType=TIMESTAMP}
+        and DATE_FORMAT(statday,'%Y-%m-%d') &lt;= #{timemax,jdbcType=TIMESTAMP}
+        union all
+        select statday,feeid,jfscsum,fee,null as typeName1,null as typeName2,null as typeName3,'智能云调度' as typeName4 from stat_cc_day_record
+        where DATE_FORMAT(statday,'%Y-%m-%d') &gt;= #{timemin,jdbcType=TIMESTAMP}
+        and DATE_FORMAT(statday,'%Y-%m-%d') &lt;= #{timemax,jdbcType=TIMESTAMP}
+        )m
+        inner join tb_user_admin ua on m.feeid=ua.feeid
+        )n
+        group by n.uid
+        order by sum(n.fee) desc limit 10
+        )t
+        inner join tb_user_admin tua on tua.uid=t.uid
+        left join tb_user_admin_authen_company tuc on t.uid=tuc.uid
+        )r,(select @rowno:=0) as rowno
+    </select>
+
+    <select id="selectOverviewsTopRev" resultType="map" parameterType="java.util.HashMap">
+        select (@rowno:=@rowno+1) as rowno,r.jfscsum,r.thscsum,r.fee,r.sid,r.name,r.typeName from (
+        select t.jfscsum,t.thscsum,t.fee,tua.sid,tuc.name,t.typeName from (
+        select n.uid,sum(n.jfscsum) jfscsum,sum(n.thscsum) thscsum,sum(n.fee) fee,CONCAT_WS(',',max(n.typeName1),max(n.typeName2),max(n.typeName3),max(n.typeName4),max(n.typeName5),max(n.typeName6),max(n.typeName7),max(n.typeName8)) typeName from (
+        select m.statday,m.feeid,m.jfscsum,m.thscsum,m.fee,m.typeName1,m.typeName2,m.typeName3,m.typeName4,m.typeName5,m.typeName6,m.typeName7,m.typeName8,ua.uid from (
+        select stafday as statday,feeid,jfscsum,thscsum,fee,'专线语音' as typeName1,null as typeName2,null as typeName3,null as typeName4 ,null as typeName5,null as typeName6, null as typeName7, null as typeName8  from stat_rest_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,jfscsum,thscsum,fee,null as typeName1,'专号通' as typeName2,null as typeName3,null as typeName4,null as typeName5,null as typeName6, null as typeName7, null as typeName8  from stat_mask_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,jfscsum,thscsum,fee,null as typeName1,null as typeName2,'SIP接口' as typeName3,null as typeName4,null as typeName5,null as typeName6, null as typeName7, null as typeName8  from stat_sip_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,jfscsum,thscsum,fee,null as typeName1,null as typeName2,null as typeName3,'智能云调度' as typeName4 ,null as typeName5,null as typeName6, null as typeName7, null as typeName8  from stat_cc_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,jfscsum,thscsum,fee,null as typeName1,null as typeName2,null as typeName3,null as typeName4,'语音通知' as typeName5,null as typeName6, null as typeName7, null as typeName8  from stat_voice_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,jfscsum,thscsum,fee,null as typeName1,null as typeName2,null as typeName3,null as typeName4,null as typeName5,'云话机' as typeName6, null as typeName7, null as typeName8  from stat_sp_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,jfscsum,thscsum,fee,null as typeName1,null as typeName2,null as typeName3,null as typeName4,null as typeName5,null as typeName6 ,'云总机' as typeName7, null as typeName8 from stat_ivr_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        union all
+        select statday,feeid,CASE WHEN fee_mode = '00' THEN jfscsum WHEN fee_mode = '01' THEN succcnt END AS jfscsum,
+        thscsum,fee,null as typeName1,null as typeName2,null as typeName3,null as typeName4,null as typeName5,null as typeName6 ,null as typeName7,'语音验证码' as typeName8 from stat_voiceverify_day_record
+        WHERE 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        )m
+        inner join tb_user_admin ua on m.feeid=ua.feeid
+        )n
+        group by n.uid
+        order by sum(n.fee) desc limit 10
+        )t
+        inner join tb_user_admin tua on tua.uid=t.uid
+        left join tb_user_admin_authen_company tuc on t.uid=tuc.uid
+        )r,(select @rowno:=0) as rowno
+
+    </select>
+
+
+    <select id="selectRestFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee+recordingfee),0)fee ,IFNULL(SUM(fee),0)feecall ,IFNULL(sum(recordingfee),0) recordingfee ,CASE WHEN SUM(jflyscsum) IS NULL OR SUM(jflyscsum) = 0 THEN 0 ELSE round(SUM(recordingfee) / sum(jflyscsum), 4) END pjlydj
+        from stat_rest_day_record
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectRestAblineSum" resultType="map" parameterType="java.util.HashMap">
+        SELECT b.abline,
+        CASE
+        WHEN SUM(answercnt) IS NULL OR SUM(answercnt) = 0 THEN
+        0
+        ELSE
+        round(SUM(fee)/sum(answercnt) ,4)
+        END pjdj
+        FROM stat_rest_day_record c
+        RIGHT JOIN (SELECT 'A' abline UNION
+        SELECT 'B' abline
+        ) b
+        ON
+        <if test="rType==1 and rType!=null">
+            DATE_FORMAT(stafday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            DATE_FORMAT(stafday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        AND c.abline = b.abline
+        GROUP BY b.abline
+    </select>
+
+    <select id="selectRestCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT stafday , sum(fee)fee ,feeid from stat_rest_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(stafday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+
+    <select id="selectMaskFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee+recordingfee),0)sumfee ,IFNULL(SUM(fee),0)fee ,IFNULL(sum(recordingfee),0) recordingfee ,CASE WHEN SUM(jflyscsum) IS NULL OR SUM(jflyscsum) = 0 THEN 0 ELSE round(SUM(recordingfee) / sum(jflyscsum), 4) END pjlydj
+        from stat_mask_day_record         where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectMaskAblineSum" resultType="map" parameterType="java.util.HashMap">
+        SELECT b.abline,
+        CASE
+        WHEN SUM(answercnt) IS NULL OR SUM(answercnt) = 0 THEN
+        0
+        ELSE
+        round(SUM(fee)/sum(answercnt) ,4)
+        END pjdj
+        FROM stat_mask_day_record c
+        RIGHT JOIN (SELECT 'A' abline UNION
+        SELECT 'B' abline UNION
+        SELECT 'C' abline
+        ) b
+        ON
+        <if test="rType==1 and rType!=null">
+            DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        AND c.abline = b.abline
+        GROUP BY b.abline
+    </select>
+
+    <select id="selectMaskNumFee" resultType="map" parameterType="java.util.HashMap">
+        SELECT IFNULL(SUM(fee),0)fee from vi_stat_day_platform  where yw = 'mask'  and feetype = 'rent'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectMaskRent" resultType="map" parameterType="java.util.HashMap">
+        SELECT CASE WHEN SUM(numcnt) IS NULL OR SUM(numcnt) = 0 THEN 0 ELSE round(SUM(cost) / sum(numcnt), 4) END rent
+        FROM stat_mask_day_perrent
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+
+    </select>
+
+    <select id="selectMaskCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_mask_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+    <select id="selectVoiceFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee+recordingfee),0)fee ,CASE WHEN SUM(answercnt) IS NULL OR SUM(answercnt) = 0 THEN 0 ELSE round(SUM(fee+recordingfee) / sum(answercnt), 4) END pjdj
+        from stat_voice_day_record         where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectVoiceCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_voice_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+
+    <select id="selectSipFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee+recordingfee),0)fee from stat_sip_day_record
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectSipAblineSum" resultType="map" parameterType="java.util.HashMap">
+        SELECT b.cycle,
+        CASE
+        WHEN SUM(answercnt) IS NULL OR SUM(answercnt) = 0 THEN
+        0
+        ELSE
+        SUM(jfscsum) / SUM(answercnt)
+        END pjdj
+        FROM stat_sip_day_record c
+        RIGHT JOIN (SELECT '60' cycle UNION
+        SELECT '6' cycle
+        ) b
+        ON
+        <if test="rType==1 and rType!=null">
+            DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        AND c.cycle = b.cycle
+        GROUP BY b.cycle
+        order by b.cycle DESC
+    </select>
+
+    <select id="selectSipCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_sip_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+
+    <select id="selectCcFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee),0)fee from stat_cc_day_record
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectCcAblineSum" resultType="map" parameterType="java.util.HashMap">
+        SELECT b.abline,
+        CASE
+        WHEN SUM(jfscsum) IS NULL OR SUM(jfscsum) = 0 THEN
+        0
+        ELSE
+        SUM(fee) / SUM(jfscsum)
+        END pjdj
+        FROM stat_cc_day_record c
+        RIGHT JOIN (SELECT 'I' abline UNION
+        SELECT 'O' abline
+        ) b
+        ON
+        <if test="rType==1 and rType!=null">
+            DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        AND c.abline = b.abline
+        GROUP BY b.abline
+    </select>
+
+    <select id="selectCcNumFee" resultType="map" parameterType="java.util.HashMap">
+        SELECT IFNULL(SUM(fee),0)fee from vi_stat_day_platform  where yw = 'cc'  and feetype = 'rent'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+
+    <select id="selectCcCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_cc_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+    <select id="selectSpFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee+recordingfee),0)fee ,IFNULL(SUM(fee),0)feecall ,IFNULL(sum(recordingfee),0) recordingfee ,CASE WHEN SUM(jflyscsum) IS NULL OR SUM(jflyscsum) = 0 THEN 0 ELSE round(SUM(recordingfee) / sum(jflyscsum), 4) END pjlydj
+        from stat_sp_day_record
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectSpAblineSum" resultType="map" parameterType="java.util.HashMap">
+        select '回拨A' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sipprest' and sipa!=sipb  AND abline='A'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select '回拨B' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sipprest' and sipa!=sipb AND abline='B'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select 'SipPhone回拨A' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sipprest' and sipa=1 and sipa=sipb AND abline='A'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select 'SipPhone回拨B' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sipprest' and sipa=1 and sipa=sipb AND abline='B'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select '直拨' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sippout'  and sipa!=sipb
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select 'SipPhone直拨' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sippout' and sipa=1 and sipa=sipb
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select '回呼' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_sp_day_record where rcdtype='sippin'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+    </select>
+
+    <select id="selectSpCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_sp_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+
+
+    <select id="selectEccFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee+recordingfee),0)fee ,IFNULL(SUM(fee),0)feecall ,IFNULL(sum(recordingfee),0) recordingfee ,CASE WHEN SUM(jflyscsum) IS NULL OR SUM(jflyscsum) = 0 THEN 0 ELSE round(SUM(recordingfee) / sum(jflyscsum), 4) END pjlydj
+        from stat_ivr_day_record
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+
+    <select id="selectEccAblineSum" resultType="map" parameterType="java.util.HashMap">
+        select '呼入总机SIP' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_ivr_day_record where rcdtype='CallInSip'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select '呼入总机非SIP' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_ivr_day_record where rcdtype='CallInNonSip'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+
+        union select '呼入直呼' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_ivr_day_record where rcdtype='CallInDirect'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select '呼出市话' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_ivr_day_record where rcdtype='CallOutLocal'
+
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+
+        union select '呼出长途' as rcdtype , (select  if(sum(answercnt)=null,null,round(sum(fee)/sum(answercnt) ,4)) as pjdj
+        from stat_ivr_day_record where rcdtype='CallOutNonLocal'
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        group by rcdtype) as pjdj
+    </select>
+
+    <select id="selectEccCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_ivr_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+
+    <select id="selectEccSipRent" resultType="map" parameterType="java.util.HashMap">
+        SELECT IFNULL(SUM(cost_fee),0)sipcost ,COUNT(*) count,CASE WHEN COUNT(*) IS NULL OR COUNT(*) = 0 THEN 0 ELSE round(SUM(cost_fee) / COUNT(*), 4) END pjsipcost from  rms_ivr_rent_history
+        where rent_type = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+
+    <select id="selectEccZjRent" resultType="map" parameterType="java.util.HashMap">
+        SELECT IFNULL(SUM(cost_fee),0) zjcost ,COUNT(*) count,CASE WHEN COUNT(*) IS NULL OR COUNT(*) = 0 THEN 0 ELSE round(SUM(cost_fee) / COUNT(*), 4) END pjzjcost from  rms_ivr_rent_history
+        where rent_type = 0
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectEccMinCost" resultType="map" parameterType="java.util.HashMap">
+        SELECT ifnull(sum(min_consume), 0) AS minconsume FROM  stat_ivr_consume_record
+        where 1 = 1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(ctime,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectVoiceverifyFeeSum" resultType="map" parameterType="java.util.HashMap">
+        select IFNULL(SUM(fee),0)fee from stat_voiceverify_day_record
+        where 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+    <select id="selectVoiceverifyCount" resultType="String" parameterType="java.util.HashMap">
+        SELECT count(*)count from
+        (SELECT statday , sum(fee)fee ,feeid from stat_voiceverify_day_record
+        where  1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY feeid) as a
+    </select>
+
+    <select id="selectVoiceverifyPjSum" resultType="map" parameterType="java.util.HashMap">
+        SELECT fee_mode,
+        CASE WHEN SUM(jfscsum) IS NULL OR SUM(jfscsum) = 0 THEN 0
+        ELSE SUM(fee)/SUM(jfscsum) END fzpjdj,
+        CASE WHEN SUM(answercnt) IS NULL OR SUM(answercnt) = 0 THEN 0
+        ELSE SUM(fee)/SUM(answercnt) END tspjdj
+        FROM stat_voiceverify_day_record
+        WHERE 1=1
+        <if test="rType==1 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m-%d')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="rType==2 and rType!=null">
+            AND DATE_FORMAT(statday,'%Y-%m')= #{statday,jdbcType=TIMESTAMP}
+        </if>
+        GROUP BY fee_mode
+    </select>
+
+</mapper>

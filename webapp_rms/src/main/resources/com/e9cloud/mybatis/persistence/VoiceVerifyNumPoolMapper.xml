@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VoiceVerifyNumPool_Mapper" >
+
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.VoiceVerifyNumPool" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, cityid, number, status, addtime, updatetime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_voiceverify_num_pool
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="getVoiceNumPoolByPhone" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.VoiceVerifyNumPool" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_voiceverify_num_pool
+    where 1=1
+    <if test="status!=null and status!=''">
+      and status = #{status,jdbcType=VARCHAR}
+    </if>
+    <if test="number!=null and number!=''">
+      and number = #{number,jdbcType=VARCHAR}
+    </if>
+    <if test="cityid!=null and cityid!=''">
+      and cityid = #{cityid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+
+
+
+  <select id="getVoicePhoneById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_voiceverify_num_pool
+    where 1=1
+    <if test="_parameter!=null and _parameter!=''">
+      AND id = #{_parameter,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="selectNumByIds" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_voiceverify_num_pool
+    where `status` != '02'
+    AND id IN
+    <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <select id="countNumbyNumber" resultType="long" parameterType="string">
+    select
+    count(*)
+    from tb_voiceverify_num_pool
+    where `status` != '02'
+    AND number = #{number,jdbcType=VARCHAR}
+  </select>
+
+  <update id="updateToDelStatus">
+    UPDATE
+    tb_voiceverify_num_pool
+    SET `status` = '02'
+    WHERE id IN
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </update>
+
+  <select id="pageVoiceVerifyNumPool" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+      np.number, np.`status`, np.id, tp.pname, tc.cname, tc.area_code areaCode, ai.sid,
+      ac.`name` companyName, vn.appid, ai.app_name appName
+    FROM tb_voiceverify_num_pool np
+    LEFT JOIN tb_voiceverify_num vn ON np.id = vn.num_id AND vn.status = '00'
+    LEFT JOIN tb_app_info ai ON vn.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ua.sid = ai.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ac.uid = ua.uid
+    LEFT JOIN tb_telno_city tc ON np.cityid = tc.ccode AND tc.ctype = 0
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    WHERE np.`status` != '02'
+    <if test="params.number != null and params.number != ''">
+      AND np.number like CONCAT('%',#{params.number,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.status != null and params.status != ''">
+      AND np.`status` = #{params.status,jdbcType=VARCHAR}
+    </if>
+    <if test="params.pcode != null and params.pcode != ''">
+      AND tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode != ''">
+      AND tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      AND ai.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.companyName != null and params.companyName != ''">
+      AND ac.`name` like CONCAT('%',#{params.companyName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.appid != null and params.appid != ''">
+      AND vn.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName != ''">
+      AND ai.app_name like CONCAT('%',#{params.appName,jdbcType=VARCHAR},'%')
+    </if>
+    ORDER BY np.updatetime DESC, np.addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_voiceverify_num_pool
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.VoiceVerifyNumPool" >
+    insert into tb_voiceverify_num_pool
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+
+
+  <update id="updateVoicePhoneByStatus" parameterType="com.e9cloud.mybatis.domain.VoiceVerifyNumPool">
+    UPDATE tb_voiceverify_num_pool SET status= #{status,jdbcType=VARCHAR} where id = #{id}
+  </update>
+
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.VoiceVerifyNumPool" >
+    update tb_voiceverify_num_pool
+    <set >
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="addtime != null" >
+        addtime = #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

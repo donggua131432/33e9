@@ -1,0 +1,29 @@
+
+/****************产品内容样式******************/
+.container{background:url("../img/product_page_bg.png") 0 0 repeat;padding-top:50px;}
+.main_box{margin:0 auto 8em;height:545px;}
+.product_series{text-align: center;padding-top:20px;}
+.product_series>h1{letter-spacing:15px;font-size:45px;font-weight: normal;}
+/*.main_box .product_series>p{margin-top:1.2em;font-size:1.6em;}*/
+.product_box{margin-top:2.5em;text-align: center;padding:0px 24px;}
+.product_box .product_main{margin-right:60px;}
+.proIntroB{margin-bottom:45px !important;}
+.product_main{border:1px solid #CFCFCF;border-radius:2px;width:334px;height:480px;cursor:pointer;}
+.product_main:hover{border:1px solid #4C7ACD; color: #4975C6 !important;}
+
+.common_title{display:inline-block;width:250px;height:250px;margin-top:-30px;}
+.ydd_pic1{background:url("../img/pro_znydd.png") 0 0 no-repeat;}
+.ydd_pic2{background:url("../img/pro_znydd1.png") 0 0 no-repeat;}
+.rest_pic1{background:url("../img/pro_rest.png") 0 0 no-repeat;}
+.rest_pic2{background:url("../img/pro_rest1.png") 0 0 no-repeat;}
+.Designed_pic1{background:url("../img/Designed_pic3.png") 0 0 no-repeat;}
+.Designed_pic2{background:url("../img/Designed_pic33.png") 0 0 no-repeat;}
+
+.product_main .pro_common{margin:-50px 0 10px 0;letter-spacing:5px;font-size:28px;color:#C3C3C5;}
+.pro_intro{margin-bottom:0.8em;font-size:1.1em;letter-spacing:1.5px;color:#E0E3E5;}
+/*.pro_intro_bottom{margin-bottom:3em;}*/
+.product_main>a{display:inline-block;margin-bottom:40px;font-size:1.1em;letter-spacing:4px;font-weight:600;color:#548BEF;}
+.product_main .bottom{margin-bottom:2.2em;}
+.DPor{padding-top:.2rem;}
+.pro_common_hover{color:#5790F8 !important;}
+.pro_intro_hover{color:#4572BB !important;}

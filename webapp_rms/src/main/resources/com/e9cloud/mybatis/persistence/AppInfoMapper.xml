@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AppInfo_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.AppInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="app_name" property="appName" jdbcType="VARCHAR" />
+    <result column="app_type" property="appType" jdbcType="VARCHAR" />
+    <result column="call_no" property="callNo" jdbcType="VARCHAR" />
+    <result column="callback_url" property="callbackUrl" jdbcType="VARCHAR" />
+    <result column="associate_type" property="associateType" jdbcType="VARCHAR" />
+    <result column="url_status" property="urlStatus" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="is_defined" property="isDefined" jdbcType="VARCHAR" />
+
+    <result column="quota" property="quota" jdbcType="DECIMAL" />
+    <result column="limit_flag" property="limitFlag" jdbcType="VARCHAR" />
+
+    <result column="is_Route" property="isRoute" jdbcType="CHAR" />
+    <result column="route_Code" property="routeCode" jdbcType="VARCHAR" />
+    <result column="answer_trunk" property="answerTrunk" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, appid, sid, bus_type, app_name, app_type, call_no, callback_url, associate_type,
+    url_status, status, create_date, update_date,is_Route,route_Code, answer_trunk
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_app_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_app_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <!-- 分页选取智能云调度应用列表 -->
+  <select id="pageAppListForZnydd" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ac.name companyName, ua.sid,ua.email, ai.appid appId, ai.app_name appName,ai.status, ai.create_date createDate ,ai.app_type appType,ai.call_no callNo
+    FROM
+    tb_user_admin AS ua ,
+    tb_app_info AS ai ,
+    tb_user_admin_authen_company ac
+    where  ua.sid = ai.sid
+    and ua.uid = ac.uid
+    and ai.bus_type =  #{params.abustype,jdbcType=VARCHAR}
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.appName != null and params.appName != ''">
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.status != null and params.status != ''">
+      and ai.status = #{params.status,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appType != null and params.appType != ''">
+      and ai.app_type = #{params.appType,jdbcType=VARCHAR}
+    </if>
+    <if test="timemin != null">
+      AND ai.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND ai.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.callNo != null and params.callNo != ''">
+      and ai.call_no LIKE "%"#{params.callNo,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="params.appId != null and params.appId != ''">
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.email != null and params.email != ''">
+      and ua.email LIKE "%"#{params.email,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- 下载rest应用列表 -->
+  <select id="pageAppListForRest" resultType="map" parameterType="Page">
+    SELECT
+    ac.name companyName, ua.sid,ua.email, ai.appid appId, ai.app_name appName,ai.status, ai.create_date createDate ,ai.app_type appType,ai.call_no callNo
+    FROM
+    tb_user_admin AS ua ,
+    tb_app_info AS ai ,
+    tb_user_admin_authen_company ac
+    where  ua.sid = ai.sid
+    and ua.uid = ac.uid
+    and ai.bus_type =  #{params.abustype,jdbcType=VARCHAR}
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.appName != null and params.appName != ''">
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.status != null and params.status != ''">
+      and ai.status = #{params.status,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appType != null and params.appType != ''">
+      and ai.app_type = #{params.appType,jdbcType=VARCHAR}
+    </if>
+    <if test="timemin != null">
+      AND ai.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND ai.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.callNo != null and params.callNo != ''">
+      and ai.call_no LIKE "%"#{params.callNo,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="params.appId != null and params.appId != ''">
+      and ai.appid = #{params.appId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.email != null and params.email != ''">
+      and ua.email LIKE "%"#{params.email,jdbcType=VARCHAR}"%"
+    </if>
+
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+  </select>
+
+
+  <!-- 云话机业务应用列表 -->
+  <select id="pageAppListForSipPhone" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ua.email,ac.name companyName, ua.sid, ai.appid appId, ai.app_name appName, ai.status, ai.create_date createDate
+    FROM
+    tb_user_admin AS ua ,
+    tb_app_info AS ai ,
+    tb_user_admin_authen_company ac
+    where  ua.sid = ai.sid
+    and ua.uid = ac.uid
+    and ai.bus_type = #{params.abustype,jdbcType=VARCHAR}
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName != ''">
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.appid != null and params.appid != ''">
+      and ai.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status != ''">
+      and ai.status = #{params.status,jdbcType=VARCHAR}
+    </if>
+    <if test="params.email != null and params.email != ''">
+      and ua.email LIKE "%"#{params.email,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="timemin != null">
+      AND ai.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND ai.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- sip业务应用列表 -->
+  <select id="pageAppListForSip" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ua.email,ac.name companyName, ua.sid, ai.appid appId, ai.app_name appName, ai.status, ai.create_date createDate
+    FROM
+    tb_user_admin AS ua ,
+    tb_app_info AS ai ,
+    tb_user_admin_authen_company ac
+    where  ua.sid = ai.sid
+    and ua.uid = ac.uid
+    and ai.bus_type = #{params.abustype,jdbcType=VARCHAR}
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName != ''">
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.appid != null and params.appid != ''">
+      and ai.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status != ''">
+      and ai.status = #{params.status,jdbcType=VARCHAR}
+    </if>
+    <if test="params.email != null and params.email != ''">
+      and ua.email LIKE "%"#{params.email,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="timemin != null">
+      AND ai.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND ai.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 导出sip应用 -->
+  <select id="getpageAppListForSip" resultType="map" parameterType="Page">
+    SELECT
+    ua.email,ac.name companyName, ua.sid, ai.appid appId, ai.app_name appName, ai.status, ai.create_date createDate
+    FROM
+    tb_user_admin AS ua ,
+    tb_app_info AS ai ,
+    tb_user_admin_authen_company ac
+    where  ua.sid = ai.sid
+    and ua.uid = ac.uid
+    and ai.bus_type = '03'
+
+    <if test="params.companyName != null and params.companyName != ''">
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName != ''">
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.appid != null and params.appid != ''">
+      and ai.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.status != null and params.status != ''">
+      and ai.status = #{params.status,jdbcType=VARCHAR}
+    </if>
+    <if test="params.email != null and params.email != ''">
+      and ua.email LIKE "%"#{params.email,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="timemin != null">
+      AND ai.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND ai.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by ai.create_date  DESC
+    </if>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.AppInfo" >
+    insert into tb_app_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="busType != null" >
+        bus_type,
+      </if>
+      <if test="appName != null" >
+        app_name,
+      </if>
+      <if test="appType != null" >
+        app_type,
+      </if>
+      <if test="callNo != null" >
+        call_no,
+      </if>
+      <if test="callbackUrl != null" >
+        callback_url,
+      </if>
+      <if test="associateType != null" >
+        associate_type,
+      </if>
+      <if test="urlStatus != null" >
+        url_status,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="answerTrunk != null" >
+        answer_trunk,
+      </if>
+      <if test="pinyin != null" >
+        pinyin,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="busType != null" >
+        #{busType,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null" >
+        #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="appType != null" >
+        #{appType,jdbcType=VARCHAR},
+      </if>
+      <if test="callNo != null" >
+        #{callNo,jdbcType=VARCHAR},
+      </if>
+      <if test="callbackUrl != null" >
+        #{callbackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="associateType != null" >
+        #{associateType,jdbcType=VARCHAR},
+      </if>
+      <if test="urlStatus != null" >
+        #{urlStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="answerTrunk != null" >
+        #{answerTrunk,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyin != null" >
+        #{pinyin,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.AppInfo" >
+    update tb_app_info
+    <set >
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="busType != null" >
+        bus_type = #{busType,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null" >
+        app_name = #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="appType != null" >
+        app_type = #{appType,jdbcType=VARCHAR},
+      </if>
+      <if test="callNo != null" >
+        call_no = #{callNo,jdbcType=VARCHAR},
+      </if>
+      <if test="callbackUrl != null" >
+        callback_url = #{callbackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="associateType != null" >
+        associate_type = #{associateType,jdbcType=VARCHAR},
+      </if>
+      <if test="urlStatus != null" >
+        url_status = #{urlStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="isDefined != null" >
+        is_defined = #{isDefined,jdbcType=VARCHAR},
+      </if>
+
+      <if test="isRoute != null" >
+        is_Route = #{isRoute,jdbcType=VARCHAR},
+      </if>
+      <if test="routeCode != null" >
+        route_Code = #{routeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="answerTrunk != null" >
+        answer_trunk = #{answerTrunk,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyin != null" >
+        pinyin = #{pinyin,jdbcType=VARCHAR},
+      </if>
+
+      <if test="quota != null" >
+        quota = #{quota,jdbcType=DECIMAL},
+      </if>
+      <if test="limitFlag != null" >
+        limit_flag = #{limitFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="findAppListCountByMap" resultType="Integer" parameterType="java.util.HashMap" >
+    select  count(1)
+    from
+    tb_app_info a
+    where a.sid =  #{sid,jdbcType=VARCHAR}
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appName)">
+      and a.app_name like  CONCAT('%',#{appName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appType)">
+      and a.app_type = #{appType,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="findAppListByMap" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+    select  id, appid, sid, app_name,  b.name as app_type ,status, create_date
+    from
+    tb_app_info a left join (select name,code from tb_dic_data where typekey = 'appType') b on  a.app_type = b.code
+    where a.sid =  #{sid,jdbcType=VARCHAR}
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appName)">
+      and a.app_name like  CONCAT('%',#{appName,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="@com.e9cloud.core.util.Tools@isNotNullStr(appType)">
+      and a.app_type = #{appType,jdbcType=VARCHAR}
+    </if>
+    order by create_date desc
+    limit  #{start,jdbcType=DECIMAL},#{pageSize,jdbcType=DECIMAL}
+  </select>
+
+  <!-- 更改用户的状态 -->
+  <update id="updateAppStatus" parameterType="com.e9cloud.mybatis.domain.AppInfo" >
+    UPDATE tb_app_info
+    SET status = #{status,jdbcType=VARCHAR}
+    where appid = #{appid,jdbcType=VARCHAR}
+  </update>
+
+
+  <resultMap id="appWithDicResultMap" type="com.e9cloud.mybatis.domain.AppInfo" extends="BaseResultMap">
+    <association property="dicData" column="id" javaType="com.e9cloud.mybatis.domain.DicData">
+      <id column="id" property="id" jdbcType="VARCHAR" />
+      <result column="name" property="name" jdbcType="VARCHAR" />
+      <result column="code" property="code" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+  <select id="findAppInfoByAppId" resultMap="appWithDicResultMap" parameterType="java.lang.String" >
+    select id,
+    appid, sid, bus_type, app_name, app_type,b.name, call_no, callback_url,
+    url_status, status, create_date
+    from tb_app_info a left join (select name,code from tb_dic_data where typekey = 'appType') b on  a.app_type = b.code
+    where appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="findAppInfoByObj" resultMap="appWithDicResultMap" parameterType="com.e9cloud.mybatis.domain.AppInfo" >
+    select id,
+    appid, sid, bus_type, app_name, app_type,b.name, call_no, callback_url,
+    url_status, status, create_date
+    from tb_app_info a left join (select name,code from tb_dic_data where typekey = 'appType') b on  a.app_type = b.code
+    where 1=1
+    <if test="sid!=null and ''!=sid">
+      and a.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="appid!=null and ''!=appid">
+      and a.appid = #{appid,jdbcType=VARCHAR}
+    </if>
+    <if test="busType!=null and ''!=busType">
+      and a.bus_type = #{busType,jdbcType=VARCHAR}
+    </if>
+    <if test="appType!=null and ''!=appType">
+      and a.app_type = #{appType,jdbcType=VARCHAR}
+    </if>
+    <if test="status!=null and ''!=status">
+      and a.status = #{status,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+
+  <resultMap id="appWithCompanyResultMap" type="com.e9cloud.mybatis.domain.AppInfo" extends="BaseResultMap">
+      <result column="companyName" property="companyName" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="findZnyddAppInfoByAppId" resultMap="appWithCompanyResultMap" parameterType="java.lang.String" >
+    select id,
+    appid, sid, bus_type, app_name, app_type,is_defined, call_no, callback_url, answer_trunk,
+    url_status, status, create_date ,is_Route ,route_Code,(
+      select ac.name from tb_user_admin_authen_company ac where ac.uid = (
+        select ua.uid from tb_user_admin ua where ua.sid = (
+          select ai.sid from tb_app_info ai where ai.appid = #{appid,jdbcType=VARCHAR}
+      ) AND ua.sid != ''
+      )) companyName
+    from tb_app_info ai where ai.appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getAppInfoByMap" resultMap="appWithCompanyResultMap" parameterType="map" >
+    select id,
+    appid, sid, bus_type, app_name, app_type,is_defined, call_no, callback_url, answer_trunk,
+    url_status, status, create_date ,is_Route ,route_Code,(
+    select ac.name from tb_user_admin_authen_company ac where ac.uid = (
+    select ua.uid from tb_user_admin ua where ua.sid = (
+    select ai.sid from tb_app_info ai where ai.appid = #{appId,jdbcType=VARCHAR}
+    ) AND ua.sid != ''
+    )) companyName
+    from tb_app_info ai
+    where ai.appid = #{appId,jdbcType=VARCHAR}  and ai.bus_type = #{busType,jdbcType=VARCHAR} and ai.status = #{status,jdbcType=VARCHAR}
+  </select>
+
+  <select id="findSipAppInfoByAppId" resultMap="appWithCompanyResultMap" parameterType="java.lang.String" >
+   select id,appid, sid, bus_type, app_name, status, create_date ,max_concurrent ,is_Route ,route_Code,(
+    select ac.name from tb_user_admin_authen_company ac where ac.uid = (
+    select ua.uid from tb_user_admin ua where ua.sid = (
+    select ai.sid from tb_app_info ai where ai.appid = #{appid,jdbcType=VARCHAR}
+    ) AND ua.sid != ''
+    )) companyName
+    from tb_app_info ai where ai.appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+  <resultMap id="appWithExtra" type="com.e9cloud.mybatis.domain.AppInfo" extends="BaseResultMap">
+    <result column="companyName" property="companyName" jdbcType="VARCHAR" />
+    <association column="appid" property="appInfoExtra" javaType="com.e9cloud.mybatis.domain.AppInfoExtra" select="AppInfoExtra_Mapper.selectByAppId" />
+  </resultMap>
+
+  <select id="selectSipPhoneAppInfoByAppId" resultMap="appWithExtra" parameterType="java.lang.String" >
+    select id,appid, sid, bus_type, app_name, status, create_date ,max_concurrent ,is_Route ,route_Code, callback_url, quota, limit_flag,(
+    select ac.name from tb_user_admin_authen_company ac where ac.uid = (
+    select ua.uid from tb_user_admin ua where ua.sid = (
+    select ai.sid from tb_app_info ai where ai.appid = #{appid,jdbcType=VARCHAR}
+    ) AND ua.sid != ''
+    )) companyName
+    from tb_app_info ai where ai.appid = #{appid,jdbcType=VARCHAR}
+  </select>
+
+</mapper>

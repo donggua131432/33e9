@@ -1,0 +1,112 @@
+package com.e9cloud.mybatis.service;
+
+import com.e9cloud.core.page.Page;
+import com.e9cloud.core.page.PageWrapper;
+import com.e9cloud.mybatis.base.IBaseService;
+import com.e9cloud.mybatis.domain.UserAdmin;
+import com.e9cloud.mybatis.domain.UserAdminHistory;
+import com.e9cloud.mybatis.domain.UserExternInfo;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by wujiang on 2016/2/18.
+ */
+public interface UserAdminService extends IBaseService {
+
+    /**
+     * 根据充值账号（sid）查询用户
+     * @param SID 充值账号
+     * @return userAdmin
+     */
+    UserAdmin findUserAdminSID(String SID);
+
+    UserAdmin findUserAdminByUid(String uid);
+
+    /**
+     * 根据充值账号（sid）查询用户,更新fee
+     * @param userAdmin
+     */
+    void updateUserAdminWithFee(UserAdmin userAdmin);
+
+    /**
+     * 分页查询用户余额列表
+     * @param page
+     * @return
+     */
+    PageWrapper selectBalanceListPage(Page page);
+
+
+    /**
+     * 根据参数查询用户管理主账号信息
+     * @param userAdmin
+     * @return
+     */
+    UserAdmin getUserAdmin(UserAdmin userAdmin);
+
+    UserAdmin getUserAdminWithCompany(UserAdmin userAdmin);
+
+    /**
+     * 下载用户的余额列表信息
+     * @param page 分页信息
+     * @return
+     */
+    List<UserAdmin> selectBalanceLisDownload(Page page);
+
+    /**
+     * 保存用户信息
+     * @param userAdmin
+     */
+    void saveUserAdmin(UserAdmin userAdmin);
+
+    /**
+     * 根据邮箱或者手机号统计用户数量
+     * @param userAdmin 只能有手机号或邮箱
+     * @return
+     */
+    long countUserAdminByEmailOrMobile(UserAdmin userAdmin);
+
+    /**
+     * 得到公司名和sid下拉列表
+     * @param page
+     * @return
+     */
+    PageWrapper getCompanyNameAndSidByPage(Page page);
+
+    /**
+     * 得到公司名和sid下拉列表(Select2)
+     * @param page
+     * @return
+     */
+    PageWrapper getCompanyNameAndSidForSelect2(Page page);
+
+    /**
+     * 更改用户的认证状态
+     * @param userAdmin
+     * @return
+     */
+    void updateAuthStatus(UserAdmin userAdmin);
+
+    /**
+     * 分页查询开发者列表
+     * @return
+     */
+    PageWrapper pageUserAdminList(Page page);
+
+    List<Map<String, Object>> getPageUserAdminList(Page page);
+
+    /**
+     * 修改用户的状态
+     * @param userAdmin
+     */
+    void updateUserAdminStatusByUid(UserAdmin userAdmin);
+
+    /**
+     * 查询所有的用户
+     * @return
+     */
+    List<UserAdmin> findAllUserAdmin();
+
+    public List<UserAdmin> getUserAdminWithCompanyList(UserAdmin userAdmin) ;
+}

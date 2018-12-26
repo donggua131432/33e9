@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SipBasic_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SipBasic" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="relay_num" property="relayNum" jdbcType="VARCHAR" />
+    <result column="relay_name" property="relayName" jdbcType="VARCHAR" />
+    <result column="relay_type" property="relayType" jdbcType="CHAR" />
+    <result column="ipport1" property="ipport1" jdbcType="VARCHAR" />
+    <result column="ipport2" property="ipport2" jdbcType="VARCHAR" />
+    <result column="ipport3" property="ipport3" jdbcType="VARCHAR" />
+    <result column="ipport4" property="ipport4" jdbcType="VARCHAR" />
+    <result column="areacode" property="areacode" jdbcType="VARCHAR" />
+    <result column="sip_business" property="sipBusiness" jdbcType="BIGINT" />
+    <result column="sip_url" property="sipUrl" jdbcType="VARCHAR" />
+    <result column="sip_outno_pr" property="sipOutnoPr" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="max_concurrent" property="maxConcurrent" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="freeze_time" property="freezeTime" jdbcType="TIMESTAMP" />
+    <result column="is_force" property="isForce" jdbcType="CHAR" />
+    <result column="use_type" property="useType" jdbcType="VARCHAR" />
+    <result column="bus_type" property="busType" jdbcType="VARCHAR" />
+    <result column="limit_status" property="limitStatus" jdbcType="VARCHAR"/>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, relay_num, relay_name, relay_type, ipport1, ipport2, ipport3, ipport4, areacode, sip_business,
+    sip_url, sip_outno_pr, status, max_concurrent, create_time , is_force , use_type, bus_type, limit_status
+  </sql>
+
+  <sql id="Page_Column_List" >
+    id, relay_num relayNum, relay_name relayName, relay_type relayType, ipport1, ipport2, ipport3, ipport4, areacode, sip_business sipBusiness,
+    sip_url sipUrl, sip_outno_pr sipOutnoPr, status, max_concurrent maxConcurrent, create_time createTime ,is_force isForce
+  </sql>
+
+  <resultMap id="authWithDicResultMap" type="com.e9cloud.mybatis.domain.SipBasic" extends="BaseResultMap">
+    <association property="dicData" column="id" javaType="com.e9cloud.mybatis.domain.DicData">
+      <id column="id" property="id" jdbcType="VARCHAR" />
+      <result column="dicname" property="name" jdbcType="VARCHAR" />
+      <result column="code" property="code" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_basic
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getSipBasicByRelayNum" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_basic
+    where status = '00'
+    AND relay_num = #{relay_num,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectLimitStatusByRelayNum" resultMap="BaseResultMap" parameterType="string">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM tb_sip_basic
+    WHERE status = '00'
+    AND relay_num = #{relayNum,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 分页查询 -->
+  <select id="pageRelay" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select
+    <include refid="Page_Column_List" />
+    from tb_sip_basic where 1=1 and status = '00'
+
+    <if test="params.relayName != null and params.relayName != ''">
+      and relay_name LIKE "%"#{params.relayName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.relayNum != null and params.relayNum != ''">
+      and relay_num = #{params.relayNum,jdbcType=VARCHAR}
+    </if>
+    <if test="params.relayType != null and params.relayType != ''">
+      and relay_type = #{params.relayType,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sipUrl != null and params.sipUrl != ''">
+      and  #{params.sipUrl,jdbcType=VARCHAR} like  concat('%', if (sip_url like '%[%]%' ,concat(SUBSTRING_INDEX(sip_url, '[', 1),'%' , SUBSTRING_INDEX(sip_url, ']', -1)),sip_url),'%') and sip_url is not null and sip_url !=''
+    </if>
+    <if test="params.ipport != null and params.ipport != ''">
+      and (ipport1  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%" or ipport2  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%"  or ipport3  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%"  or ipport4  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%" )
+    </if>
+
+    <if test="timemin != null">
+      AND create_time &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND create_time &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+
+
+
+    order by create_time  DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <!-- 分页查询 -->
+  <select id="pageDownloadRelay" resultType="map" parameterType="Page">
+    select
+    <include refid="Page_Column_List" />
+    from tb_sip_basic where 1=1 and status = '00'
+
+    <if test="params.relayName != null and params.relayName != ''">
+      and relay_name LIKE "%"#{params.relayName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.relayNum != null and params.relayNum != ''">
+      and relay_num = #{params.relayNum,jdbcType=VARCHAR}
+    </if>
+    <if test="params.relayType != null and params.relayType != ''">
+      and relay_type = #{params.relayType,jdbcType=VARCHAR}
+    </if>
+    <if test="params.sipUrl != null and params.sipUrl != ''">
+      and  #{params.sipUrl,jdbcType=VARCHAR} like  concat('%', if (sip_url like '%[%]%' ,concat(SUBSTRING_INDEX(sip_url, '[', 1),'%' , SUBSTRING_INDEX(sip_url, ']', -1)),sip_url),'%') and sip_url is not null and sip_url !=''
+    </if>
+    <if test="params.ipport != null and params.ipport != ''">
+      and (ipport1  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%" or ipport2  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%"  or ipport3  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%"  or ipport4  LIKE "%"#{params.ipport,jdbcType=VARCHAR}"%" )
+    </if>
+    <if test="timemin != null">
+      AND create_time &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND create_time &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+      order by create_time  DESC
+  </select>
+
+  <!-- 中继资源下拉列表 -->
+  <select id="selectRelaysForRes" resultMap="BaseResultMap" parameterType="map">
+    SELECT
+      <include refid="Base_Column_List" />
+    FROM tb_sip_basic sb
+    WHERE sb.limit_status = '00'
+    AND sb.`status` = '00'
+    <if test="useType != null and useType != ''">
+      AND use_type = #{useType,jdbcType=VARCHAR}
+    </if>
+    <if test="resId != null">
+      OR (relay_num = (SELECT rr.relay_num FROM tb_relay_res rr WHERE rr.id = #{resId,jdbcType=INTEGER}) AND sb.`status` = '00')
+    </if>
+  </select>
+
+  <!-- 查询SIP中继列表 -->
+  <select id="selectRelaysForSip" resultMap="BaseResultMap" parameterType="map">
+    select
+      <include refid="Base_Column_List" />
+    from tb_sip_basic
+    WHERE status = '00'
+    AND relay_num NOT IN (
+    SELECT DISTINCT relay_num FROM tb_sip_relayinfo
+    <if test="subid != null">
+      WHERE subid != #{subid,jdbcType=VARCHAR}
+    </if>
+    )
+    <if test="relayNum != null and relayNum != ''">
+      and relay_num = #{relayNum,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 查询中继列表（SIP） -->
+  <select id="selectRelays" resultMap="BaseResultMap" parameterType="map">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_basic
+    WHERE status = '00'
+    AND use_type = '00'
+    AND bus_type = '03'
+    AND relay_num NOT IN (
+      SELECT DISTINCT relay_num FROM tb_sip_relayinfo
+      <if test="subid != null">
+        WHERE subid != #{subid,jdbcType=VARCHAR}
+      </if>
+
+    )
+    <if test="relayNum != null and relayNum != ''">
+      and relay_num = #{relayNum,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <!-- 查询未占用且正常中继列表(智能云调度) -->
+  <select id="selectRelaysByLimit" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_basic
+    WHERE status = '00' AND limit_status = '00'
+    AND use_type = '00' AND bus_type = '01'
+  </select>
+
+  <select id="selectRelaysForAnswerTrunk" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sip_basic
+    WHERE status = '00'
+    AND use_type = '00' AND bus_type = '91'
+  </select>
+
+  <!-- 判断中继是否要加入任务列表 -->
+  <select id="countRelayForTask" resultType="long" parameterType="map">
+    SELECT COUNT(1) FROM tb_sip_basic
+    WHERE relay_num != #{relayNum,jdbcType=VARCHAR}
+    AND `status` = '00'
+    AND (
+         ipport1 = #{ipport,jdbcType=VARCHAR} OR ipport2 = #{ipport,jdbcType=VARCHAR}
+      OR ipport3 = #{ipport,jdbcType=VARCHAR} OR ipport4 = #{ipport,jdbcType=VARCHAR}
+    )
+  </select>
+
+  <!-- 查询中继方向为为（10 出中继 11双向中继）类型的中继群 且正常中继列表 -->
+  <select id="selectRelaysByRelayType" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    <!--select id, relay_num relayNum, relay_name relayName, relay_type relayType, ipport1, ipport2, ipport3, ipport4, sip_business sipBusiness,
+    sip_url sipUrl, sip_outno_pr sipOutnoPr, status, max_concurrent maxConcurrent, create_time createTime,is_force isForce
+    from tb_sip_basic
+    WHERE status = '00' AND relay_type = '10' OR relay_type= '11'-->
+  select
+  sb.relay_name relayName, sb.relay_num relayNum, sb.relay_type relayType, sb.create_time createTime,
+  IF(ar.relay_num is null, '0', '1') isChecked
+  from tb_sip_basic sb LEFT JOIN (SELECT * FROM tb_app_relay WHERE appid = #{params.appid,jdbcType=VARCHAR}) ar ON sb.relay_num = ar.relay_num
+  WHERE status = '00' AND (relay_type = '10' OR relay_type= '11')
+  ORDER BY sb.create_time DESC
+  <include refid="com.e9cloud.suf"/>
+</select>
+
+<!-- 查询中继方向为为（10 出中继 11双向中继）类型的中继群 且正常中继列表 -->
+  <select id="getRelaysByRelayType" resultMap="BaseResultMap">
+    select id, relay_num relayNum, relay_name relayName, relay_type relayType, ipport1, ipport2, ipport3, ipport4, sip_business sipBusiness,
+    sip_url sipUrl, sip_outno_pr sipOutnoPr, status, max_concurrent maxConcurrent, create_time createTime,is_force isForce
+    from tb_sip_basic
+    WHERE status = '00' AND relay_type = '10' OR relay_type= '11'
+    ORDER BY create_time DESC
+  </select>
+
+  <!-- 判断中继是否可用 -->
+  <select id="countEnableRelays" resultType="long" parameterType="string">
+    select
+    COUNT(1)
+    from tb_sip_basic
+    WHERE relay_num = #{relayNum,jdbcType=VARCHAR} AND status = '00' AND relay_num NOT IN (SELECT DISTINCT relay_num FROM tb_sip_relayinfo)
+  </select>
+
+  <!-- 更改中继的使用情况 -->
+  <update id="updateLimitStatusByRelayNum" parameterType="com.e9cloud.mybatis.domain.SipBasic" >
+    update tb_sip_basic
+    SET limit_status = #{limitStatus,jdbcType=VARCHAR}
+    where relay_num = #{relayNum,jdbcType=VARCHAR}
+  </update>
+
+  <select id="countSipBasicByNum" resultType="long" parameterType="com.e9cloud.mybatis.domain.SipBasic">
+    SELECT
+    count(1)
+    FROM
+    tb_sip_basic ua
+    Where 1=1 and status = '00'
+    <if test="relayName != null and relayName != ''">
+      and ua.relay_name = #{relayName,jdbcType=VARCHAR}
+    </if>
+    <if test="relayNum != null and relayNum != ''">
+      and ua.relay_num = #{relayNum,jdbcType=VARCHAR}
+    </if>
+    <if test="ipport1 != null and ipport2 != null">
+      and (
+        (ua.ipport1 = #{ipport1,jdbcType=VARCHAR} AND ua.ipport2 = #{ipport2,jdbcType=VARCHAR})
+        OR
+        (ua.ipport1 = #{ipport2,jdbcType=VARCHAR} AND ua.ipport2 = #{ipport1,jdbcType=VARCHAR})
+      )
+    </if>
+    <if test="ipport3 != null and ipport4 != null">
+      and (
+      (ua.ipport3 = #{ipport3,jdbcType=VARCHAR} AND ua.ipport4 = #{ipport4,jdbcType=VARCHAR})
+      OR
+      (ua.ipport3 = #{ipport4,jdbcType=VARCHAR} AND ua.ipport4 = #{ipport3,jdbcType=VARCHAR})
+      )
+    </if>
+    <if test="id != null and id != ''">
+      and ua.id = #{id,jdbcType=INTEGER}
+    </if>
+  </select>
+
+  <select id="flagSipBasic" resultType="long" parameterType="com.e9cloud.mybatis.domain.SipBasic">
+    SELECT count(1) from tb_sip_basic where limit_status = '01' and id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="editcountSipBasicByNum" resultType="long" parameterType="com.e9cloud.mybatis.domain.SipBasic">
+    SELECT
+    count(1)
+    FROM
+    tb_sip_basic ua
+    Where 1=1 and ua.status = '00' and ua.id != #{id,jdbcType=INTEGER}
+    <if test="relayName != null and relayName != ''">
+      and ua.relay_name = #{relayName,jdbcType=VARCHAR}
+    </if>
+    <if test="relayNum != null and relayNum != ''">
+      and ua.relay_num = #{relayNum,jdbcType=VARCHAR}
+    </if>
+    <if test="ipport1 != null and ipport2 != null">
+      and (
+      (ua.ipport1 = #{ipport1,jdbcType=VARCHAR} AND ua.ipport2 = #{ipport2,jdbcType=VARCHAR})
+      OR
+      (ua.ipport1 = #{ipport2,jdbcType=VARCHAR} AND ua.ipport2 = #{ipport1,jdbcType=VARCHAR})
+      )
+    </if>
+    <if test="ipport3 != null and ipport4 != null">
+      and (
+      (ua.ipport3 = #{ipport3,jdbcType=VARCHAR} AND ua.ipport4 = #{ipport4,jdbcType=VARCHAR})
+      OR
+      (ua.ipport3 = #{ipport4,jdbcType=VARCHAR} AND ua.ipport4 = #{ipport3,jdbcType=VARCHAR})
+      )
+    </if>
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_sip_basic
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.SipBasic" >
+    insert into tb_sip_basic (id, relay_num, relay_name, 
+      relay_type, ipport1, ipport2, 
+      ipport3, ipport4, sip_business, 
+      sip_url, sip_outno_pr, status, 
+      max_concurrent, create_time)
+    values (#{id,jdbcType=INTEGER}, #{relayNum,jdbcType=VARCHAR}, #{relayName,jdbcType=VARCHAR}, 
+      #{relayType,jdbcType=CHAR}, #{ipport1,jdbcType=VARCHAR}, #{ipport2,jdbcType=VARCHAR}, 
+      #{ipport3,jdbcType=VARCHAR}, #{ipport4,jdbcType=VARCHAR}, #{sipBusiness,jdbcType=BIGINT}, 
+      #{sipUrl,jdbcType=VARCHAR}, #{sipOutnoPr,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+      #{maxConcurrent,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.SipBasic" >
+    insert into tb_sip_basic
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="relayNum != null" >
+        relay_num,
+      </if>
+      <if test="relayName != null" >
+        relay_name,
+      </if>
+      <if test="relayType != null" >
+        relay_type,
+      </if>
+      <if test="ipport1 != null" >
+        ipport1,
+      </if>
+      <if test="ipport2 != null" >
+        ipport2,
+      </if>
+      <if test="ipport3 != null" >
+        ipport3,
+      </if>
+      <if test="ipport4 != null" >
+        ipport4,
+      </if>
+      <if test="areacode != null" >
+        areacode,
+      </if>
+      <if test="sipBusiness != null" >
+        sip_business,
+      </if>
+      <if test="sipUrl != null" >
+        sip_url,
+      </if>
+      <if test="sipOutnoPr != null" >
+        sip_outno_pr,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="useType != null" >
+        use_type,
+      </if>
+      <if test="busType != null" >
+        bus_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="relayNum != null" >
+        #{relayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="relayName != null" >
+        #{relayName,jdbcType=VARCHAR},
+      </if>
+      <if test="relayType != null" >
+        #{relayType,jdbcType=CHAR},
+      </if>
+      <if test="ipport1 != null" >
+        #{ipport1,jdbcType=VARCHAR},
+      </if>
+      <if test="ipport2 != null" >
+        #{ipport2,jdbcType=VARCHAR},
+      </if>
+      <if test="ipport3 != null" >
+        #{ipport3,jdbcType=VARCHAR},
+      </if>
+      <if test="ipport4 != null" >
+        #{ipport4,jdbcType=VARCHAR},
+      </if>
+      <if test="areacode != null" >
+        #{areacode,jdbcType=VARCHAR},
+      </if>
+      <if test="sipBusiness != null" >
+        #{sipBusiness,jdbcType=BIGINT},
+      </if>
+      <if test="sipUrl != null" >
+        #{sipUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sipOutnoPr != null" >
+        #{sipOutnoPr,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="useType != null" >
+        #{useType,jdbcType=VARCHAR},
+      </if>
+      <if test="busType != null" >
+        #{busType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.SipBasic" >
+    update tb_sip_basic
+    <set >
+      <if test="relayNum != null" >
+        relay_num = #{relayNum,jdbcType=VARCHAR},
+      </if>
+      <if test="relayName != null" >
+        relay_name = #{relayName,jdbcType=VARCHAR},
+      </if>
+      <if test="relayType != null" >
+        relay_type = #{relayType,jdbcType=CHAR},
+      </if>
+      <if test="ipport1 != null" >
+        ipport1 = #{ipport1,jdbcType=VARCHAR},
+      </if>
+      <if test="ipport2 != null" >
+        ipport2 = #{ipport2,jdbcType=VARCHAR},
+      </if>
+      <if test="ipport3 != null" >
+        ipport3 = #{ipport3,jdbcType=VARCHAR},
+      </if>
+      <if test="ipport4 != null" >
+        ipport4 = #{ipport4,jdbcType=VARCHAR},
+      </if>
+      <if test="areacode != null" >
+        areacode = #{areacode,jdbcType=VARCHAR},
+      </if>
+      <if test="sipBusiness != null" >
+        sip_business = #{sipBusiness,jdbcType=BIGINT},
+      </if>
+      <if test="sipUrl != null" >
+        sip_url = #{sipUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sipOutnoPr != null" >
+        sip_outno_pr = #{sipOutnoPr,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="maxConcurrent != null" >
+        max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isForce != null" >
+        is_force = #{isForce,jdbcType=CHAR},
+      </if>
+      <if test="useType != null" >
+        use_type = #{useType,jdbcType=VARCHAR},
+      </if>
+      <if test="busType != null" >
+        bus_type = #{busType,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.SipBasic" >
+    update tb_sip_basic
+    set relay_num = #{relayNum,jdbcType=VARCHAR},
+      relay_name = #{relayName,jdbcType=VARCHAR},
+      relay_type = #{relayType,jdbcType=CHAR},
+      ipport1 = #{ipport1,jdbcType=VARCHAR},
+      ipport2 = #{ipport2,jdbcType=VARCHAR},
+      ipport3 = #{ipport3,jdbcType=VARCHAR},
+      ipport4 = #{ipport4,jdbcType=VARCHAR},
+      sip_business = #{sipBusiness,jdbcType=BIGINT},
+      sip_url = #{sipUrl,jdbcType=VARCHAR},
+      sip_outno_pr = #{sipOutnoPr,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      max_concurrent = #{maxConcurrent,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateRelayStatusByRelayNum" parameterType="map" >
+    update tb_sip_basic
+    set status = #{status,jdbcType=VARCHAR}
+    <if test="status == '02'" >
+      , freeze_time = NOW()
+    </if>
+    where relay_num = #{relayNum,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

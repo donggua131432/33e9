@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="IvrDayRecord_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.IvrDayRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statday" property="statday" jdbcType="DATE" />
+    <result column="rcdtype" property="rcdtype" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="lyscsum" property="lyscsum" jdbcType="INTEGER" />
+    <result column="jflyscsum" property="jflyscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, statday, rcdtype, abline, sid, feeid, appid, callcnt, succcnt, answercnt, thscsum,
+    jfscsum, lyscsum, jflyscsum, fee, recordingfee, ctime
+  </sql>
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from stat_ivr_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <!-- 分页选取话务报表列表 -->
+  <select id="pageIvrDayRecordList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT r.statday statDay ,rcdtype rcdType ,app_name as appName,abLine,r.appid,
+    sum(r.callcnt) callCnt ,sum(r.succcnt) succCnt,CONCAT(CAST((sum(r.succcnt)/sum(r.callcnt))*100 AS DECIMAL(5,2)),'%')as callRate, sum(r.lyscsum) lyscsum,
+    sum(r.thscsum) thscSum,sum(r.jfscsum) jfscSum,sum(r.fee) fee,sum(r.recordingfee) recordingFee,sum(r.fee + r.recordingfee) feesum, case when sum(r.succcnt)=0 then '0' else   ROUND(sum(r.thscsum) / sum(r.succcnt), 0) end as pjthsc
+    FROM stat_ivr_day_record r,tb_app_info ai
+    WHERE  r.appid = ai.appid
+
+    <if test="params.rcdType != null and params.rcdType != ''">
+      and rcdtype = #{params.rcdType,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId != ''">
+      and r.appid  = #{params.appId,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.sid != null and params.sid != ''">
+      and r.sid  = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+
+    <if test="startTime == null and endTime == null and params.reportType != 2">
+      and 1 = 1 AND DATE_FORMAT(r.statday,'%Y-%m-%d') = DATE_FORMAT( #{params.date,jdbcType=TIMESTAMP},'%Y-%m-%d')
+    </if>
+
+
+    <if test="params.reportType==2 and params.reportType!=null">
+      AND DATE_FORMAT(r.statday,'%Y-%m') = DATE_FORMAT( #{ym,jdbcType=TIMESTAMP},'%Y-%m')
+    </if>
+
+    <if test="startTime != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{startTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+    </if>
+    <if test="endTime != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{endTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+    </if>
+    <if test="params.reportType==2">
+      GROUP BY rcdtype ,r.appid ,DATE_FORMAT(r.statday,'%Y-%m')
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY rcdtype, r.appid   ,DATE_FORMAT(r.statday,'%Y-%m-%d')
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY rcdtype ,r.appid ,DATE_FORMAT(r.statday,'%Y-%m-%d')
+    </if>
+    ORDER  BY r.statday DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+  <!-- 导出选取话务报表列表 -->
+  <select id="downloadIvrDayRecordList" resultType="map" parameterType="Page">
+    SELECT r.statday statDay ,rcdtype rcdType ,app_name as appName,abLine,r.appid,
+    sum(r.callcnt) callCnt ,sum(r.succcnt) succCnt,CONCAT(CAST((sum(r.succcnt)/sum(r.callcnt))*100 AS DECIMAL(5,2)),'%')as callRate, sum(r.lyscsum) lyscsum,
+    sum(r.thscsum) thscSum,sum(r.jfscsum) jfscSum,sum(r.fee) fee,sum(r.recordingfee) recordingFee,sum(r.fee + r.recordingfee) feesum, case when sum(r.succcnt)=0 then '0' else   ROUND(sum(r.thscsum) / sum(r.succcnt), 0) end as pjthsc
+    FROM stat_ivr_day_record r,tb_app_info ai
+    WHERE  r.appid = ai.appid
+
+    <if test="params.rcdType != null and params.rcdType != ''">
+      and rcdtype = #{params.rcdType,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appId != null and params.appId != ''">
+      and r.appid  = #{params.appId,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.sid != null and params.sid != ''">
+      and r.sid  = #{params.sid,jdbcType=VARCHAR}
+    </if>
+
+    <if test="params.reportType==2 and params.reportType!=null">
+      AND DATE_FORMAT(r.statday,'%Y-%m') = DATE_FORMAT( #{ym,jdbcType=TIMESTAMP},'%Y-%m')
+    </if>
+
+    <if test="startTime != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &gt;=DATE_FORMAT(#{startTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+
+    </if>
+    <if test="endTime != null">
+      <if test="params.reportType==1 and params.reportType!=null">
+        AND DATE_FORMAT(r.statday,'%Y-%m-%d') &lt;= DATE_FORMAT( #{endTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+      </if>
+    </if>
+    <if test="params.reportType==2">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m'),r.appid,rcdtype
+    </if>
+    <if test="params.reportType==1">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d'), r.appid ,rcdtype
+    </if>
+    <if test="params.reportType==0 or params.reportType ==null">
+      GROUP BY DATE_FORMAT(r.statday,'%Y-%m-%d') ,r.appid ,rcdtype
+    </if>
+    ORDER  BY r.statday DESC
+  </select>
+
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from stat_ivr_day_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.IvrDayRecord" >
+    insert into stat_ivr_day_record (id, statday, rcdtype,
+      abline, sid, feeid, appid, 
+      callcnt, succcnt, answercnt, 
+      thscsum, jfscsum, lyscsum, 
+      jflyscsum, fee, recordingfee, 
+      ctime)
+    values (#{id,jdbcType=INTEGER}, #{statday,jdbcType=DATE}, #{rcdtype,jdbcType=VARCHAR}, 
+      #{abline,jdbcType=CHAR}, #{sid,jdbcType=VARCHAR}, #{feeid,jdbcType=VARCHAR}, #{appid,jdbcType=VARCHAR}, 
+      #{callcnt,jdbcType=INTEGER}, #{succcnt,jdbcType=INTEGER}, #{answercnt,jdbcType=INTEGER}, 
+      #{thscsum,jdbcType=INTEGER}, #{jfscsum,jdbcType=INTEGER}, #{lyscsum,jdbcType=INTEGER}, 
+      #{jflyscsum,jdbcType=INTEGER}, #{fee,jdbcType=DECIMAL}, #{recordingfee,jdbcType=DECIMAL}, 
+      #{ctime,jdbcType=TIMESTAMP})
+  </insert>
+
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.IvrDayRecord" >
+    insert into stat_ivr_day_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="statday != null" >
+        statday,
+      </if>
+      <if test="rcdtype != null" >
+        rcdtype,
+      </if>
+      <if test="abline != null" >
+        abline,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="callcnt != null" >
+        callcnt,
+      </if>
+      <if test="succcnt != null" >
+        succcnt,
+      </if>
+      <if test="answercnt != null" >
+        answercnt,
+      </if>
+      <if test="thscsum != null" >
+        thscsum,
+      </if>
+      <if test="jfscsum != null" >
+        jfscsum,
+      </if>
+      <if test="lyscsum != null" >
+        lyscsum,
+      </if>
+      <if test="jflyscsum != null" >
+        jflyscsum,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="recordingfee != null" >
+        recordingfee,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="statday != null" >
+        #{statday,jdbcType=DATE},
+      </if>
+      <if test="rcdtype != null" >
+        #{rcdtype,jdbcType=VARCHAR},
+      </if>
+      <if test="abline != null" >
+        #{abline,jdbcType=CHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="callcnt != null" >
+        #{callcnt,jdbcType=INTEGER},
+      </if>
+      <if test="succcnt != null" >
+        #{succcnt,jdbcType=INTEGER},
+      </if>
+      <if test="answercnt != null" >
+        #{answercnt,jdbcType=INTEGER},
+      </if>
+      <if test="thscsum != null" >
+        #{thscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jfscsum != null" >
+        #{jfscsum,jdbcType=INTEGER},
+      </if>
+      <if test="lyscsum != null" >
+        #{lyscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jflyscsum != null" >
+        #{jflyscsum,jdbcType=INTEGER},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingfee != null" >
+        #{recordingfee,jdbcType=DECIMAL},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.IvrDayRecord" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update stat_ivr_day_record
+    <set >
+      <if test="statday != null" >
+        statday = #{statday,jdbcType=DATE},
+      </if>
+      <if test="rcdtype != null" >
+        rcdtype = #{rcdtype,jdbcType=VARCHAR},
+      </if>
+      <if test="abline != null" >
+        abline = #{abline,jdbcType=CHAR},
+      </if>
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        appid = #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="callcnt != null" >
+        callcnt = #{callcnt,jdbcType=INTEGER},
+      </if>
+      <if test="succcnt != null" >
+        succcnt = #{succcnt,jdbcType=INTEGER},
+      </if>
+      <if test="answercnt != null" >
+        answercnt = #{answercnt,jdbcType=INTEGER},
+      </if>
+      <if test="thscsum != null" >
+        thscsum = #{thscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jfscsum != null" >
+        jfscsum = #{jfscsum,jdbcType=INTEGER},
+      </if>
+      <if test="lyscsum != null" >
+        lyscsum = #{lyscsum,jdbcType=INTEGER},
+      </if>
+      <if test="jflyscsum != null" >
+        jflyscsum = #{jflyscsum,jdbcType=INTEGER},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="recordingfee != null" >
+        recordingfee = #{recordingfee,jdbcType=DECIMAL},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.IvrDayRecord" >
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    update stat_ivr_day_record
+    set statday = #{statday,jdbcType=DATE},
+      rcdtype = #{rcdtype,jdbcType=VARCHAR},
+      abline = #{abline,jdbcType=CHAR},
+      sid = #{sid,jdbcType=VARCHAR},
+      feeid = #{feeid,jdbcType=VARCHAR},
+      appid = #{appid,jdbcType=VARCHAR},
+      callcnt = #{callcnt,jdbcType=INTEGER},
+      succcnt = #{succcnt,jdbcType=INTEGER},
+      answercnt = #{answercnt,jdbcType=INTEGER},
+      thscsum = #{thscsum,jdbcType=INTEGER},
+      jfscsum = #{jfscsum,jdbcType=INTEGER},
+      lyscsum = #{lyscsum,jdbcType=INTEGER},
+      jflyscsum = #{jflyscsum,jdbcType=INTEGER},
+      fee = #{fee,jdbcType=DECIMAL},
+      recordingfee = #{recordingfee,jdbcType=DECIMAL},
+      ctime = #{ctime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

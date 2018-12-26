@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RestStatMinuteRecord_Mapper">
+
+  <!-- rest业务，话务统计-分钟统计 -->
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.RestStatMinuteRecord">
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="statmin" property="statmin" jdbcType="TIMESTAMP" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="abline" property="abline" jdbcType="CHAR" />
+    <result column="callcnt" property="callcnt" jdbcType="INTEGER" />
+    <result column="succcnt" property="succcnt" jdbcType="INTEGER" />
+    <result column="thscsum" property="thscsum" jdbcType="INTEGER" />
+    <result column="jfscsum" property="jfscsum" jdbcType="INTEGER" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="recordingfee" property="recordingfee" jdbcType="DECIMAL" />
+    <result column="answercnt" property="answercnt" jdbcType="INTEGER" />
+    <result column="rcd_cnt" property="rcdCnt" jdbcType="INTEGER" />
+    <result column="rcd_time" property="rcdTime" jdbcType="INTEGER" />
+    <result column="rcd_bill_cnt" property="rcdBillCnt" jdbcType="INTEGER" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, statmin, appid, subid, feeid, abline, callcnt, succcnt, thscsum, jfscsum, fee, 
+    recordingfee, answercnt, rcd_cnt, rcd_time, rcd_bill_cnt, ctime
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from stat_rest_minute_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <!-- 按天统计 专线语音 的话务情况 -->
+  <select id="countRestScanByMin" resultType="map" parameterType="map">
+    SELECT
+    SUM(sr.thscsum) thscsum,
+
+    SUM(if(sr.abline='A',sr.thscsum,0)) thscsumA,
+    SUM(if(sr.abline='B',sr.thscsum,0)) thscsumB,
+
+    SUM(if(sr.abline='A',sr.thscsum,0))/SUM(if(sr.abline='A',sr.succcnt,0)) thscAvgA,
+    SUM(if(sr.abline='B',sr.thscsum,0))/SUM(if(sr.abline='B',sr.succcnt,0)) thscAvgB,
+
+    SUM(sr.jfscsum) jfscsum,
+
+    SUM(sr.callcnt) callcnt,
+
+    SUM(if(sr.abline='A',sr.succcnt,0))/SUM(if(sr.abline='A',sr.callcnt,0)) succcntA,
+    SUM(if(sr.abline='B',sr.succcnt,0))/SUM(if(sr.abline='B',sr.callcnt,0)) succcntB,
+
+    SUM(if(sr.abline='A',sr.answercnt,0))/SUM(if(sr.abline='A',sr.callcnt,0)) answercntA,
+    SUM(if(sr.abline='B',sr.answercnt,0))/SUM(if(sr.abline='B',sr.callcnt,0)) answercntB,
+
+    DATE_FORMAT(sr.statmin, '%H:%i') d
+    FROM stat_rest_minute_record sr
+    WHERE sr.statmin &gt;= #{startDay,jdbcType=TIMESTAMP}
+    AND sr.statmin &lt; #{endDay,jdbcType=TIMESTAMP}
+    GROUP BY d
+  </select>
+
+</mapper>

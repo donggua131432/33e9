@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SpApplyNum_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.SpApplyNum" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="sip_phone" property="sipPhone" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="show_num" property="showNum" jdbcType="VARCHAR" />
+    <result column="long_distance_flag" property="longDistanceFlag" jdbcType="VARCHAR" />
+    <result column="call_switch_flag" property="callSwitchFlag" jdbcType="VARCHAR" />
+
+  </resultMap>
+
+  <select id="selectSipPhoneByAppId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select a.id, a.appid, b.sip_phone, c.number, a.show_num, a.long_distance_flag, a.call_switch_flag
+    from tb_sp_apply_num a, tb_sp_sipphone b, tb_sp_fixphone c
+    where a.sipphone_id=b.id and a.fixphone_id=c.id and a.appid=#{appid,jdbcType=VARCHAR} and a.status='00'
+  </select>
+
+
+  <update id="updateSipPhoneStat" parameterType="com.e9cloud.mybatis.domain.SpApplyNum">
+    update tb_sp_apply_num a, tb_sp_sipphone b
+    <set>
+      <if test="@com.e9cloud.util.Tools@isNotNullStr(longDistanceFlag)">
+        a.long_distance_flag = #{longDistanceFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="@com.e9cloud.util.Tools@isNotNullStr(callSwitchFlag)">
+        a.call_switch_flag = #{callSwitchFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where a.sipphone_id = b.id
+    and a.appid = #{appid,jdbcType=VARCHAR}
+    and b.sip_phone = #{sipPhone,jdbcType=VARCHAR}
+  </update>
+
+  <select id="selectSipPhoneStat" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.SpApplyNum">
+    select a.id, a.appid, a.long_distance_flag, a.call_switch_flag, b.sip_phone
+    from tb_sp_apply_num a, tb_sp_sipphone b
+    where a.sipphone_id=b.id
+    and a.appid=#{appid,jdbcType=VARCHAR}
+    and a.status='00'
+    and b.sip_phone = #{sipPhone,jdbcType=VARCHAR}
+  </select>
+</mapper>

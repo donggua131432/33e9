@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="EccFixPhone_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.EccFixphone" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="appid" property="appid" jdbcType="VARCHAR" />
+    <result column="eccid" property="eccid" jdbcType="VARCHAR" />
+    <result column="cityid" property="cityid" jdbcType="VARCHAR" />
+    <result column="num_type" property="numType" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="addtime" property="addtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, appid, eccid, cityid, num_type, number, status, addtime, updatetime
+  </sql>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_ecc_fixphone
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+
+  <select id="selectEccFixphoneByNumber" resultMap="BaseResultMap" parameterType="map">
+    select
+    <include refid="Base_Column_List" />
+    from tb_ecc_fixphone
+    where number = #{fixphone,jdbcType=VARCHAR}
+    <if test="extid != null and extid != ''">
+      AND id != (
+        SELECT fixphone_id FROM tb_ecc_extention WHERE id = #{extid,jdbcType=VARCHAR}
+      )
+    </if>
+  </select>
+
+  <!-- 分页选取ecc 非fixphone列表 -->
+  <select id="pageEccFixPhoneList" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    SELECT
+    ef.num_type numType,
+    ef.number,
+    tp.pname,
+    tc.cname,
+    ef.updatetime,
+    ac.name companyName,
+    ua.sid,
+    ai.app_name appName,
+    ai.appid appId
+    FROM tb_ecc_fixphone ef
+    LEFT JOIN tb_telno_city tc ON ef.cityid = tc.ccode
+    LEFT JOIN tb_telno_province tp ON tc.pcode = tp.pcode
+    LEFT JOIN tb_app_info ai ON ef.appid = ai.appid
+    LEFT JOIN tb_user_admin ua ON ua.sid = ai.sid
+    LEFT JOIN tb_user_admin_authen_company ac ON ua.uid = ac.uid
+    WHERE 1=1
+    <if test="params.number != null  and params.number !=''" >
+      and ef.number LIKE "%"#{params.number,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.cityid != null and params.cityid !=''" >
+      and ef.cityid = #{params.cityid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.updatetime != null" >
+      and updatetime = #{params.updatetime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.companyName != null and params.companyName !=''" >
+      and ac.name LIKE "%"#{params.companyName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.sid != null and params.sid !=''" >
+      and ua.sid = #{params.sid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appid != null and params.appid !=''" >
+      and ai.appid = #{params.appid,jdbcType=VARCHAR}
+    </if>
+    <if test="params.appName != null and params.appName !=''" >
+      and ai.app_name LIKE "%"#{params.appName,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.pcode != null and params.pcode !=''" >
+      and tp.pcode = #{params.pcode,jdbcType=VARCHAR}
+    </if>
+    <if test="params.ccode != null and params.ccode !=''" >
+      and tc.ccode = #{params.ccode,jdbcType=VARCHAR}
+    </if>
+    order by updatetime DESC ,addtime DESC
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.EccFixphone" >
+    insert into tb_ecc_fixphone
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appid,
+      </if>
+      <if test="eccid != null" >
+        eccid,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+      <if test="numType != null" >
+        num_type,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="addtime != null" >
+        addtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=VARCHAR},
+      </if>
+      <if test="eccid != null" >
+        #{eccid,jdbcType=VARCHAR},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=VARCHAR},
+      </if>
+      <if test="numType != null" >
+        #{numType,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="addtime != null" >
+        #{addtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+</mapper>

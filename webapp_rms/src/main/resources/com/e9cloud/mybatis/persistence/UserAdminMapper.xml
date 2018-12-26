@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserAdmin_Mapper" >
+  <resultMap id="BaseResultMap" type="com.e9cloud.mybatis.domain.UserAdmin" >
+    <id column="uid" property="uid" jdbcType="VARCHAR" />
+    <result column="sid" property="sid" jdbcType="VARCHAR" />
+    <result column="feeid" property="feeid" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="remind_fee" jdbcType="DECIMAL" property="remindFee" />
+    <result column="sms_mobile" jdbcType="VARCHAR" property="smsMobile" />
+    <result column="token" jdbcType="VARCHAR" property="token" />
+    <result column="call_no" property="callNo" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+    <result column="utype" property="utype" jdbcType="CHAR" />
+    <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+    <result column="salt" property="salt" jdbcType="VARCHAR" />
+    <result column="nick" property="nick" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="bus_type" jdbcType="CHAR" property="busType" />
+    <result column="auth_status" property="authStatus" jdbcType="CHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="login_date" property="loginDate" jdbcType="TIMESTAMP" />
+    <result column="login_count" property="loginCount" jdbcType="INTEGER" />
+    <result column="limit_flag" jdbcType="CHAR" property="limitFlag" />
+    <result column="sms_status" jdbcType="CHAR" property="smsStatus"/>
+  </resultMap>
+
+  <resultMap id="BaseResultMapWithBusTypes" type="com.e9cloud.mybatis.domain.UserAdmin" extends="BaseResultMap">
+    <association property="busTypes" column="sid" javaType="string" select="BusinessType_Mapper.busTypesBySid"></association>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    uid, sid, feeid, fee,token, call_no, email, mobile, utype, pwd, salt, nick, name, status,
+    create_date, update_date, login_date, login_count,bus_type,auth_status,remind_fee,limit_flag,sms_mobile,sms_status
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    uid, sid, status, bus_type,fee,email,mobile,auth_status
+    from tb_user_admin
+    where uid = #{uid,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_user_admin
+  </select>
+
+  <select id="selectAllWithBusTypes" resultMap="BaseResultMapWithBusTypes" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_user_admin
+  </select>
+
+  <select id="selectUserAdminByObject" resultMap="BaseResultMap" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_user_admin
+    where 1=1
+    <if test="uid!=null and ''!=uid">
+      and uid = #{uid,jdbcType=VARCHAR}
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="selectBySID" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from tb_user_admin
+    where sid = #{sid,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_user_admin
+    where uid = #{uid,jdbcType=VARCHAR}
+  </delete>
+
+  <select id="selectUserAdminPage" resultType="map" parameterType="Page">
+    <include refid="com.e9cloud.pre"/>
+    select u.sid, u.fee, c.name
+    from tb_user_admin u left join tb_user_admin_authen_company c
+    on u.uid = c.uid
+    where 1=1
+    <if test="startTime != null and endTime != null">
+      And recharge_time BETWEEN #{startTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      And u.sid like "%"#{params.sid,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.customer_name != null and params.customer_name != ''">
+      And c.name like "%"#{params.customer_name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.price_min != null and params.price_min != '' and params.price_max != null and params.price_max != ''">
+      And u.fee BETWEEN #{params.price_min,jdbcType=INTEGER} AND #{params.price_max,jdbcType=INTEGER}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by u.${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+  <select id="selectUserAdmindownload" resultMap="BaseResultMap" parameterType="Page">
+    select u.sid, u.fee, c.name
+    from tb_user_admin u left join tb_user_admin_authen_company c
+    on u.uid = c.uid
+    where 1=1
+    <if test="startTime != null and endTime != null">
+      And recharge_time BETWEEN #{startTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.sid != null and params.sid != ''">
+      And u.sid like "%"#{params.sid,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.customer_name != null and params.customer_name != ''">
+      And c.name like "%"#{params.customer_name,jdbcType=VARCHAR}"%"
+    </if>
+    <if test="params.price_min != null and params.price_min != '' and params.price_max != null and params.price_max != ''">
+      And u.fee BETWEEN #{params.price_min,jdbcType=INTEGER} AND #{params.price_max,jdbcType=INTEGER}
+    </if>
+    <if test="sidx != null and sidx != ''">
+      order by u.${sidx} ${sord}
+    </if>
+  </select>
+
+  <select id="countUserAdminByEmailOrMobile" resultType="long" parameterType="com.e9cloud.mybatis.domain.UserAdmin">
+      SELECT
+        count(1)
+      FROM
+      tb_user_admin ua
+      Where 1=1
+      <if test="email != null and email != ''">
+        and ua.email = #{email,jdbcType=VARCHAR}
+      </if>
+      <if test="mobile != null and mobile != ''">
+        and ua.mobile = #{mobile,jdbcType=VARCHAR}
+      </if>
+  </select>
+
+  <insert id="insert" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    insert into tb_user_admin (uid, sid, feeid, 
+      fee, call_no, email,
+      mobile, utype, pwd, salt, 
+      nick, name, status, create_date, 
+      update_date, login_date, login_count
+      )
+    values (#{uid,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR}, #{feeid,jdbcType=VARCHAR}, 
+      #{fee,jdbcType=DECIMAL}, #{callNo,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+      #{mobile,jdbcType=VARCHAR}, #{utype,jdbcType=CHAR}, #{pwd,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, 
+      #{nick,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{status,jdbcType=CHAR}, #{createDate,jdbcType=TIMESTAMP}, 
+      #{updateDate,jdbcType=TIMESTAMP}, #{loginDate,jdbcType=TIMESTAMP}, #{loginCount,jdbcType=INTEGER}
+      )
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    insert into tb_user_admin
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="sid != null" >
+        sid,
+      </if>
+      <if test="feeid != null" >
+        feeid,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="token != null">
+        token,
+      </if>
+      <if test="callNo != null" >
+        call_no,
+      </if>
+      <if test="email != null" >
+        email,
+      </if>
+      <if test="mobile != null" >
+        mobile,
+      </if>
+      <if test="utype != null" >
+        utype,
+      </if>
+      <if test="busType != null" >
+        bus_type,
+      </if>
+      <if test="pwd != null" >
+        pwd,
+      </if>
+      <if test="salt != null" >
+        salt,
+      </if>
+      <if test="nick != null" >
+        nick,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="loginDate != null" >
+        login_date,
+      </if>
+      <if test="loginCount != null" >
+        login_count,
+      </if>
+      <if test="authStatus != null" >
+        auth_status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="uid != null" >
+        #{uid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="token != null">
+        #{token,jdbcType=VARCHAR},
+      </if>
+      <if test="callNo != null" >
+        #{callNo,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null" >
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="utype != null" >
+        #{utype,jdbcType=CHAR},
+      </if>
+      <if test="busType != null" >
+        #{busType,jdbcType=CHAR},
+      </if>
+      <if test="pwd != null" >
+        #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null" >
+        #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="nick != null" >
+        #{nick,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginDate != null" >
+        #{loginDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginCount != null" >
+        #{loginCount,jdbcType=INTEGER},
+      </if>
+      <if test="authStatus != null" >
+        #{authStatus,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    update tb_user_admin
+    <set >
+      <if test="sid != null" >
+        sid = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="feeid != null" >
+        feeid = #{feeid,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="remindFee != null">
+        remind_fee = #{remindFee,jdbcType=DECIMAL},
+      </if>
+      <if test="token != null">
+        token = #{token,jdbcType=VARCHAR},
+      </if>
+      <if test="callNo != null" >
+        call_no = #{callNo,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null" >
+        mobile = #{mobile,jdbcType=VARCHAR},
+      </if>
+
+      <if test="smsMobile != null">
+        sms_mobile = #{smsMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="utype != null" >
+        utype = #{utype,jdbcType=CHAR},
+      </if>
+      <if test="pwd != null" >
+        pwd = #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null" >
+        salt = #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="nick != null" >
+        nick = #{nick,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+
+      <if test="limitFlag != null">
+        limit_flag = #{limitFlag,jdbcType=CHAR},
+      </if>
+
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginDate != null" >
+        login_date = #{loginDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="loginCount != null" >
+        login_count = #{loginCount,jdbcType=INTEGER},
+      </if>
+      <if test="authStatus != null" >
+        auth_status = #{authStatus,jdbcType=CHAR},
+      </if>
+      <if test="smsStatus != null">
+        sms_status = #{smsStatus,jdbcType=CHAR},
+      </if>
+    </set>
+    where uid = #{uid,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    update tb_user_admin
+    set sid = #{sid,jdbcType=VARCHAR},
+      feeid = #{feeid,jdbcType=VARCHAR},
+      fee = #{fee,jdbcType=DECIMAL},
+      call_no = #{callNo,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      mobile = #{mobile,jdbcType=VARCHAR},
+      utype = #{utype,jdbcType=CHAR},
+      pwd = #{pwd,jdbcType=VARCHAR},
+      salt = #{salt,jdbcType=VARCHAR},
+      nick = #{nick,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      status = #{status,jdbcType=CHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      login_date = #{loginDate,jdbcType=TIMESTAMP},
+      login_count = #{loginCount,jdbcType=INTEGER}
+    where uid = #{uid,jdbcType=VARCHAR}
+  </update>
+
+  <!-- ==================== 联查询tb_user_admin,tb_user_admin_authen_company根据sid查询用户（企业）信息  start ==================== -->
+  <resultMap id="UserAdminUnionCompanyResult" type="com.e9cloud.mybatis.domain.UserAdmin" extends="BaseResultMap">
+    <association property="authenCompany" column="uid" javaType="com.e9cloud.mybatis.domain.AuthenCompany">
+      <id column="id" property="id" jdbcType="INTEGER" />
+      <result column="uid" property="uid" jdbcType="VARCHAR" />
+      <result column="name" property="name" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+
+  <select id="selectUserAdminUnionCompanyInfo" resultMap="UserAdminUnionCompanyResult" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    select a.uid,a.sid,a.feeid,b.name from tb_user_admin as a, tb_user_admin_authen_company as b where a.uid = b.uid
+    <if test="uid!=null and ''!=uid">
+      and a.uid = #{uid,jdbcType=VARCHAR}
+    </if>
+    <if test="sid!=null and ''!=sid">
+      and a.sid = #{sid,jdbcType=VARCHAR}
+    </if>
+    <if test="feeid!=null and ''!=feeid">
+      and a.feeid = #{feeid,jdbcType=VARCHAR}
+    </if>
+  </select>
+
+  <select id="findCompanyNameAndSidByPage" resultType="map" parameterType="Page" >
+  <include refid="com.e9cloud.pre"/>
+  select a.sid,b.name from tb_user_admin as a, tb_user_admin_authen_company as b
+  where a.uid = b.uid
+  <if test="params.name != null and params.name != ''">
+    AND b.name LIKE CONCAT('%',#{params.name,jdbcType=VARCHAR},'%')
+  </if>
+  <if test="params.sid != null and params.sid != ''">
+    AND a.sid LIKE CONCAT('%',#{params.sid,jdbcType=VARCHAR},'%')
+  </if>
+  <if test="params.busType != null and params.busType != ''">
+    AND a.sid IN (
+      SELECT DISTINCT(sid) FROM tb_business_type
+      WHERE `status` = '00'
+      AND bus_type = #{params.busType,jdbcType=VARCHAR}
+    )
+  </if>
+  <include refid="com.e9cloud.suf"/>
+</select>
+
+  <select id="pageUserAdminList" resultType="map" parameterType="Page" >
+    <include refid="com.e9cloud.pre"/>
+    select
+      a.uid, a.email, a.create_date createDate, a.fee, a.sid, a.auth_status authStatus, b.name, b.trade_id tradeId, a.status
+    from tb_user_admin as a left join tb_user_admin_authen_company as b
+    on a.uid = b.uid
+    WHERE 1 = 1
+    <if test="timemin != null">
+      AND a.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND a.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.name != null and params.name != ''">
+      AND b.name LIKE CONCAT('%',#{params.name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.email != null and params.email != ''">
+      AND a.email LIKE CONCAT('%',#{params.email,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.tradeId != null and params.tradeId != ''">
+      AND b.trade_id = #{params.tradeId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.authStatus != null and params.authStatus != ''">
+      AND a.auth_status = #{params.authStatus,jdbcType=VARCHAR}
+    </if>
+    <if test="params.accountStatus != null and params.accountStatus != ''">
+      AND a.status = #{params.accountStatus,jdbcType=VARCHAR}
+    </if>
+    <if test="params.accountID != null and params.accountID != ''">
+      AND a.sid = #{params.accountID,jdbcType=VARCHAR}
+    </if>
+
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+    <include refid="com.e9cloud.suf"/>
+  </select>
+
+
+
+  <select id="getPageUserAdminList" resultType="map" parameterType="Page" >
+    select
+    a.uid, a.email, a.create_date createDate, a.fee, a.sid, a.auth_status authStatus, b.name,c.`name` tradeId, a.status
+    from tb_user_admin as a left join tb_user_admin_authen_company as b
+    on a.uid = b.uid  LEFT JOIN (select name,code from tb_dic_data where typekey = 'tradeType') as c  on  b.trade_id = c.`code`
+    WHERE 1 = 1
+    <if test="timemin != null">
+      AND a.create_date &gt;= #{timemin,jdbcType=TIMESTAMP}
+    </if>
+    <if test="timemax != null">
+      AND a.create_date &lt;= #{timemax,jdbcType=TIMESTAMP}
+    </if>
+    <if test="params.name != null and params.name != ''">
+      AND b.name LIKE CONCAT('%',#{params.name,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.email != null and params.email != ''">
+      AND a.email LIKE CONCAT('%',#{params.email,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="params.tradeId != null and params.tradeId != ''">
+      AND b.trade_id = #{params.tradeId,jdbcType=VARCHAR}
+    </if>
+    <if test="params.authStatus != null and params.authStatus != ''">
+      AND a.auth_status = #{params.authStatus,jdbcType=VARCHAR}
+    </if>
+    <if test="params.accountStatus != null and params.accountStatus != ''">
+      AND a.status = #{params.accountStatus,jdbcType=VARCHAR}
+    </if>
+    <if test="params.accountID != null and params.accountID != ''">
+      AND a.sid = #{params.accountID,jdbcType=VARCHAR}
+    </if>
+
+    <if test="sidx != null and sidx != ''">
+      order by ${sidx} ${sord}
+    </if>
+  </select>
+
+  <select id="updateUserAdminStatusByUid" parameterType="com.e9cloud.mybatis.domain.UserAdmin" >
+    update tb_user_admin
+    set
+      status = #{status,jdbcType=CHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP}
+    where uid = #{uid,jdbcType=VARCHAR}
+  </select>
+
+</mapper>
